@@ -166,8 +166,17 @@
   .chip[data-side="主婚人親友"] { background: var(--parents); color: var(--parents-ink); border-color: transparent; }
   .chip[data-side="新人親友"] { background: var(--couple); color: var(--couple-ink); border-color: transparent; }
   .chip.over { border-color: var(--warn); color: var(--warn); }
-  .names { list-style: none; padding: 0; margin: 12px 0 0; columns: 2; column-gap: 16px; }
-  .names li { padding: 6px 0; border-bottom: 1px dotted var(--line); break-inside: avoid; }
+  .names { list-style: none; padding: 0; margin: 4px 0 0; columns: 2; column-gap: 20px; }
+  .names li { padding: 7px 0; border-bottom: 1px dotted var(--line); break-inside: avoid; text-align: center; font-size: 16px; }
+  /* 賓客點桌子浮出的資訊卡：置中的座位卡樣式 */
+  .place { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 4px; }
+  .place .eyebrow { font-family: var(--latin); font-size: 12px; letter-spacing: .4em; padding-left: .4em; color: var(--accent); }
+  .place .n { font-family: var(--latin); font-size: 52px; font-weight: 600; line-height: 1; color: var(--body); margin-top: 2px; }
+  .place .n:not(:empty) { font-variant-numeric: lining-nums; }
+  .place .mini-rule { display: flex; align-items: center; gap: 6px; width: 72px; margin: 12px 0 10px; color: var(--accent); }
+  .place .mini-rule::before, .place .mini-rule::after { content: ""; flex: 1; height: 1px; background: currentColor; opacity: .7; }
+  .place .mini-rule i { width: 5px; height: 5px; background: currentColor; transform: rotate(45deg); }
+  .place .tname { font-size: 15px; letter-spacing: .12em; color: var(--accent); margin: 0 0 10px; }
 
   /* 編輯面板 */
   .field-label { font-size: 13px; color: var(--muted); letter-spacing: .1em; margin: 16px 0 6px; }
@@ -261,7 +270,6 @@
   <!-- 賓客：點桌子後浮出同桌名單 -->
   <div class="sheet" id="detail" hidden>
     <button class="close" id="close-detail" aria-label="關閉">×</button>
-    <h2>同桌賓客<small>TABLE</small></h2>
     <div id="detail-body"></div>
   </div>
 
@@ -566,9 +574,14 @@ function renderDetail() {
   $("detail").hidden = mode === "staff" || !selected;
   if (!selected) return;
   const d = state.tables[selected];
-  $("detail-body").innerHTML = `<div class="detail-head"><span class="big">${esc(label(d))}</span>${d.side ? `<span class="chip" data-side="${esc(d.side)}">${esc(d.side)}</span>` : ""}</div>
-    ${d.name ? `<div class="tname">${esc(d.name)}</div>` : ""}
-    ${d.guests.length ? `<ul class="names">${d.guests.map(n => `<li>${esc(n)}</li>`).join("")}</ul>` : `<p class="hint" style="margin-top:10px">這桌還沒有安排賓客。</p>`}`;
+  // 和席次一覽的座位卡同一套：TABLE、大號桌號、細線菱形、桌名，名單兩欄
+  $("detail-body").innerHTML = `<div class="place">
+      <span class="eyebrow">${d.num === "主桌" ? "HEAD TABLE" : "TABLE"}</span>
+      <span class="n">${esc(d.num === "主桌" ? "主桌" : d.num)}</span>
+      <span class="mini-rule"><i></i></span>
+      ${d.name ? `<div class="tname">${esc(d.name)}</div>` : ""}
+    </div>
+    ${d.guests.length ? `<ul class="names">${d.guests.map(n => `<li>${esc(n)}</li>`).join("")}</ul>` : `<p class="hint" style="text-align:center">這桌還沒有安排賓客。</p>`}`;
 }
 
 // 編輯區塊：工作人員點了桌子才出現；桌號依平面圖固定，不能手動改
