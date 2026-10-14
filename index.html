@@ -84,7 +84,7 @@
   .tbl .chair { fill: var(--paper); stroke: var(--accent); stroke-width: 1; }
   .tbl .chair.taken { fill: var(--accent); }
   .tbl .chair.over { fill: var(--warn); stroke: var(--warn); }
-  .tbl .chair.kid { fill: var(--kid); stroke: var(--paper); stroke-width: 1; }
+  .tbl .chair.kid { fill: var(--kid); stroke: none; }
   .tbl .num { font-size: 24px; font-weight: 700; text-anchor: middle; dominant-baseline: central; fill: var(--body); }
   .tbl .num.long { font-size: 16px; }
   .tbl .num.empty { fill: #c9b99f; font-weight: 500; }
@@ -143,7 +143,7 @@
   .status { margin: 0; font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: baseline; font-variant-numeric: tabular-nums; }
   .status a { color: var(--accent); margin-left: auto; text-decoration: none; }
   .saved.bad { color: var(--warn); }
-  body[data-mode="guest"] .staff-only, body[data-mode="guest"] .card .cnt { display: none; }
+  body[data-mode="guest"] .staff-only, body[data-mode="guest"] .card .meter { display: none; }
 
   /* 底部面板：手機從下方滑出，電腦上浮在下方中央。賓客＝同桌名單（不擋畫面），工作人員＝編輯（對話框） */
   .sheet {
@@ -179,8 +179,6 @@
   .chip[data-side="主婚人親友"] { background: var(--parents); color: var(--parents-ink); border-color: transparent; }
   .chip[data-side="新人親友"] { background: var(--couple); color: var(--couple-ink); border-color: transparent; }
   .chip.over { border-color: var(--warn); color: var(--warn); }
-  .names { list-style: none; padding: 0; margin: 4px 0 0; columns: 2; column-gap: 20px; }
-  .names li { padding: 7px 0; border-bottom: 1px dotted var(--line); break-inside: avoid; text-align: center; font-size: 16px; }
   /* 賓客點桌子浮出的資訊卡：置中的座位卡樣式 */
   .place { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 4px; }
   .place .eyebrow { font-family: var(--latin); font-size: 12px; letter-spacing: .4em; padding-left: .4em; color: var(--accent); }
@@ -264,9 +262,20 @@
   .card .mini-rule i { width: 5px; height: 5px; background: currentColor; transform: rotate(45deg); }
   .card .tname { font-size: 14px; letter-spacing: .12em; color: var(--accent); margin: 0 0 8px; }
   .card .who { font-size: 15px; color: var(--body); line-height: 1.9; }
-  .card .who span { display: block; }   /* 一行一位 */
   .card .who.none { color: #c2b39c; font-size: 14px; }
-  .card .cnt { position: absolute; top: 8px; right: 10px; font-family: var(--latin); color: var(--muted); font-size: 13px; }
+  /* 姓名｜人數 兩欄對齊 */
+  .party-grid { display: grid; grid-template-columns: auto auto; justify-content: center; align-items: baseline; column-gap: 12px; text-align: left; }
+  .party-grid .ct { text-align: right; color: var(--muted); font-size: .85em; white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; }
+  .party-grid .kid-n { font-style: normal; display: block; font-size: .9em; line-height: 1.2; }
+  .names-grid { justify-content: stretch; grid-template-columns: 1fr auto 1fr auto; column-gap: 14px; margin-top: 4px; }
+  .names-grid .nm, .names-grid .ct { padding: 7px 0; border-bottom: 1px dotted var(--line); font-size: 16px; }
+  .names-grid .ct { font-size: 14px; }
+  @media (max-width: 340px) { .names-grid { grid-template-columns: 1fr auto; } }
+  /* 座位條 */
+  .card .meter { display: flex; gap: 4px; margin-top: auto; padding-top: 12px; }
+  .meter i { width: 6px; height: 6px; border-radius: 50%; border: 1px solid var(--accent); }
+  .meter i.on { background: var(--accent); }
+  .meter i.over { background: var(--warn); border-color: var(--warn); }
 
   [hidden] { display: none !important; }
 
@@ -307,7 +316,7 @@
       <span class="side-tag" data-side="主婚人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>主婚人親友</span>
       <span class="side-tag" data-side="新人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>新人親友</span>
       <span class="side-tag staff-only" data-side=""><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>未設定</span>
-      <span class="side-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><rect class="kid-icon" x="3.5" y="3.5" width="7" height="7" transform="rotate(45 7 7)"/></svg>兒童座椅</span>
+      <span class="side-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><rect class="kid-icon" x="2.5" y="2.5" width="9" height="9" rx="1.2"/></svg>兒童座椅</span>
     </div>
   </section>
 
@@ -634,7 +643,12 @@ let mode = STAFF ? "staff" : "guest", selected = null, query = "";
 const $ = (id) => document.getElementById(id);
 const seatsOf = (d) => d.guests.reduce((n, g) => n + (g.name ? g.count : 0), 0);
 // 顯示用：代表人姓名，多人時後面加「3 位」
-const partyHTML = (g) => `${esc(g.name)}${g.count > 1 ? `<small class="party-n">${g.count} 位</small>` : ""}${g.child && mode === "staff" ? `<small class="kid-n">童椅 ${g.child}</small>` : ""}`;
+// 名單排成兩欄：姓名（靠左）｜人數（靠右），整塊置中，每一行就會對齊
+const partyCells = (g) => `<span class="nm">${esc(g.name)}</span><span class="ct">${g.count > 1 ? `${g.count} 位` : ""}${g.child && mode === "staff" ? `<em class="kid-n">童椅 ${g.child}</em>` : ""}</span>`;
+// 座位條：10 個小點代表 10 個座位，已入座的塗滿，超過的標紅（工作人員才看得到）
+const meterHTML = (d) => { const used = seatsOf(d), n = Math.max(d.cap, used);
+  return `<span class="meter" title="${used} / ${d.cap} 位" aria-label="${used} / ${d.cap} 位">` +
+    Array.from({ length: n }, (_, k) => `<i class="${k >= d.cap ? "over" : k < used ? "on" : ""}"></i>`).join("") + `</span>`; };
 const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const label = (d) => d.num ? (/^\d+$/.test(d.num) ? `第 ${d.num} 桌` : d.num) : "未編號";
 const numKey = (d) => { const n = parseInt(d.num, 10); return d.num === "主桌" ? -1 : isNaN(n) ? 1e9 : n; };
@@ -655,7 +669,7 @@ function renderPlan() {
     num.classList.toggle("long", d.num.length > 2);
     const used = seatsOf(d);
     cnt.textContent = mode === "staff" && used ? `${used}/${d.cap}` : "";
-    // 椅子：依人數上限擺一圈，已排入的賓客塗滿；兒童座椅畫成菱形，放在離走道最遠的那一側
+    // 椅子：依人數上限擺一圈，已排入的賓客塗滿；兒童座椅畫成方塊，放在離走道最遠的那一側
     const t = TABLES.find(x => x.id === g.dataset.id), n = Math.max(d.cap, used), cr = t.seat - 4.5;
     const angle = (k) => -Math.PI / 2 + (k + 0.5) * 2 * Math.PI / n;
     const kids = Math.min(n, d.guests.reduce((c, p) => c + (p.child || 0), 0));
@@ -664,7 +678,11 @@ function renderPlan() {
     let filled = kids;   // 兒童也算入座人數
     g.querySelector(".chairs").innerHTML = Array.from({ length: n }, (_, k) => {
       const a = angle(k), cx = (t.x + cr * Math.cos(a)).toFixed(1), cy = (t.y + cr * Math.sin(a)).toFixed(1);
-      if (kidSeats.has(k)) return `<rect class="chair kid" x="${cx - 4.2}" y="${cy - 4.2}" width="8.4" height="8.4" transform="rotate(45 ${cx} ${cy})"><title>兒童座椅</title></rect>`;
+      if (kidSeats.has(k)) {
+        // 方塊的一條邊貼著桌緣（邊朝桌心），跟著座位角度轉
+        const side = 7.6, kr = t.r + side / 2 - 0.5, kx = t.x + kr * Math.cos(a), ky = t.y + kr * Math.sin(a);
+        return `<rect class="chair kid" x="${(kx - side / 2).toFixed(2)}" y="${(ky - side / 2).toFixed(2)}" width="${side}" height="${side}" rx="1" transform="rotate(${(a * 180 / Math.PI).toFixed(1)} ${kx.toFixed(2)} ${ky.toFixed(2)})"><title>兒童座椅</title></rect>`;
+      }
       const taken = filled < used && (filled++, true);
       const cls = mode !== "staff" ? "chair" : k >= d.cap && taken ? "chair over" : taken ? "chair taken" : "chair";
       return `<circle class="${cls}" cx="${cx}" cy="${cy}" r="4"/>`;
@@ -689,7 +707,7 @@ function renderDetail() {
       <span class="mini-rule"><i></i></span>
       ${d.name ? `<div class="tname">${esc(d.name)}</div>` : ""}
     </div>
-    ${d.guests.length ? `<ul class="names">${d.guests.map(p => `<li>${partyHTML(p)}</li>`).join("")}</ul>` : `<p class="hint" style="text-align:center">這桌還沒有安排賓客。</p>`}`;
+    ${d.guests.length ? `<div class="party-grid names-grid">${d.guests.map(partyCells).join("")}</div>` : `<p class="hint" style="text-align:center">這桌還沒有安排賓客。</p>`}`;
 }
 
 // 編輯區塊：工作人員點了桌子才出現；桌號依平面圖固定，不能手動改
@@ -727,11 +745,11 @@ function renderRoster() {
   $("roster").innerHTML = ids.map(id => {
     const d = state.tables[id];
     return `<button class="card" data-id="${id}" aria-label="${esc(label(d))}${d.name ? "・" + esc(d.name) : ""}">
-      <span class="cnt">${seatsOf(d)}/${d.cap}</span>
       <span class="eyebrow">TABLE</span><span class="n">${esc(d.num)}</span>
       <span class="mini-rule"><i></i></span>
       ${d.name ? `<div class="tname">${esc(d.name)}</div>` : ""}
-      <div class="who${d.guests.length ? "" : " none"}">${d.guests.length ? d.guests.map(p => `<span>${partyHTML(p)}</span>`).join("") : "尚未安排"}</div></button>`;
+      ${d.guests.length ? `<div class="who party-grid">${d.guests.map(partyCells).join("")}</div>` : `<div class="who none">尚未安排</div>`}
+      ${meterHTML(d)}</button>`;
   }).join("");
 }
 
