@@ -43,6 +43,17 @@ python3 tools/import_roster.py             # 上傳
 - 一組多人在桌上記成「王小明 +2」，佔 3 個座位；已入座的人不會再出現在待安排名單。
 - 有新回覆時重跑一次即可，已排好的座位不受影響。
 
+### 試算表已排好的桌次
+
+試算表的兩個排桌分頁（主婚人親友：桌次 1…；新人親友：桌次 A…）可整批放進席次表，B 欄為桌名：
+
+```bash
+python3 tools/import_tables.py --dry-run   # 看每一桌會放到第幾桌
+python3 tools/import_tables.py             # 寫入（會覆蓋所有桌的桌名、歸屬、名單）
+```
+
+主婚人親友依桌次放到第 1… 桌，新人親友接在後面（A→下一號…）；放好後可在工作人員版用拖曳整桌交換位置。
+
 ## 資料
 
 存在 Supabase **wedding** 專案（`jkzybhpzihljrluxslmy`）的 `seating` schema，活動代號 `lin-20261025`。
