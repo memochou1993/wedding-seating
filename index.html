@@ -136,6 +136,7 @@
   .results button:hover { border-color: var(--accent); }
   .results b { color: var(--accent); white-space: nowrap; }
   .hint { color: var(--muted); font-size: 13px; margin: 0; }
+  .hint:empty { display: none; }
   .status { margin: 0; font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: baseline; font-variant-numeric: tabular-nums; }
   .status a { color: var(--accent); margin-left: auto; text-decoration: none; }
   .saved.bad { color: var(--warn); }
@@ -609,7 +610,7 @@ function renderRoster() {
 
 function renderSearch() {
   const q = query.trim(), list = $("results");
-  if (!q) { list.innerHTML = ""; $("search-hint").textContent = mode === "staff" ? (matchMedia("(pointer: coarse)").matches ? "點桌子編輯名單；長按桌子再拖到另一桌，可整桌交換。" : "點桌子編輯名單；把桌子拖到另一桌上，可整桌交換。") : "也可以直接點平面圖上的桌子。"; return; }
+  if (!q) { list.innerHTML = ""; $("search-hint").textContent = mode === "staff" ? (matchMedia("(pointer: coarse)").matches ? "點桌子編輯名單；長按桌子再拖到另一桌，可整桌交換。" : "點桌子編輯名單；把桌子拖到另一桌上，可整桌交換。") : ""; return; }
   const hits = [];
   // 比對賓客姓名，也比對桌名（例如輸入「大學同學」找到那一桌）
   for (const id of ORDER) {
