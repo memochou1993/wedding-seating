@@ -59,8 +59,8 @@
   .rule span { width: 7px; height: 7px; background: currentColor; transform: rotate(45deg); }
 
   /* 版面：手機優先的單欄。標題 → 固定在頂端的找座位列 → 平面圖 → 席次一覽；電腦上置中最寬 880px */
-  @media (max-width: 560px) { body { padding: 16px 12px 48px; } .hero { padding: 72px 20px 48px; } .plan-card { padding: 48px 14px 28px; } .roster { padding: 56px 16px 40px; } }
-  .plan-card { padding: 64px 34px 44px; }
+  @media (max-width: 560px) { body { padding: 16px 8px 48px; } .hero { padding: 72px 20px 48px; } .plan-card { padding: 46px 8px 26px; } .roster { padding: 56px 16px 40px; } }
+  .plan-card { padding: 60px 22px 40px; }
   .plan-card svg.plan { display: block; width: 100%; height: auto; }
 
   /* 平面圖 */
@@ -86,12 +86,12 @@
   .tbl .chair.over { fill: var(--warn); stroke: var(--warn); }
   .tbl .chair.kid { fill: var(--kid); stroke: none; }
   body[data-mode="staff"] .tbl .chair.kid { cursor: grab; }
-  .tbl .num { font-size: 24px; font-weight: 700; text-anchor: middle; dominant-baseline: central; fill: var(--body); }
+  .tbl .num { font-size: 26px; font-weight: 700; text-anchor: middle; dominant-baseline: central; fill: var(--body); }
   .tbl .num.long { font-size: 16px; }
   .tbl .num.empty { fill: #c9b99f; font-weight: 500; }
-  .tbl .num.with-name { font-size: 19px; }
-  .tbl .num.with-name.long { font-size: 14px; }
-  .tbl .tn { font-size: 8.4px; font-weight: 500; letter-spacing: .02em; text-anchor: middle; dominant-baseline: central; fill: var(--accent); pointer-events: none; }
+  .tbl .num.with-name { font-size: 21px; }
+  .tbl .num.with-name.long { font-size: 15px; }
+  .tbl .tn { font-size: 9px; font-weight: 500; letter-spacing: 0; text-anchor: middle; dominant-baseline: central; fill: var(--accent); pointer-events: none; }
   .tbl.match .tn { fill: #fff; }
   /* 選取／聚焦：桌子後方一圈淡淡的香檳金光暈 */
   .tbl circle.hit { fill: transparent; }   /* 放大觸控範圍，手機上比較好點 */
@@ -314,7 +314,7 @@
   </section>
 
   <section class="plan-card framed">
-    <svg class="plan" id="plan" viewBox="70 70 790 1245" role="group" aria-label="宴會廳平面圖"></svg>
+    <svg class="plan" id="plan" viewBox="80 78 752 1232" role="group" aria-label="宴會廳平面圖"></svg>
     <div class="legend">
       <span class="side-tag" data-side="主婚人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>主婚人親友</span>
       <span class="side-tag" data-side="新人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>新人親友</span>
@@ -390,7 +390,7 @@
  * 桌位：依 PDF 的交錯排列重新排齊。每桌連椅子的佔地半徑 SEAT，
  * 與牆、伸展台保持 GAP 的走道；同一區兩欄左右錯開半排。
  */
-const TABLE_R = 27, SEAT = 35;            // 桌面半徑、連椅子的佔地半徑
+const TABLE_R = 30, SEAT = 37;            // 桌面半徑、連椅子的佔地半徑（桌面放大，桌名可放 6 個字）
 const PITCH = 150, ROW_A = 380, ROW_B = ROW_A + PITCH / 2;
 const rowsA = [0, 1, 2, 3, 4].map(k => ROW_A + k * PITCH);
 const rowsB = [0, 1, 2, 3, 4].map(k => ROW_B + k * PITCH);
@@ -427,11 +427,12 @@ function awayFromAisle(t) {
 const angDist = (a, b) => { const d = Math.abs(a - b) % (2 * Math.PI); return d > Math.PI ? 2 * Math.PI - d : d; };
 // 桌名分行：以字寬計（中文 1、英數 0.55），一行最多約 5 個中文字寬；
 // 有空白就在空白處斷（「合作夥伴 1」），否則從中間平均斷（「揪咪團／家人們」）；第二行太長用「…」
+const nameWidth = (str) => [...str].reduce((n, c) => n + (/[\x00-\x7f]/.test(c) ? 0.55 : 1), 0);
 function tableNameLines(name) {
   name = (name || "").trim();
   if (!name) return [];
-  const w = (str) => [...str].reduce((n, c) => n + (/[\x00-\x7f]/.test(c) ? 0.55 : 1), 0);
-  const MAX = 5.2;
+  const w = nameWidth;
+  const MAX = 6.05;   // 一行最多 6 個中文字
   if (w(name) <= MAX) return [name];
   const chars = [...name];
   let a, b;
@@ -706,13 +707,14 @@ function renderPlan() {
     num.classList.toggle("long", d.num.length > 2);
     // 桌名寫在桌號下方；太長就分兩行（先在空白處斷，否則每行最多 5 字），第二行再長就用「…」
     const lines = tableNameLines(d.name);
-    const up = lines.length ? (lines.length > 1 ? 9 : 6) * t.r / 27 : 0;
+    const up = lines.length ? (lines.length > 1 ? 10 : 8) * t.r / 30 : 0;
     num.setAttribute("y", t.y - 3 - up);
     num.classList.toggle("with-name", lines.length > 0);
-    tn.innerHTML = lines.map((l, i) => `<tspan x="${t.x}" y="${(t.y + (lines.length > 1 ? 4 + i * 9.5 : 9) * t.r / 27).toFixed(1)}">${esc(l)}</tspan>`).join("");
+    // 字級依這一行的字寬自動調整：短桌名字大一點，6 個字時剛好塞進桌面
+    tn.innerHTML = lines.map((l, i) => `<tspan x="${t.x}" y="${(t.y + (lines.length > 1 ? 4 + i * 10 : 8.5) * t.r / 30).toFixed(1)}" font-size="${Math.min(10, 49 / nameWidth(l)).toFixed(2)}">${esc(l)}</tspan>`).join("");
     const used = seatsOf(d);
     // 椅子：依人數上限擺一圈，已排入的賓客塗滿；兒童座椅畫成方塊，放在離走道最遠的那一側
-    const n = Math.max(d.cap, used), cr = t.seat - 4.5;
+    const n = Math.max(d.cap, used), cr = t.r + 3.2;   // 椅子緊貼桌緣一圈
     const angle = (k) => slotAngle(k, n);
     const kidSeats = kidSlots(t, d);
     let filled = kidSeats.size;   // 兒童也算入座人數
@@ -725,7 +727,7 @@ function renderPlan() {
       }
       const taken = filled < used && (filled++, true);
       const cls = mode !== "staff" ? "chair" : k >= d.cap && taken ? "chair over" : taken ? "chair taken" : "chair";
-      return `<circle class="${cls}" cx="${cx}" cy="${cy}" r="4"/>`;
+      return `<circle class="${cls}" cx="${cx}" cy="${cy}" r="3.6"/>`;
     }).join("");
     g.dataset.side = d.side;
     g.classList.toggle("selected", g.dataset.id === selected);

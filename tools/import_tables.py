@@ -21,7 +21,7 @@ PARENTS_GID, COUPLE_GID = "1652681496", "659016309"
 
 # ── 與 index.html 相同的桌位與桌號規則（id 綁位置；桌號由舞台往入口、中間往兩側）──
 def table_numbers():
-    seat, pitch, a0 = 35, 150, 380
+    seat, pitch, a0 = 37, 150, 380
     rows_a = [a0 + k * pitch for k in range(5)]
     rows_b = [a0 + pitch // 2 + k * pitch for k in range(5)]
     cols = [(90 + 20 + seat, rows_a), (250 - 20 - seat, rows_b),
