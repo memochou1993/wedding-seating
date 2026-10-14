@@ -329,14 +329,21 @@ const row = ([, y]) => Math.round((y - ROW_A) / (PITCH / 2));
 const TABLES = [{ id: "main", x: 455, y: 290, r: 35, seat: 45, main: true }].concat(
   SPOTS.slice().sort((a, b) => row(a) - row(b) || a[0] - b[0]).map(([x, y], i) => ({ id: "t" + (i + 1), x, y, r: TABLE_R, seat: SEAT }))
 );
-const ORDER = TABLES.map(t => t.id);
+// 桌號像蛇一樣走：四個區塊各自沿交錯的兩欄由上往下（或由下往上）編，
+// 一區走完接著隔壁區的同一端繼續，所以是 左區↓ → 中左↑ → 中右↓ → 右區↑。
+// 桌子的 id（t1…t41）綁在位置上、存檔也用 id，這裡只決定「哪個位置是幾號」。
+const ZONES = [[0, 250, "down"], [300, 461, "up"], [461, 622, "down"], [672, 830, "up"]];
+const SNAKE = ZONES.flatMap(([x0, x1, dir]) => TABLES.filter(t => !t.main && t.x > x0 && t.x < x1)
+  .sort((a, b) => dir === "down" ? a.y - b.y : b.y - a.y));
+const NUM_OF = Object.fromEntries([["main", "主桌"], ...SNAKE.map((t, i) => [t.id, String(i + 1)])]);
+const ORDER = ["main", ...SNAKE.map(t => t.id)];
 
 /* ───────────── 資料（本機 localStorage 快取，雲端同步見下方）───────────── */
 const KEY = "wedding-seating-v1";
 const DEFAULT_CAP = 10;                   // 每桌固定 10 人
 function defaultState() {
   const tables = {};
-  TABLES.forEach((t, i) => tables[t.id] = { num: t.main ? "主桌" : String(i), name: "", side: "", cap: DEFAULT_CAP, guests: [] });
+  TABLES.forEach((t, i) => tables[t.id] = { num: NUM_OF[t.id], name: "", side: "", cap: DEFAULT_CAP, guests: [] });
   return { tables };
 }
 const SIDES = ["主婚人親友", "新人親友"];
