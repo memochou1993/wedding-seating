@@ -209,15 +209,23 @@
   .text-input:focus { border-color: var(--accent); outline: none; }
   .field-label { display: block; }
   /* 出席名單（待安排）：點一下就加入這一桌 */
-  .pool-list { list-style: none; margin: 8px 0 0; padding: 0; max-height: 40vh; overflow: auto; border-top: 1px solid var(--line); }
-  .pool-list button { width: 100%; text-align: left; display: flex; align-items: center; gap: 10px; border: 0; border-bottom: 1px solid var(--line); background: transparent; padding: 9px 4px; cursor: pointer; color: var(--body); font-size: 16px; }
+  .combo { position: relative; }
+  .combo-pop { display: none; margin-top: -1px; border: 1px solid var(--accent); background: #fff; box-shadow: 0 10px 24px rgba(78,58,42,.12); }
+  .combo:focus-within .combo-pop { display: block; }
+  .combo:focus-within .text-input { border-color: var(--accent); }
+  .combo-filter { display: flex; gap: 6px; padding: 8px; border-bottom: 1px solid var(--line); }
+  .combo-filter button { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 4px 12px; font-size: 13px; color: var(--body); cursor: pointer; min-height: 32px; }
+  .combo-filter button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .pool-list { list-style: none; margin: 0; padding: 0; max-height: 45vh; max-height: 45dvh; overflow: auto; }
+  .pool-list button.active { background: var(--accent-soft); }
+  .pool-list button { width: 100%; text-align: left; display: flex; align-items: center; gap: 10px; border: 0; border-bottom: 1px solid var(--line); background: transparent; padding: 9px 10px; cursor: pointer; color: var(--body); font-size: 16px; }
   .pool-list button:hover { background: var(--accent-soft); }
   .pool-list .who-line { flex: 1; min-width: 0; }
   .pool-list .meta { display: block; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .pool-list .meta .warn { color: var(--warn); }
-  .pool-list .party { flex: none; font-family: var(--latin); font-size: 14px; color: var(--accent); border: 1px solid var(--line); border-radius: 999px; padding: 0 9px; }
-  .pool-list .plus { flex: none; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--accent); color: var(--accent); display: grid; place-items: center; font-size: 18px; }
-  .pool-list .empty { padding: 12px 4px; color: var(--muted); font-size: 14px; }
+  .pool-list .party { flex: none; font-size: 13px; font-variant-numeric: lining-nums; color: var(--accent); border: 1px solid var(--line); border-radius: 999px; padding: 0 9px; }
+  .pool-list .plus { flex: none; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--accent); color: var(--accent); display: grid; place-items: center; font-size: 16px; }
+  .pool-list .empty { padding: 12px 10px; color: var(--muted); font-size: 14px; }
   .btn { border: 1px solid var(--accent); background: transparent; color: var(--body); min-height: 44px; padding: 8px 16px; cursor: pointer; letter-spacing: .1em; font-size: 15px; }
   .btn:hover { background: var(--accent-soft); }
   .btn.solid { background: var(--accent); color: #fff; }
@@ -314,14 +322,20 @@
       <button class="btn solid" type="submit">加入</button>
     </form>
     <div class="pool" id="pool" hidden>
-      <div class="field-label">從出席名單加入 <span class="muted" id="pool-count"></span></div>
-      <div class="seg" id="pool-side" role="group" aria-label="名單篩選">
-        <button type="button" data-v="">全部</button>
-        <button type="button" data-v="主婚人親友">主婚人親友</button>
-        <button type="button" data-v="新人親友">新人親友</button>
+      <label class="field-label" for="pool-q">從出席名單加入 <span class="muted" id="pool-count"></span></label>
+      <!-- 下拉選單：點輸入框才展開，可打字篩選 -->
+      <div class="combo" id="combo">
+        <input class="text-input" id="pool-q" type="search" placeholder="點這裡選人，或輸入姓名、關係、單位" autocomplete="off" enterkeyhint="search"
+          role="combobox" aria-expanded="false" aria-controls="pool-list" aria-autocomplete="list">
+        <div class="combo-pop">
+          <div class="combo-filter" id="pool-side" role="group" aria-label="名單篩選">
+            <button type="button" data-v="">全部</button>
+            <button type="button" data-v="主婚人親友">主婚人親友</button>
+            <button type="button" data-v="新人親友">新人親友</button>
+          </div>
+          <ul class="pool-list" id="pool-list" role="listbox"></ul>
+        </div>
       </div>
-      <input class="text-input" id="pool-q" type="search" placeholder="搜尋姓名、關係或單位" autocomplete="off" enterkeyhint="search" style="margin-top:8px">
-      <ul class="pool-list" id="pool-list"></ul>
     </div>
     <div class="nav">
       <button class="btn" type="button" id="prev">← 上一桌</button>
@@ -712,8 +726,17 @@ function renderPool() {
   $("pool-list").innerHTML = list.length ? list.map(p => {
     const meta = [p.relation, p.unit, p.veg ? `素食 ${p.veg}` : "", p.child ? `兒童椅 ${p.child}` : ""].filter(Boolean).map(esc);
     if (p.note) meta.push(`<span class="warn">${esc(p.note)}</span>`);
-    return `<li><button type="button" data-name="${esc(p.name)}"><span class="who-line">${esc(p.name)}<span class="meta">${meta.join("・") || "&nbsp;"}</span></span>${p.count > 1 ? `<span class="party">${p.count} 位</span>` : ""}<span class="plus" aria-hidden="true">＋</span></button></li>`;
+    return `<li><button type="button" role="option" tabindex="-1" data-name="${esc(p.name)}"><span class="who-line">${esc(p.name)}<span class="meta">${meta.join("・") || "&nbsp;"}</span></span>${p.count > 1 ? `<span class="party">${p.count} 位</span>` : ""}<span class="plus" aria-hidden="true">＋</span></button></li>`;
   }).join("") : `<li class="empty">${left.length ? "沒有符合的人。" : "出席名單都已安排好了。"}</li>`;
+  poolActive = Math.min(poolActive, list.length - 1);
+  markActive();
+}
+// 下拉選單的鍵盤操作：↑↓ 移動、Enter 加入、Esc 收起
+let poolActive = -1;
+function markActive() {
+  const opts = [...$("pool-list").querySelectorAll("button[data-name]")];
+  opts.forEach((b, i) => b.classList.toggle("active", i === poolActive));
+  opts[poolActive]?.scrollIntoView({ block: "nearest" });
 }
 function renderAll() { renderPlan(); renderDetail(); renderEditor(); renderStats(); renderRoster(); renderSearch(); renderPool(); }
 
@@ -786,13 +809,27 @@ $("f-new").addEventListener("paste", (e) => {   // 貼上多行名單直接加�
   addNames($("f-new").value + "\n" + text);
 });
 $("pool-side").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (b) { poolSide = b.dataset.v; renderPool(); } });
-$("pool-q").addEventListener("input", (e) => { poolQ = e.target.value; renderPool(); });
-$("pool-list").addEventListener("click", (e) => {
-  const b = e.target.closest("button[data-name]"); if (!b) return;
-  const p = roster.find(x => x.name === b.dataset.name); if (!p) return;
+$("pool-q").addEventListener("input", (e) => { poolQ = e.target.value; poolActive = -1; renderPool(); });
+function addFromPool(name) {
+  const p = roster.find(x => x.name === name); if (!p) return;
   edit(d => d.guests.push({ name: p.name, count: clampCount(p.count) }));
   renderEditor();
+  $("f-list").lastElementChild?.scrollIntoView({ block: "nearest" });
+}
+// 點選項時先擋掉 mousedown，輸入框才不會失焦、選單也不會收起，可以連續加好幾組
+$("combo").addEventListener("mousedown", (e) => { if (e.target.closest("button")) e.preventDefault(); });
+$("pool-list").addEventListener("click", (e) => { const b = e.target.closest("button[data-name]"); if (b) addFromPool(b.dataset.name); });
+$("pool-q").addEventListener("focus", () => { $("pool-q").setAttribute("aria-expanded", "true"); poolActive = -1; renderPool(); });
+$("pool-q").addEventListener("blur", () => $("pool-q").setAttribute("aria-expanded", "false"));
+$("pool-q").addEventListener("keydown", (e) => {
+  if (composing(e)) return;
+  const n = $("pool-list").querySelectorAll("button[data-name]").length;
+  if (e.key === "ArrowDown") { e.preventDefault(); poolActive = Math.min(n - 1, poolActive + 1); markActive(); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); poolActive = Math.max(0, poolActive - 1); markActive(); }
+  else if (e.key === "Enter") { e.preventDefault(); const b = $("pool-list").querySelectorAll("button[data-name]")[Math.max(0, poolActive)]; if (b) addFromPool(b.dataset.name); }
+  else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); $("pool-q").blur(); }
 });
+$("editor").addEventListener("cancel", (e) => { if ($("combo").contains(document.activeElement)) e.preventDefault(); });   // Esc 只收起下拉，不關面板
 const step = (k) => { const i = ORDER.indexOf(selected); document.activeElement.blur(); select(ORDER[(i + k + ORDER.length) % ORDER.length], true); };
 $("close-editor").onclick = () => $("editor").close();
 $("editor").addEventListener("close", () => { if (selected) select(null, true); });
