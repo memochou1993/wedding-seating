@@ -29,6 +29,14 @@ create table if not exists seating.tables (
   primary key (event_id, table_id)
 );
 
+-- 兒童座椅在桌邊的位置（角度，度；0＝右、90＝下），工作人員可拖曳調整；空陣列＝自動擺在離走道最遠處
+alter table seating.tables add column if not exists kid_seats jsonb not null default '[]'::jsonb;
+do $$ begin
+  alter table seating.tables add constraint kid_seats_valid
+    check (jsonb_typeof(kid_seats) = 'array' and jsonb_array_length(kid_seats) <= 10
+           and not jsonb_path_exists(kid_seats, '$[*] ? (@.type() != "number" || @ < -360 || @ > 360)'));
+exception when duplicate_object then null; end $$;
+
 -- 已建立的資料表補上桌名欄位
 alter table seating.tables add column if not exists name text not null default '' check (char_length(name) <= 20);
 
@@ -62,7 +70,7 @@ set search_path = ''
 as $$
   select jsonb_build_object(
     'tables', coalesce(jsonb_object_agg(t.table_id, jsonb_build_object(
-      'num', t.num, 'name', t.name, 'side', t.side, 'cap', t.cap, 'guests', t.guests, 'updated_at', t.updated_at)), '{}'::jsonb),
+      'num', t.num, 'name', t.name, 'side', t.side, 'cap', t.cap, 'guests', t.guests, 'kidAngles', t.kid_seats, 'updated_at', t.updated_at)), '{}'::jsonb),
     'updated_at', max(t.updated_at)
   )
   from seating.tables t
@@ -83,7 +91,7 @@ as $$
   );
 $$;
 
--- 寫：p_tables = { "<table_id>": { num, name, side, cap, guests } }，只覆蓋有傳的桌；回傳寫入時間
+-- 寫：p_tables = { "<table_id>": { num, name, side, cap, guests, kidAngles } }，只覆蓋有傳的桌；回傳寫入時間
 create or replace function public.seating_save(p_event text, p_key text, p_tables jsonb)
 returns timestamptz
 language plpgsql
@@ -100,18 +108,19 @@ begin
     raise exception 'invalid payload' using errcode = '22023';
   end if;
 
-  insert into seating.tables as t (event_id, table_id, num, name, side, cap, guests, updated_at)
+  insert into seating.tables as t (event_id, table_id, num, name, side, cap, guests, kid_seats, updated_at)
   select p_event, k,
          coalesce(v ->> 'num', ''),
          coalesce(v ->> 'name', ''),
          coalesce(v ->> 'side', ''),
          coalesce((v ->> 'cap')::int, 10),
          coalesce(v -> 'guests', '[]'::jsonb),
+         coalesce(v -> 'kidAngles', '[]'::jsonb),
          v_now
   from jsonb_each(p_tables) as x(k, v)
   on conflict (event_id, table_id) do update
     set num = excluded.num, name = excluded.name, side = excluded.side, cap = excluded.cap,
-        guests = excluded.guests, updated_at = excluded.updated_at;
+        guests = excluded.guests, kid_seats = excluded.kid_seats, updated_at = excluded.updated_at;
 
   return v_now;
 end;

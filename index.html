@@ -85,6 +85,7 @@
   .tbl .chair.taken { fill: var(--accent); }
   .tbl .chair.over { fill: var(--warn); stroke: var(--warn); }
   .tbl .chair.kid { fill: var(--kid); stroke: none; }
+  body[data-mode="staff"] .tbl .chair.kid { cursor: grab; }
   .tbl .num { font-size: 24px; font-weight: 700; text-anchor: middle; dominant-baseline: central; fill: var(--body); }
   .tbl .num.long { font-size: 16px; }
   .tbl .num.empty { fill: #c9b99f; font-weight: 500; }
@@ -422,13 +423,24 @@ function awayFromAisle(t) {
   return t.x < z[2] ? 0 : Math.PI;
 }
 const angDist = (a, b) => { const d = Math.abs(a - b) % (2 * Math.PI); return d > Math.PI ? 2 * Math.PI - d : d; };
+const seatCount = (d) => Math.max(d.cap, seatsOf(d));
+const slotAngle = (k, n) => -Math.PI / 2 + (k + 0.5) * 2 * Math.PI / n;
+// 兒童座椅在哪幾個椅位：先照工作人員拖過的角度（kidAngles）找最近的椅位，不夠的再自動補在離走道最遠處
+function kidSlots(t, d) {
+  const n = seatCount(d), kids = Math.min(n, d.guests.reduce((c, p) => c + (p.child || 0), 0)), chosen = new Set();
+  const nearest = (target) => Array.from({ length: n }, (_, k) => k).filter(k => !chosen.has(k))
+    .sort((a, b) => angDist(slotAngle(a, n), target) - angDist(slotAngle(b, n), target))[0];
+  for (const deg of (d.kidAngles || []).slice(0, kids)) chosen.add(nearest(deg * Math.PI / 180));
+  while (chosen.size < kids) chosen.add(nearest(awayFromAisle(t)));
+  return chosen;
+}
 
 /* ───────────── 資料（本機 localStorage 快取，雲端同步見下方）───────────── */
 const KEY = "wedding-seating-v1";
 const DEFAULT_CAP = 10;                   // 每桌固定 10 人
 function defaultState() {
   const tables = {};
-  TABLES.forEach((t, i) => tables[t.id] = { num: NUM_OF[t.id], name: "", side: "", cap: DEFAULT_CAP, guests: [] });
+  TABLES.forEach((t, i) => tables[t.id] = { num: NUM_OF[t.id], name: "", side: "", kidAngles: [], cap: DEFAULT_CAP, guests: [] });
   return { tables };
 }
 // 一筆賓客＝一組人 { name: 代表人, count: 共幾位 }；舊格式字串「王小明 +2」轉成 { 王小明, 3 }
@@ -452,6 +464,7 @@ function merge(s) {
     const t = d.tables[id];   // 本機或雲端資料若有異常值，一律校正成安全的型別
     t.name = typeof t.name === "string" ? t.name.slice(0, 20) : "";
     t.guests = Array.isArray(t.guests) ? t.guests.map(toParty).filter(Boolean) : [];
+    t.kidAngles = Array.isArray(t.kidAngles) ? t.kidAngles.filter(a => Number.isFinite(a) && Math.abs(a) <= 360).slice(0, 10) : [];
     if (!SIDES.includes(d.tables[id].side)) d.tables[id].side = "";
     d.tables[id].cap = DEFAULT_CAP;
     d.tables[id].num = DEFAULT_NUM[id];       // 桌號固定，不吃存檔裡的值
@@ -484,7 +497,7 @@ async function rpc(fn, args) {
   if (!r.ok) throw new Error(`${fn} ${r.status}`);
   return r.json();
 }
-const pick = (d) => ({ num: d.num, name: d.name, side: d.side, cap: d.cap, guests: d.guests.filter(g => g.name) });
+const pick = (d) => ({ num: d.num, name: d.name, side: d.side, cap: d.cap, guests: d.guests.filter(g => g.name), kidAngles: d.kidAngles || [] });
 
 // 存檔：先寫本機（離線也不會遺失），再排程送上雲端；ids 省略 = 目前選取的桌
 function save(ids) {
@@ -671,17 +684,15 @@ function renderPlan() {
     cnt.textContent = mode === "staff" && used ? `${used}/${d.cap}` : "";
     // 椅子：依人數上限擺一圈，已排入的賓客塗滿；兒童座椅畫成方塊，放在離走道最遠的那一側
     const t = TABLES.find(x => x.id === g.dataset.id), n = Math.max(d.cap, used), cr = t.seat - 4.5;
-    const angle = (k) => -Math.PI / 2 + (k + 0.5) * 2 * Math.PI / n;
-    const kids = Math.min(n, d.guests.reduce((c, p) => c + (p.child || 0), 0));
-    const kidSeats = new Set(Array.from({ length: n }, (_, k) => k)
-      .sort((a, b) => angDist(angle(a), awayFromAisle(t)) - angDist(angle(b), awayFromAisle(t))).slice(0, kids));
-    let filled = kids;   // 兒童也算入座人數
+    const angle = (k) => slotAngle(k, n);
+    const kidSeats = kidSlots(t, d);
+    let filled = kidSeats.size;   // 兒童也算入座人數
     g.querySelector(".chairs").innerHTML = Array.from({ length: n }, (_, k) => {
       const a = angle(k), cx = (t.x + cr * Math.cos(a)).toFixed(1), cy = (t.y + cr * Math.sin(a)).toFixed(1);
       if (kidSeats.has(k)) {
         // 方塊的一條邊貼著桌緣（邊朝桌心），跟著座位角度轉
         const side = 7.6, kr = t.r + side / 2 - 0.5, kx = t.x + kr * Math.cos(a), ky = t.y + kr * Math.sin(a);
-        return `<rect class="chair kid" x="${(kx - side / 2).toFixed(2)}" y="${(ky - side / 2).toFixed(2)}" width="${side}" height="${side}" rx="1" transform="rotate(${(a * 180 / Math.PI).toFixed(1)} ${kx.toFixed(2)} ${ky.toFixed(2)})"><title>兒童座椅</title></rect>`;
+        return `<rect class="chair kid" data-slot="${k}" x="${(kx - side / 2).toFixed(2)}" y="${(ky - side / 2).toFixed(2)}" width="${side}" height="${side}" rx="1" transform="rotate(${(a * 180 / Math.PI).toFixed(1)} ${kx.toFixed(2)} ${ky.toFixed(2)})"><title>兒童座椅</title></rect>`;
       }
       const taken = filled < used && (filled++, true);
       const cls = mode !== "staff" ? "chair" : k >= d.cap && taken ? "chair over" : taken ? "chair taken" : "chair";
@@ -923,6 +934,7 @@ function tableAt(pt) {
 function swapTables(a, b) {
   const A = state.tables[a], B = state.tables[b];
   for (const k of SWAP_KEYS) [A[k], B[k]] = [B[k], A[k]];
+  A.kidAngles = []; B.kidAngles = [];   // 換了位置，兒童座椅重新自動擺到離走道最遠處
   save([a, b]); renderAll();
 }
 function showToast(text, undo) {
@@ -933,6 +945,7 @@ function showToast(text, undo) {
 function startDrag() {
   drag.active = true;
   document.body.classList.add("dragging");
+  if (drag.kind === "kid") { navigator.vibrate?.(15); return; }
   drag.g.classList.add("lifting");
   const t = TABLES.find(x => x.id === drag.id);
   drag.ghost = document.createElementNS(NS, "g");
@@ -944,6 +957,21 @@ function startDrag() {
 }
 function moveDrag(e) {
   const pt = svgPoint(e);
+  if (drag.kind === "kid") {   // 兒童座椅：沿著桌邊轉到最近的椅位
+    const t = TABLES.find(x => x.id === drag.id), d = state.tables[drag.id], n = seatCount(d);
+    const a = Math.atan2(pt.y - t.y, pt.x - t.x);
+    const to = Array.from({ length: n }, (_, k) => k).sort((x, y) => angDist(slotAngle(x, n), a) - angDist(slotAngle(y, n), a))[0];
+    if (to !== drag.slot) {
+      const slots = [...kidSlots(t, d)];
+      const i = slots.indexOf(drag.slot), j = slots.indexOf(to);
+      if (j >= 0) slots[j] = drag.slot;   // 拖到另一張兒童座椅上就互換
+      slots[i] = to;
+      d.kidAngles = slots.map(k => Math.round(slotAngle(k, n) * 180 / Math.PI));
+      drag.slot = to;
+      renderPlan();
+    }
+    return;
+  }
   drag.ghost.setAttribute("transform", `translate(${pt.x},${pt.y})`);
   const over = tableAt(pt), target = over && over.id !== drag.id ? over.id : null;
   if (target !== drag.target) {
@@ -961,7 +989,16 @@ function autoScroll() {
 function endDrag(drop) {
   if (!drag) return;
   clearTimeout(drag.timer);
-  if (drag.active) {
+  if (drag.active && drag.kind === "kid") {
+    justDragged = true; setTimeout(() => justDragged = false, 0);
+    document.body.classList.remove("dragging");
+    const id = drag.id, before = drag.before, d = state.tables[id];
+    if (!drop) { d.kidAngles = before; renderPlan(); }
+    else if (JSON.stringify(before) !== JSON.stringify(d.kidAngles)) {
+      save([id]);
+      showToast(`已移動${label(d)}的兒童座椅`, () => { d.kidAngles = before; save([id]); renderPlan(); });
+    }
+  } else if (drag.active) {
     justDragged = true; setTimeout(() => justDragged = false, 0);
     drag.ghost.remove();
     drag.g.classList.remove("lifting");
@@ -979,6 +1016,8 @@ plan.addEventListener("pointerdown", (e) => {
   if (mode !== "staff" || e.button > 0) return;
   const g = e.target.closest(".tbl"); if (!g) return;
   drag = { id: g.dataset.id, g, x: e.clientX, y: e.clientY, last: e, active: false, target: null, edge: 0, touch: e.pointerType !== "mouse" };
+  const kid = e.target.closest(".chair.kid");   // 按在兒童座椅上 → 拖的是兒童座椅，不是整桌
+  if (kid) Object.assign(drag, { kind: "kid", slot: +kid.dataset.slot, before: [...(state.tables[drag.id].kidAngles || [])] });
   if (drag.touch) drag.timer = setTimeout(() => drag && startDrag(), 350);
   requestAnimationFrame(autoScroll);
 });
