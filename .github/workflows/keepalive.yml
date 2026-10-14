@@ -1,0 +1,16 @@
+# Supabase 免費方案一週沒有資料庫活動會暫停；每 3 天讀一次席次，讓 wedding 專案保持運作。
+name: keep supabase awake
+on:
+  schedule:
+    - cron: "17 3 */3 * *"
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: read seating
+        run: |
+          curl -fsS https://jkzybhpzihljrluxslmy.supabase.co/rest/v1/rpc/seating_get \
+            -H "apikey: sb_publishable__eJX3f2Vw1CY-Dilst5Qfg_cgXw-i16" \
+            -H "Content-Type: application/json" \
+            -d '{"p_event":"lin-20261025"}' -o /dev/null
