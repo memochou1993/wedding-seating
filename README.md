@@ -6,8 +6,7 @@
 - 賓客版：https://memochou1993.github.io/wedding-seating/
 - 工作人員版：同一網址加 `?edit=<編輯金鑰>`（金鑰在本機 `.edit-key`，不進版控）
 
-單一檔案、不需建置，GitHub Pages 直接發佈 `main` 分支。平面圖座標取自飯店提供的
-`reference/聖+威42桌.pptx.pdf`（飯店文件，不進版控）。
+單一檔案、不需建置，GitHub Pages 直接發佈 `main` 分支。
 `.github/workflows/keepalive.yml` 每 3 天讀一次資料庫，避免 Supabase 免費方案閒置暫停。
 
 ## 安全
