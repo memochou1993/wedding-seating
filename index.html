@@ -833,6 +833,17 @@ $("editor").addEventListener("cancel", (e) => { if ($("combo").contains(document
 const step = (k) => { const i = ORDER.indexOf(selected); document.activeElement.blur(); select(ORDER[(i + k + ORDER.length) % ORDER.length], true); };
 $("close-editor").onclick = () => $("editor").close();
 $("editor").addEventListener("close", () => { if (selected) select(null, true); });
+// 點面板外面（變暗的背景）就關閉；按下與放開都在外面才算，避免在面板裡拖選文字時誤關
+const outside = (dlg, e) => { const r = dlg.getBoundingClientRect(); return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom; };
+let downOutside = false;
+$("editor").addEventListener("pointerdown", (e) => { downOutside = e.target === $("editor") && outside($("editor"), e); });
+$("editor").addEventListener("click", (e) => { if (downOutside && e.target === $("editor") && outside($("editor"), e)) $("editor").close(); downOutside = false; });
+// 賓客的同桌名單：點頁面其他地方就收起（點別桌則直接換成那一桌）
+document.addEventListener("click", (e) => {
+  if (mode !== "guest" || !selected || $("detail").hidden) return;
+  if (e.target.closest("#detail, .tbl, #results, .card, .bar")) return;
+  select(null, true);
+});
 $("prev").onclick = () => step(-1);
 $("next").onclick = () => step(1);
 
