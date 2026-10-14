@@ -112,3 +112,54 @@ revoke all on function public.seating_save(text, text, jsonb) from public;
 grant execute on function public.seating_get(text) to anon, authenticated;
 grant execute on function public.seating_check_key(text, text) to anon, authenticated;
 grant execute on function public.seating_save(text, text, jsonb) to anon, authenticated;
+
+-- ───────────── 出席名單（工作人員專用，需要編輯金鑰才能讀寫）─────────────
+-- 由 tools/import_roster.py 從出席調查試算表匯入；只存排座位需要的欄位，不存電話與留言。
+-- people = [{ "name", "count", "side", "relation", "unit", "veg", "child", "note" }, …]
+create table if not exists seating.rosters (
+  event_id text primary key references seating.events (id) on delete cascade,
+  people jsonb not null default '[]'::jsonb
+    check (jsonb_typeof(people) = 'array' and jsonb_array_length(people) <= 600 and octet_length(people::text) < 200000),
+  updated_at timestamptz not null default now()
+);
+alter table seating.rosters enable row level security;
+
+create or replace function public.seating_get_roster(p_event text, p_key text)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  if not public.seating_check_key(p_event, p_key) then
+    raise exception 'invalid edit key' using errcode = '42501';
+  end if;
+  return coalesce((select jsonb_build_object('people', r.people, 'updated_at', r.updated_at)
+                   from seating.rosters r where r.event_id = p_event),
+                  jsonb_build_object('people', '[]'::jsonb, 'updated_at', null));
+end;
+$$;
+
+create or replace function public.seating_set_roster(p_event text, p_key text, p_people jsonb)
+returns timestamptz
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_now timestamptz := now();
+begin
+  if not public.seating_check_key(p_event, p_key) then
+    raise exception 'invalid edit key' using errcode = '42501';
+  end if;
+  insert into seating.rosters (event_id, people, updated_at) values (p_event, p_people, v_now)
+  on conflict (event_id) do update set people = excluded.people, updated_at = excluded.updated_at;
+  return v_now;
+end;
+$$;
+
+revoke all on function public.seating_get_roster(text, text) from public;
+revoke all on function public.seating_set_roster(text, text, jsonb) from public;
+grant execute on function public.seating_get_roster(text, text) to anon, authenticated;
+grant execute on function public.seating_set_roster(text, text, jsonb) to anon, authenticated;
