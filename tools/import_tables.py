@@ -7,7 +7,7 @@
 來源（同一份試算表的兩個分頁，ID 在本機 .sheet-id）：
   主婚人親友分頁：A 桌次(1…)、B 桌名、D 姓名、G 出席人數 → 席次表第 1… 桌
   新人親友分頁：  A 桌次(A…)、B 桌名、C 姓名、D 出席人數 → 接在主婚人親友之後的桌號
-一組多人記成「姓名 +N」。
+每一筆是一組賓客：{ 代表人姓名, 共幾位 }。
 """
 import csv, io, json, sys, urllib.request
 from pathlib import Path
@@ -43,8 +43,9 @@ def fetch(sheet_id, gid):
 
 
 def entry(name, count):
+    """一組賓客：代表人姓名＋這組共幾位"""
     n = int(count) if str(count).strip().isdigit() else 1
-    return f"{name} +{n - 1}" if n > 1 else name
+    return {"name": name[:20], "count": max(1, min(n, 20))}
 
 
 def parse(rows, num_col, name_col, count_col):

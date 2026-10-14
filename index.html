@@ -192,6 +192,12 @@
   .guest-list li.over::before { color: var(--warn); }
   .guest-list input { flex: 1; min-width: 0; border: 0; background: transparent; padding: 10px 4px; font-size: 16px; color: var(--body); }
   .guest-list input:focus { outline: none; background: var(--accent-soft); }
+  .g-count { flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: 14px; color: var(--muted); }
+  .g-count input { width: 3.2em; padding: 8px 4px; border: 1px solid var(--line); background: #fff; text-align: center; font-size: 16px; color: var(--body); font-variant-numeric: lining-nums tabular-nums; }
+  .g-count input:focus { border-color: var(--accent); outline: none; background: #fff; }
+  .guest-list .g-count input { flex: none; }
+  .add .g-count input { padding: 10px 4px; }
+  .party-n { margin-left: 6px; font-size: .8em; color: var(--muted); font-variant-numeric: lining-nums; }
   .guest-list .del { width: 44px; height: 44px; border: 0; background: transparent; color: var(--muted); font-size: 20px; cursor: pointer; flex: none; }
   .guest-list:empty { display: none; }
   .add { display: flex; gap: 8px; margin-top: 10px; }
@@ -303,7 +309,8 @@
     <div class="field-label">賓客</div>
     <ol class="guest-list" id="f-list"></ol>
     <form class="add" id="f-add">
-      <input id="f-new" placeholder="輸入姓名，可一次貼上多行" autocomplete="off" enterkeyhint="done" aria-label="新增賓客">
+      <input id="f-new" placeholder="代表人姓名，可一次貼上多行" autocomplete="off" enterkeyhint="done" aria-label="新增一組賓客：代表人姓名">
+      <label class="g-count boxed"><input id="f-new-count" type="number" inputmode="numeric" min="1" max="20" value="1" aria-label="這組共幾位">位</label>
       <button class="btn solid" type="submit">加入</button>
     </form>
     <div class="pool" id="pool" hidden>
@@ -370,6 +377,15 @@ function defaultState() {
   TABLES.forEach((t, i) => tables[t.id] = { num: NUM_OF[t.id], name: "", side: "", cap: DEFAULT_CAP, guests: [] });
   return { tables };
 }
+// 一筆賓客＝一組人 { name: 代表人, count: 共幾位 }；舊格式字串「王小明 +2」轉成 { 王小明, 3 }
+function toParty(g) {
+  if (typeof g === "string") {
+    const m = g.match(/^(.*?)\s*[+＋]\s*(\d+)$/);
+    g = m ? { name: m[1], count: 1 + +m[2] } : { name: g, count: 1 };
+  }
+  if (!g || typeof g !== "object" || typeof g.name !== "string" || !g.name.trim()) return null;
+  return { name: g.name.trim().slice(0, 20), count: Math.min(20, Math.max(1, Math.round(+g.count) || 1)) };
+}
 const SIDES = ["主婚人親友", "新人親友"];
 const DEFAULT_NUM = Object.fromEntries(Object.entries(defaultState().tables).map(([id, d]) => [id, d.num]));
 // 把本機存檔或雲端資料套到預設資料上；不認得的歸屬（例如舊版的男方、女方）一律改回未設定
@@ -379,7 +395,7 @@ function merge(s) {
     Object.assign(d.tables[id], s.tables[id] || {});
     const t = d.tables[id];   // 本機或雲端資料若有異常值，一律校正成安全的型別
     t.name = typeof t.name === "string" ? t.name.slice(0, 20) : "";
-    t.guests = Array.isArray(t.guests) ? t.guests.filter(n => typeof n === "string") : [];
+    t.guests = Array.isArray(t.guests) ? t.guests.map(toParty).filter(Boolean) : [];
     if (!SIDES.includes(d.tables[id].side)) d.tables[id].side = "";
     d.tables[id].cap = DEFAULT_CAP;
     d.tables[id].num = DEFAULT_NUM[id];       // 桌號固定，不吃存檔裡的值
@@ -412,7 +428,7 @@ async function rpc(fn, args) {
   if (!r.ok) throw new Error(`${fn} ${r.status}`);
   return r.json();
 }
-const pick = (d) => ({ num: d.num, name: d.name, side: d.side, cap: d.cap, guests: d.guests.filter(Boolean) });
+const pick = (d) => ({ num: d.num, name: d.name, side: d.side, cap: d.cap, guests: d.guests.filter(g => g.name) });
 
 // 存檔：先寫本機（離線也不會遺失），再排程送上雲端；ids 省略 = 目前選取的桌
 function save(ids) {
@@ -569,9 +585,9 @@ function buildPlan() {
 const STAFF = !!EDIT_KEY;
 let mode = STAFF ? "staff" : "guest", selected = null, query = "";
 const $ = (id) => document.getElementById(id);
-// 一筆賓客可以是一組人：「王小明 +2」＝王小明加 2 位同行，佔 3 個座位
-const parseGuest = (s) => { const m = String(s).match(/^(.*?)\s*[+＋]\s*(\d+)$/); return m ? { name: m[1].trim(), extra: +m[2] } : { name: String(s).trim(), extra: 0 }; };
-const seatsOf = (d) => d.guests.reduce((n, g) => n + (g ? 1 + parseGuest(g).extra : 0), 0);
+const seatsOf = (d) => d.guests.reduce((n, g) => n + (g.name ? g.count : 0), 0);
+// 顯示用：代表人姓名，多人時後面加「3 位」
+const partyHTML = (g) => `${esc(g.name)}${g.count > 1 ? `<small class="party-n">${g.count} 位</small>` : ""}`;
 const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const label = (d) => d.num ? (/^\d+$/.test(d.num) ? `第 ${d.num} 桌` : d.num) : "未編號";
 const numKey = (d) => { const n = parseInt(d.num, 10); return d.num === "主桌" ? -1 : isNaN(n) ? 1e9 : n; };
@@ -603,7 +619,7 @@ function renderPlan() {
     g.dataset.side = d.side;
     g.classList.toggle("selected", g.dataset.id === selected);
     g.classList.toggle("dup", mode === "staff" && dups.has(d.num));
-    g.classList.toggle("match", !!q && (d.guests.some(n => n.includes(q)) || d.name.includes(q)));
+    g.classList.toggle("match", !!q && (d.guests.some(p => p.name.includes(q)) || d.name.includes(q)));
     g.setAttribute("aria-label", `${label(d)}${d.name ? "・" + d.name : ""}，${d.side || "未設定"}，${used} 位賓客`);
   }
 }
@@ -619,7 +635,7 @@ function renderDetail() {
       <span class="mini-rule"><i></i></span>
       ${d.name ? `<div class="tname">${esc(d.name)}</div>` : ""}
     </div>
-    ${d.guests.length ? `<ul class="names">${d.guests.map(n => `<li>${esc(n)}</li>`).join("")}</ul>` : `<p class="hint" style="text-align:center">這桌還沒有安排賓客。</p>`}`;
+    ${d.guests.length ? `<ul class="names">${d.guests.map(p => `<li>${partyHTML(p)}</li>`).join("")}</ul>` : `<p class="hint" style="text-align:center">這桌還沒有安排賓客。</p>`}`;
 }
 
 // 編輯區塊：工作人員點了桌子才出現；桌號依平面圖固定，不能手動改
@@ -634,9 +650,12 @@ function renderEditor() {
   for (const b of $("f-side").children) b.setAttribute("aria-pressed", b.dataset.v === d.side);
   // 名單：正在其中一格打字時不重畫，避免游標跳掉
   if (!$("f-list").contains(document.activeElement)) {
-    const before = []; d.guests.reduce((n, g, i) => (before[i] = n, n + (g ? 1 + parseGuest(g).extra : 0)), 0);   // 這筆之前已坐了幾位
-    $("f-list").innerHTML = d.guests.map((n, i) =>
-      `<li class="${before[i] >= d.cap ? "over" : ""}"><input value="${esc(n)}" data-i="${i}" aria-label="第 ${i + 1} 位賓客"><button type="button" class="del" data-i="${i}" aria-label="移除 ${esc(n)}">×</button></li>`).join("");
+    const before = []; d.guests.reduce((n, g, i) => (before[i] = n, n + g.count), 0);   // 這組之前已坐了幾位
+    $("f-list").innerHTML = d.guests.map((p, i) =>
+      `<li class="${before[i] + p.count > d.cap ? "over" : ""}">` +
+      `<input class="g-name" value="${esc(p.name)}" data-i="${i}" aria-label="第 ${i + 1} 組代表人">` +
+      `<label class="g-count"><input type="number" inputmode="numeric" min="1" max="20" value="${p.count}" data-i="${i}" aria-label="${esc(p.name)} 這組共幾位">位</label>` +
+      `<button type="button" class="del" data-i="${i}" aria-label="移除 ${esc(p.name)}">×</button></li>`).join("");
   }
 }
 
@@ -657,7 +676,7 @@ function renderRoster() {
       <span class="eyebrow">TABLE</span><span class="n">${esc(d.num)}</span>
       <span class="mini-rule"><i></i></span>
       ${d.name ? `<div class="tname">${esc(d.name)}</div>` : ""}
-      <div class="who${d.guests.length ? "" : " none"}">${d.guests.length ? d.guests.filter(Boolean).map(n => `<span>${esc(n)}</span>`).join("") : "尚未安排"}</div></button>`;
+      <div class="who${d.guests.length ? "" : " none"}">${d.guests.length ? d.guests.map(p => `<span>${partyHTML(p)}</span>`).join("") : "尚未安排"}</div></button>`;
   }).join("");
 }
 
@@ -669,7 +688,7 @@ function renderSearch() {
   for (const id of ORDER) {
     const d = state.tables[id];
     if (d.name && d.name.includes(q)) hits.push([d.name, id, true]);
-    for (const n of d.guests) if (n.includes(q)) hits.push([n, id]);
+    for (const p of d.guests) if (p.name.includes(q)) hits.push([p.name, id]);
   }
   $("search-hint").textContent = hits.length ? `找到 ${hits.length} 筆，金色的桌子就是座位。` : "找不到，試試只輸入名字的一部分。";
   const where = (id) => { const d = state.tables[id]; return label(d) + (d.name ? `・${d.name}` : ""); };
@@ -678,7 +697,7 @@ function renderSearch() {
 }
 
 // 已入座的人（依姓名比對，「王小明 +2」算王小明）
-function assignedNames() { const set = new Set(); for (const id of ORDER) for (const g of state.tables[id].guests) if (g) set.add(parseGuest(g).name); return set; }
+function assignedNames() { const set = new Set(); for (const id of ORDER) for (const g of state.tables[id].guests) if (g.name) set.add(g.name); return set; }
 function unassigned() { const a = assignedNames(); return (roster || []).filter(p => !a.has(p.name)); }
 function renderPool() {
   $("pool").hidden = mode !== "staff" || !roster || !selected;
@@ -735,17 +754,27 @@ $("f-name").addEventListener("input", (e) => edit(d => d.name = e.target.value.t
 const composing = (e) => e.isComposing || e.keyCode === 229;
 $("f-name").addEventListener("keydown", (e) => { if (e.key === "Enter" && !composing(e)) e.target.blur(); });
 $("f-new").addEventListener("keydown", (e) => { if (e.key === "Enter" && composing(e)) e.preventDefault(); });
-// 名單編輯：改名即存；清空一格或按 × 就移除；底下輸入框可一次貼上多行（也接受、，分隔）
-$("f-list").addEventListener("input", (e) => { const i = +e.target.dataset.i; edit(d => d.guests[i] = e.target.value.trim()); refreshCount(); });
-$("f-list").addEventListener("focusout", (e) => { if (e.target.matches("input") && !e.target.value.trim()) removeGuest(+e.target.dataset.i); });
+// 名單編輯：每組＝代表人＋人數。改了即存；姓名清空或按 × 就移除；底下輸入框可一次貼上多行（也接受、，分隔）
+const clampCount = (v) => Math.min(20, Math.max(1, parseInt(v, 10) || 1));
+$("f-list").addEventListener("input", (e) => {
+  const i = +e.target.dataset.i;
+  if (e.target.matches(".g-name")) edit(d => d.guests[i].name = e.target.value.trim());
+  else if (e.target.value !== "") edit(d => d.guests[i].count = clampCount(e.target.value));
+  refreshCount();
+});
+$("f-list").addEventListener("focusout", (e) => {
+  if (e.target.matches(".g-name") && !e.target.value.trim()) removeGuest(+e.target.dataset.i);
+  else if (e.target.matches('[type="number"]')) { e.target.value = state.tables[selected].guests[+e.target.dataset.i]?.count ?? 1; renderEditor(); }
+});
 $("f-list").addEventListener("click", (e) => { const b = e.target.closest(".del"); if (b) removeGuest(+b.dataset.i); });
 function removeGuest(i) { edit(d => d.guests.splice(i, 1)); renderEditor(); }
 function refreshCount() { const d = state.tables[selected], n = seatsOf(d); $("f-count").textContent = `${n} / ${d.cap} 人`; $("f-count").classList.toggle("over", n > d.cap); }
 function addNames(text) {
   const names = text.split(/[\n,，、]+/).map(x => x.trim()).filter(Boolean);
   if (!names.length) return;
-  edit(d => d.guests.push(...names));
-  $("f-new").value = "";
+  const count = names.length === 1 ? clampCount($("f-new-count").value) : 1;   // 一次貼多人時每人各 1 位
+  edit(d => d.guests.push(...names.map(name => ({ name: name.slice(0, 20), count }))));
+  $("f-new").value = ""; $("f-new-count").value = 1;
   renderEditor();
   $("f-list").lastElementChild?.scrollIntoView({ block: "nearest" });
 }
@@ -761,7 +790,7 @@ $("pool-q").addEventListener("input", (e) => { poolQ = e.target.value; renderPoo
 $("pool-list").addEventListener("click", (e) => {
   const b = e.target.closest("button[data-name]"); if (!b) return;
   const p = roster.find(x => x.name === b.dataset.name); if (!p) return;
-  edit(d => d.guests.push(p.count > 1 ? `${p.name} +${p.count - 1}` : p.name));
+  edit(d => d.guests.push({ name: p.name, count: clampCount(p.count) }));
   renderEditor();
 });
 const step = (k) => { const i = ORDER.indexOf(selected); document.activeElement.blur(); select(ORDER[(i + k + ORDER.length) % ORDER.length], true); };

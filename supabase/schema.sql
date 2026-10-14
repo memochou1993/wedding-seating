@@ -32,10 +32,21 @@ create table if not exists seating.tables (
 -- 已建立的資料表補上桌名欄位
 alter table seating.tables add column if not exists name text not null default '' check (char_length(name) <= 20);
 
--- 賓客名單每一筆都必須是字串（擋掉物件、數字等會讓頁面出錯的資料）
+-- 賓客名單每一筆是一組人：{ "name": 代表人姓名, "count": 這組共幾位 }
+-- （舊版存成字串「王小明 +2」＝3 位，這裡一併轉成新格式）
+alter table seating.tables drop constraint if exists guests_are_strings;
+update seating.tables t set guests = coalesce((
+  select jsonb_agg(case
+    when jsonb_typeof(g) = 'string' then jsonb_build_object(
+      'name', btrim(regexp_replace(g #>> '{}', '\s*[+＋]\s*\d+$', '')),
+      'count', 1 + coalesce((regexp_match(g #>> '{}', '[+＋]\s*(\d+)$'))[1]::int, 0))
+    else g end)
+  from jsonb_array_elements(t.guests) g), '[]'::jsonb)
+where exists (select 1 from jsonb_array_elements(t.guests) g where jsonb_typeof(g) = 'string');
 do $$ begin
-  alter table seating.tables add constraint guests_are_strings
-    check (not jsonb_path_exists(guests, '$[*] ? (@.type() != "string")'));
+  alter table seating.tables add constraint guests_are_parties
+    check (not jsonb_path_exists(guests,
+      '$[*] ? (@.type() != "object" || !exists(@.name) || !exists(@.count) || @.name.type() != "string" || @.count.type() != "number" || @.count < 1 || @.count > 20)'));
 exception when duplicate_object then null; end $$;
 
 alter table seating.events enable row level security;
