@@ -89,8 +89,10 @@
   .tbl .num { font-size: 24px; font-weight: 700; text-anchor: middle; dominant-baseline: central; fill: var(--body); }
   .tbl .num.long { font-size: 16px; }
   .tbl .num.empty { fill: #c9b99f; font-weight: 500; }
-  .tbl .count { font-family: var(--latin); font-size: 11px; text-anchor: middle; fill: var(--muted); }
-  .tbl .count.over { fill: var(--warn); font-weight: 600; }
+  .tbl .num.with-name { font-size: 19px; }
+  .tbl .num.with-name.long { font-size: 14px; }
+  .tbl .tn { font-size: 8.4px; font-weight: 500; letter-spacing: .02em; text-anchor: middle; dominant-baseline: central; fill: var(--accent); pointer-events: none; }
+  .tbl.match .tn { fill: #fff; }
   /* 選取／聚焦：桌子後方一圈淡淡的香檳金光暈 */
   .tbl circle.hit { fill: transparent; }   /* 放大觸控範圍，手機上比較好點 */
   .tbl circle.glow { fill: var(--accent); opacity: 0; transition: opacity .2s; }
@@ -99,7 +101,7 @@
   .tbl.selected circle.disc { stroke-width: 2; }
   .tbl:focus { outline: none; }
   .tbl.match circle.disc { fill: var(--accent); stroke: var(--accent); }
-  .tbl.match .num, .tbl.match .count { fill: #fff; }
+  .tbl.match .num { fill: #fff; }
   .tbl.match circle.halo { opacity: 1; animation: ping 1.6s ease-out infinite; transform-box: fill-box; transform-origin: center; }
   .tbl.dup .num { fill: var(--warn); }
   /* 拖曳交換整桌（工作人員） */
@@ -423,6 +425,27 @@ function awayFromAisle(t) {
   return t.x < z[2] ? 0 : Math.PI;
 }
 const angDist = (a, b) => { const d = Math.abs(a - b) % (2 * Math.PI); return d > Math.PI ? 2 * Math.PI - d : d; };
+// 桌名分行：以字寬計（中文 1、英數 0.55），一行最多約 5 個中文字寬；
+// 有空白就在空白處斷（「合作夥伴 1」），否則從中間平均斷（「揪咪團／家人們」）；第二行太長用「…」
+function tableNameLines(name) {
+  name = (name || "").trim();
+  if (!name) return [];
+  const w = (str) => [...str].reduce((n, c) => n + (/[\x00-\x7f]/.test(c) ? 0.55 : 1), 0);
+  const MAX = 5.2;
+  if (w(name) <= MAX) return [name];
+  const chars = [...name];
+  let a, b;
+  const sp = name.indexOf(" ");
+  if (sp > 0 && w(name.slice(0, sp)) <= MAX) { a = name.slice(0, sp); b = name.slice(sp + 1).trim(); }
+  else {
+    let cut = 1, best = Infinity;   // 讓兩行寬度最接近
+    for (let i = 1; i < chars.length; i++) { const d = Math.abs(w(chars.slice(0, i).join("")) - w(chars.slice(i).join(""))); if (d < best && w(chars.slice(0, i).join("")) <= MAX) { best = d; cut = i; } }
+    a = chars.slice(0, cut).join(""); b = chars.slice(cut).join("");
+  }
+  while (w(b) > MAX - 0.6) b = [...b].slice(0, -1).join("");
+  if (b !== name.slice(name.length - b.length) && !name.endsWith(b)) b += "…";
+  return [a, b];
+}
 const seatCount = (d) => Math.max(d.cap, seatsOf(d));
 const slotAngle = (k, n) => -Math.PI / 2 + (k + 0.5) * 2 * Math.PI / n;
 // 兒童座椅在哪幾個椅位：先照工作人員拖過的角度（kidAngles）找最近的椅位，不夠的再自動補在離走道最遠處
@@ -642,7 +665,7 @@ function buildPlan() {
     g.setAttribute("tabindex", "0");
     g.setAttribute("role", "button");
     g.innerHTML = `<circle class="hit" cx="${t.x}" cy="${t.y}" r="${t.seat + 12}"/><circle class="glow" cx="${t.x}" cy="${t.y}" r="${t.seat + 9}"/><circle class="halo" cx="${t.x}" cy="${t.y}" r="${t.seat + 5}"/><g class="chairs"></g><circle class="disc" cx="${t.x}" cy="${t.y}" r="${t.r}"/>` +
-      `<text class="num" x="${t.x}" y="${t.y - 3}"></text><text class="count" x="${t.x}" y="${t.y + 17}"></text>`;
+      `<text class="num" x="${t.x}" y="${t.y - 3}"></text><text class="tn" x="${t.x}"></text>`;
     g.addEventListener("click", () => { if (!justDragged) select(t.id, true); });
     g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(t.id, true); } });
     plan.append(g);
@@ -676,14 +699,20 @@ function renderPlan() {
   const q = query.trim();
   for (const g of plan.querySelectorAll(".tbl")) {
     const d = state.tables[g.dataset.id];
-    const num = g.querySelector(".num"), cnt = g.querySelector(".count");
+    const num = g.querySelector(".num"), tn = g.querySelector(".tn");
+    const t = TABLES.find(x => x.id === g.dataset.id);
     num.textContent = d.num || (mode === "staff" ? "＋" : "");
     num.classList.toggle("empty", !d.num);
     num.classList.toggle("long", d.num.length > 2);
+    // 桌名寫在桌號下方；太長就分兩行（先在空白處斷，否則每行最多 5 字），第二行再長就用「…」
+    const lines = tableNameLines(d.name);
+    const up = lines.length ? (lines.length > 1 ? 9 : 6) * t.r / 27 : 0;
+    num.setAttribute("y", t.y - 3 - up);
+    num.classList.toggle("with-name", lines.length > 0);
+    tn.innerHTML = lines.map((l, i) => `<tspan x="${t.x}" y="${(t.y + (lines.length > 1 ? 4 + i * 9.5 : 9) * t.r / 27).toFixed(1)}">${esc(l)}</tspan>`).join("");
     const used = seatsOf(d);
-    cnt.textContent = mode === "staff" && used ? `${used}/${d.cap}` : "";
     // 椅子：依人數上限擺一圈，已排入的賓客塗滿；兒童座椅畫成方塊，放在離走道最遠的那一側
-    const t = TABLES.find(x => x.id === g.dataset.id), n = Math.max(d.cap, used), cr = t.seat - 4.5;
+    const n = Math.max(d.cap, used), cr = t.seat - 4.5;
     const angle = (k) => slotAngle(k, n);
     const kidSeats = kidSlots(t, d);
     let filled = kidSeats.size;   // 兒童也算入座人數
@@ -698,7 +727,6 @@ function renderPlan() {
       const cls = mode !== "staff" ? "chair" : k >= d.cap && taken ? "chair over" : taken ? "chair taken" : "chair";
       return `<circle class="${cls}" cx="${cx}" cy="${cy}" r="4"/>`;
     }).join("");
-    cnt.classList.toggle("over", used > d.cap);
     g.dataset.side = d.side;
     g.classList.toggle("selected", g.dataset.id === selected);
     g.classList.toggle("dup", mode === "staff" && dups.has(d.num));
