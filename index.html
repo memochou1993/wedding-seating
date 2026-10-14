@@ -696,7 +696,7 @@ function renderSearch() {
     `<li><button data-id="${id}"><span>${esc(n)}${isTable ? ` <small class="muted">（桌名）</small>` : ""}</span><b>${esc(isTable ? label(state.tables[id]) : where(id))}</b></button></li>`).join("");
 }
 
-// 已入座的人（依姓名比對，「王小明 +2」算王小明）
+// 已入座的人（依代表人姓名比對）
 function assignedNames() { const set = new Set(); for (const id of ORDER) for (const g of state.tables[id].guests) if (g.name) set.add(g.name); return set; }
 function unassigned() { const a = assignedNames(); return (roster || []).filter(p => !a.has(p.name)); }
 function renderPool() {
