@@ -155,6 +155,16 @@
   /* 電腦上編輯面板放在畫面正中央 */
   @media (min-width: 600px) { dialog.sheet { inset: 50% auto auto 50%; transform: translate(-50%, -50%); } }
   dialog.sheet:focus { outline: none; }
+  /* 面板分成 頂部（標題、×）｜可捲動的內容｜底部（上一桌／下一桌），× 與按鈕永遠看得到 */
+  #detail:not([hidden]), dialog.sheet[open] { display: flex; flex-direction: column; overflow: hidden; padding: 0; }
+  .sheet::before { margin: 10px auto 2px; flex: none; }
+  .sheet-head { position: relative; flex: none; padding: 6px 20px 12px; border-bottom: 1px solid var(--line); }
+  .sheet-body { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 4px 20px 18px; }
+  #detail .sheet-body { padding: 8px 20px calc(18px + env(safe-area-inset-bottom, 0px)); }
+  .sheet-foot { flex: none; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); background: var(--paper); }
+  .sheet-foot.nav { margin-top: 0; }
+  .sheet-head .close { top: 0; right: 8px; }
+  @media (min-width: 600px) { .sheet::before { display: none; } .sheet-head { padding-top: 16px; } .sheet-foot { padding-bottom: 14px; } #detail .sheet-body { padding-top: 18px; } }
   dialog.sheet::backdrop { background: rgba(43,37,34,.35); }
   .sheet h2 { margin: 0 0 4px; font-size: 12px; font-weight: 500; letter-spacing: .4em; color: var(--accent); }
   .sheet h2 small { font-family: var(--latin); letter-spacing: .25em; margin-left: 8px; }
@@ -298,14 +308,17 @@
   <!-- 賓客：點桌子後浮出同桌名單 -->
   <div class="sheet" id="detail" hidden>
     <button class="close" id="close-detail" aria-label="關閉">×</button>
-    <div id="detail-body"></div>
+    <div class="sheet-body" id="detail-body"></div>
   </div>
 
   <!-- 工作人員：點桌子後開啟編輯對話框 -->
   <dialog class="sheet" id="editor" aria-labelledby="f-title" tabindex="-1">
-    <button class="close" id="close-editor" aria-label="關閉">×</button>
-    <h2>編輯這一桌<small>EDIT</small></h2>
-    <div class="detail-head"><span class="big" id="f-title"></span><span class="chip" id="f-count"></span></div>
+    <header class="sheet-head">
+      <button class="close" id="close-editor" aria-label="關閉">×</button>
+      <h2>編輯這一桌<small>EDIT</small></h2>
+      <div class="detail-head"><span class="big" id="f-title"></span><span class="chip" id="f-count"></span></div>
+    </header>
+    <div class="sheet-body">
     <label class="field-label" for="f-name">桌名</label>
     <input class="text-input" id="f-name" maxlength="20" placeholder="選填，例如：大學同學" autocomplete="off" enterkeyhint="done">
     <div class="field-label" id="side-label">歸屬</div>
@@ -337,10 +350,11 @@
         </div>
       </div>
     </div>
-    <div class="nav">
+    </div>
+    <footer class="sheet-foot nav">
       <button class="btn" type="button" id="prev">← 上一桌</button>
       <button class="btn" type="button" id="next">下一桌 →</button>
-    </div>
+    </footer>
   </dialog>
 
   <section class="roster framed" id="roster-wrap">
