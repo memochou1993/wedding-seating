@@ -27,6 +27,7 @@
     --couple: #f6e6e3;      /* 新人親友桌底色 */
     --couple-ink: #8a5149;
     --warn: #a3402f;
+    --kid: #6f9a86;           /* 兒童座椅 */
     --serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
     --latin: "Cormorant Garamond", "Times New Roman", serif;
   }
@@ -83,6 +84,7 @@
   .tbl .chair { fill: var(--paper); stroke: var(--accent); stroke-width: 1; }
   .tbl .chair.taken { fill: var(--accent); }
   .tbl .chair.over { fill: var(--warn); stroke: var(--warn); }
+  .tbl .chair.kid { fill: var(--kid); stroke: var(--paper); stroke-width: 1; }
   .tbl .num { font-size: 24px; font-weight: 700; text-anchor: middle; dominant-baseline: central; fill: var(--body); }
   .tbl .num.long { font-size: 16px; }
   .tbl .num.empty { fill: #c9b99f; font-weight: 500; }
@@ -120,6 +122,7 @@
   .side-tag { display: inline-flex; align-items: center; gap: 6px; letter-spacing: .06em; color: var(--muted); }
   .side-tag svg { flex: none; width: 14px; height: 14px; }
   .side-tag circle { fill: var(--paper); stroke: var(--accent); stroke-width: 1.1; }
+  .side-tag .kid-icon { fill: var(--kid); }
   .side-tag[data-side="主婚人親友"] circle { fill: var(--parents); }
   .side-tag[data-side="新人親友"] circle { fill: var(--couple); }
   .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; margin-top: 22px; font-size: 13px; color: var(--muted); }
@@ -207,6 +210,10 @@
   .g-count input:focus { border-color: var(--accent); outline: none; background: #fff; }
   .guest-list .g-count input { flex: none; }
   .add .g-count input { padding: 10px 4px; }
+  .g-count.kid { font-size: 12px; }
+  .g-count.kid input { width: 2.6em; }
+  .g-count.kid.on input { border-color: var(--kid); color: var(--kid); font-weight: 600; }
+  .kid-n { margin-left: 6px; font-size: .8em; color: var(--kid); }
   .party-n { margin-left: 6px; font-size: .8em; color: var(--muted); font-variant-numeric: lining-nums; }
   .guest-list .del { width: 44px; height: 44px; border: 0; background: transparent; color: var(--muted); font-size: 20px; cursor: pointer; flex: none; }
   .guest-list:empty { display: none; }
@@ -300,6 +307,7 @@
       <span class="side-tag" data-side="主婚人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>主婚人親友</span>
       <span class="side-tag" data-side="新人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>新人親友</span>
       <span class="side-tag staff-only" data-side=""><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>未設定</span>
+      <span class="side-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><rect class="kid-icon" x="3.5" y="3.5" width="7" height="7" transform="rotate(45 7 7)"/></svg>兒童座椅</span>
     </div>
   </section>
 
@@ -396,6 +404,15 @@ const SNAKE = ZONES.flatMap(([x0, x1, dir]) => TABLES.filter(t => !t.main && t.x
   .sort((a, b) => dir === "down" ? a.y - b.y : b.y - a.y));
 const NUM_OF = Object.fromEntries([["main", "主桌"], ...SNAKE.map((t, i) => [t.id, String(i + 1)])]);
 const ORDER = ["main", ...SNAKE.map(t => t.id)];
+// 兒童座椅放在離走道最遠的那一側：每區兩欄之間是桌子彼此相對的內側，走道在牆邊、伸展台邊與中央。
+// 所以往「所在區塊的中線」那一側放；主桌朝舞台那一側。
+const ZONE_MID = [[0, 250, 170], [300, 461, 380], [461, 622, 542], [672, 830, 747]];
+function awayFromAisle(t) {
+  if (t.main) return -Math.PI / 2;
+  const z = ZONE_MID.find(([x0, x1]) => t.x > x0 && t.x < x1);
+  return t.x < z[2] ? 0 : Math.PI;
+}
+const angDist = (a, b) => { const d = Math.abs(a - b) % (2 * Math.PI); return d > Math.PI ? 2 * Math.PI - d : d; };
 
 /* ───────────── 資料（本機 localStorage 快取，雲端同步見下方）───────────── */
 const KEY = "wedding-seating-v1";
@@ -412,7 +429,9 @@ function toParty(g) {
     g = m ? { name: m[1], count: 1 + +m[2] } : { name: g, count: 1 };
   }
   if (!g || typeof g !== "object" || typeof g.name !== "string" || !g.name.trim()) return null;
-  return { name: g.name.trim().slice(0, 20), count: Math.min(20, Math.max(1, Math.round(+g.count) || 1)) };
+  const count = Math.min(20, Math.max(1, Math.round(+g.count) || 1));
+  const child = Math.min(count, Math.max(0, Math.round(+g.child) || 0));
+  return child ? { name: g.name.trim().slice(0, 20), count, child } : { name: g.name.trim().slice(0, 20), count };
 }
 const SIDES = ["主婚人親友", "新人親友"];
 const DEFAULT_NUM = Object.fromEntries(Object.entries(defaultState().tables).map(([id, d]) => [id, d.num]));
@@ -615,7 +634,7 @@ let mode = STAFF ? "staff" : "guest", selected = null, query = "";
 const $ = (id) => document.getElementById(id);
 const seatsOf = (d) => d.guests.reduce((n, g) => n + (g.name ? g.count : 0), 0);
 // 顯示用：代表人姓名，多人時後面加「3 位」
-const partyHTML = (g) => `${esc(g.name)}${g.count > 1 ? `<small class="party-n">${g.count} 位</small>` : ""}`;
+const partyHTML = (g) => `${esc(g.name)}${g.count > 1 ? `<small class="party-n">${g.count} 位</small>` : ""}${g.child && mode === "staff" ? `<small class="kid-n">童椅 ${g.child}</small>` : ""}`;
 const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const label = (d) => d.num ? (/^\d+$/.test(d.num) ? `第 ${d.num} 桌` : d.num) : "未編號";
 const numKey = (d) => { const n = parseInt(d.num, 10); return d.num === "主桌" ? -1 : isNaN(n) ? 1e9 : n; };
@@ -636,12 +655,19 @@ function renderPlan() {
     num.classList.toggle("long", d.num.length > 2);
     const used = seatsOf(d);
     cnt.textContent = mode === "staff" && used ? `${used}/${d.cap}` : "";
-    // 椅子：依人數上限擺一圈，已排入的賓客塗滿
+    // 椅子：依人數上限擺一圈，已排入的賓客塗滿；兒童座椅畫成菱形，放在離走道最遠的那一側
     const t = TABLES.find(x => x.id === g.dataset.id), n = Math.max(d.cap, used), cr = t.seat - 4.5;
+    const angle = (k) => -Math.PI / 2 + (k + 0.5) * 2 * Math.PI / n;
+    const kids = Math.min(n, d.guests.reduce((c, p) => c + (p.child || 0), 0));
+    const kidSeats = new Set(Array.from({ length: n }, (_, k) => k)
+      .sort((a, b) => angDist(angle(a), awayFromAisle(t)) - angDist(angle(b), awayFromAisle(t))).slice(0, kids));
+    let filled = kids;   // 兒童也算入座人數
     g.querySelector(".chairs").innerHTML = Array.from({ length: n }, (_, k) => {
-      const a = -Math.PI / 2 + (k + 0.5) * 2 * Math.PI / n;
-      const cls = mode !== "staff" ? "chair" : k >= d.cap ? "chair over" : k < used ? "chair taken" : "chair";
-      return `<circle class="${cls}" cx="${(t.x + cr * Math.cos(a)).toFixed(1)}" cy="${(t.y + cr * Math.sin(a)).toFixed(1)}" r="4"/>`;
+      const a = angle(k), cx = (t.x + cr * Math.cos(a)).toFixed(1), cy = (t.y + cr * Math.sin(a)).toFixed(1);
+      if (kidSeats.has(k)) return `<rect class="chair kid" x="${cx - 4.2}" y="${cy - 4.2}" width="8.4" height="8.4" transform="rotate(45 ${cx} ${cy})"><title>兒童座椅</title></rect>`;
+      const taken = filled < used && (filled++, true);
+      const cls = mode !== "staff" ? "chair" : k >= d.cap && taken ? "chair over" : taken ? "chair taken" : "chair";
+      return `<circle class="${cls}" cx="${cx}" cy="${cy}" r="4"/>`;
     }).join("");
     cnt.classList.toggle("over", used > d.cap);
     g.dataset.side = d.side;
@@ -682,7 +708,8 @@ function renderEditor() {
     $("f-list").innerHTML = d.guests.map((p, i) =>
       `<li class="${before[i] + p.count > d.cap ? "over" : ""}">` +
       `<input class="g-name" value="${esc(p.name)}" data-i="${i}" aria-label="第 ${i + 1} 組代表人">` +
-      `<label class="g-count"><input type="number" inputmode="numeric" min="1" max="20" value="${p.count}" data-i="${i}" aria-label="${esc(p.name)} 這組共幾位">位</label>` +
+      `<label class="g-count"><input type="number" inputmode="numeric" min="1" max="20" value="${p.count}" data-i="${i}" data-f="count" aria-label="${esc(p.name)} 這組共幾位">位</label>` +
+      `<label class="g-count kid${p.child ? " on" : ""}" title="兒童座椅"><input type="number" inputmode="numeric" min="0" max="10" value="${p.child || 0}" data-i="${i}" data-f="child" aria-label="${esc(p.name)} 兒童座椅幾張">童椅</label>` +
       `<button type="button" class="del" data-i="${i}" aria-label="移除 ${esc(p.name)}">×</button></li>`).join("");
   }
 }
@@ -796,12 +823,14 @@ const clampCount = (v) => Math.min(20, Math.max(1, parseInt(v, 10) || 1));
 $("f-list").addEventListener("input", (e) => {
   const i = +e.target.dataset.i;
   if (e.target.matches(".g-name")) edit(d => d.guests[i].name = e.target.value.trim());
-  else if (e.target.value !== "") edit(d => d.guests[i].count = clampCount(e.target.value));
+  else if (e.target.value !== "" && e.target.dataset.f === "child")
+    edit(d => { const g = d.guests[i], c = Math.min(g.count, Math.max(0, parseInt(e.target.value, 10) || 0)); if (c) g.child = c; else delete g.child; });
+  else if (e.target.value !== "") edit(d => { const g = d.guests[i]; g.count = clampCount(e.target.value); if (g.child > g.count) g.child = g.count; });
   refreshCount();
 });
 $("f-list").addEventListener("focusout", (e) => {
   if (e.target.matches(".g-name") && !e.target.value.trim()) removeGuest(+e.target.dataset.i);
-  else if (e.target.matches('[type="number"]')) { e.target.value = state.tables[selected].guests[+e.target.dataset.i]?.count ?? 1; renderEditor(); }
+  else if (e.target.matches('[type="number"]')) { renderEditor(); }
 });
 $("f-list").addEventListener("click", (e) => { const b = e.target.closest(".del"); if (b) removeGuest(+b.dataset.i); });
 function removeGuest(i) { edit(d => d.guests.splice(i, 1)); renderEditor(); }
@@ -826,7 +855,7 @@ $("pool-side").addEventListener("click", (e) => { const b = e.target.closest("bu
 $("pool-q").addEventListener("input", (e) => { poolQ = e.target.value; poolActive = -1; renderPool(); });
 function addFromPool(name) {
   const p = roster.find(x => x.name === name); if (!p) return;
-  edit(d => d.guests.push({ name: p.name, count: clampCount(p.count) }));
+  edit(d => d.guests.push(toParty({ name: p.name, count: p.count, child: p.child })));
   renderEditor();
   $("f-list").lastElementChild?.scrollIntoView({ block: "nearest" });
 }

@@ -5,8 +5,8 @@
     python3 tools/import_tables.py             # 寫入
 
 來源（同一份試算表的兩個分頁，ID 在本機 .sheet-id）：
-  主婚人親友分頁：A 桌次(1…)、B 桌名、D 姓名、G 出席人數 → 席次表第 1… 桌
-  新人親友分頁：  A 桌次(A…)、B 桌名、C 姓名、D 出席人數 → 接在主婚人親友之後的桌號
+  主婚人親友分頁：A 桌次(1…)、B 桌名、D 姓名、G 出席人數、I 兒童座椅 → 席次表第 1… 桌
+  新人親友分頁：  A 桌次(A…)、B 桌名、C 姓名、D 出席人數、F 兒童座椅 → 接在主婚人親友之後的桌號
 每一筆是一組賓客：{ 代表人姓名, 共幾位 }。
 """
 import csv, io, json, sys, urllib.request
@@ -42,13 +42,14 @@ def fetch(sheet_id, gid):
         return list(csv.reader(io.StringIO(r.read().decode("utf-8"))))
 
 
-def entry(name, count):
-    """一組賓客：代表人姓名＋這組共幾位"""
-    n = int(count) if str(count).strip().isdigit() else 1
-    return {"name": name[:20], "count": max(1, min(n, 20))}
+def entry(name, count, child=""):
+    """一組賓客：代表人姓名＋這組共幾位（＋兒童座椅數）"""
+    n = max(1, min(int(count) if str(count).strip().isdigit() else 1, 20))
+    c = min(int(child) if str(child).strip().isdigit() else 0, n)
+    return {"name": name[:20], "count": n, **({"child": c} if c else {})}
 
 
-def parse(rows, num_col, name_col, count_col):
+def parse(rows, num_col, name_col, count_col, child_col):
     tables, cur = [], None
     for r in rows[1:]:
         r += [""] * 12
@@ -68,7 +69,7 @@ def parse(rows, num_col, name_col, count_col):
         if name == "預備桌" and not cur["name"]:   # 這一列是桌名，不是賓客
             cur["name"] = name
             continue
-        cur["guests"].append(entry(name, r[count_col]))
+        cur["guests"].append(entry(name, r[count_col], r[child_col]))
         cur["seats"] += int(r[count_col]) if r[count_col].strip().isdigit() else 1
     return tables
 
@@ -76,8 +77,8 @@ def parse(rows, num_col, name_col, count_col):
 def main():
     dry = "--dry-run" in sys.argv
     sheet_id = (ROOT / ".sheet-id").read_text().strip()
-    parents = parse(fetch(sheet_id, PARENTS_GID), 0, 3, 6)
-    couple = parse(fetch(sheet_id, COUPLE_GID), 0, 2, 3)
+    parents = parse(fetch(sheet_id, PARENTS_GID), 0, 3, 6, 8)
+    couple = parse(fetch(sheet_id, COUPLE_GID), 0, 2, 3, 5)
     num_to_id = table_numbers()
 
     payload = {tid: {"num": n, "name": "", "side": "", "cap": 10, "guests": []} for n, tid in num_to_id.items()}
