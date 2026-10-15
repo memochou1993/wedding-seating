@@ -27,11 +27,11 @@ def table_numbers():
     cols = [(90 + 20 + seat, rows_a), (250 - 20 - seat, rows_b),
             (300 + 20 + seat, rows_a), (300 + 20 + seat + 50, rows_b),
             (622 - 20 - seat - 50, rows_b), (622 - 20 - seat, rows_a),
-            (672 + 17 + seat, rows_b), (822 - 17 - seat, rows_a + [a0 + 5 * pitch])]
+            (672 + 20 + seat, rows_b), (832 - 20 - seat, rows_a + [a0 + 5 * pitch])]
     spots = [(x, y) for x, ys in cols for y in ys]
     spots.sort(key=lambda p: (round((p[1] - a0) / (pitch / 2)), p[0]))
     ids = {p: f"t{i + 1}" for i, p in enumerate(spots)}
-    zones = [(300, 461), (461, 622), (0, 250), (672, 830)]
+    zones = [(300, 461), (461, 622), (0, 250), (672, 840)]
     order = [p for x0, x1 in zones for p in sorted((p for p in spots if x0 < p[0] < x1), key=lambda p: p[1])]
     return {str(n + 1): ids[p] for n, p in enumerate(order)}   # 桌號 → id
 
