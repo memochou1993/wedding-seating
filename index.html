@@ -21,6 +21,7 @@
     --muted: #8c7a68;
     --accent: #a8875a;      /* 香檳金：框線、花飾 */
     --accent-soft: #efe5d3;
+    --card: #fcf8f1;        /* 桌卡底色：介於紙色與香檳金之間的淡香檳 */
     --line: #dccdb4;
     --parents: #e7edf1;     /* 主婚人親友桌底色 */
     --parents-ink: #4d6576;
@@ -268,7 +269,7 @@
   .roster-head p { margin: 2px 0 0; font-family: var(--latin); font-size: 13px; letter-spacing: .4em; color: var(--accent); }
   .roster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
   /* 席次一覽：像婚宴的座位卡——TABLE、大號桌號、桌名，細線菱形隔開，名單置中往下排 */
-  .card { position: relative; border: 1px solid var(--line); padding: 16px 12px 16px; cursor: pointer; background: #fff; width: 100%;
+  .card { position: relative; border: 1px solid var(--line); padding: 16px 12px 16px; cursor: pointer; background: var(--card); width: 100%;
     display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; }   /* <button> 預設垂直置中，改成置頂 */
   .card:hover { border-color: var(--accent); }
   .card .eyebrow { font-family: var(--latin); font-size: 11px; letter-spacing: .4em; padding-left: .4em; color: var(--accent); }
