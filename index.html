@@ -270,10 +270,9 @@
   .party-grid { display: grid; grid-template-columns: auto auto; justify-content: center; align-items: baseline; column-gap: 12px; text-align: left; }
   .party-grid .ct { text-align: right; color: var(--muted); font-size: .85em; white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; }
   .party-grid .kid-n { font-style: normal; display: block; font-size: .9em; line-height: 1.2; }
-  .names-grid { justify-content: stretch; grid-template-columns: 1fr auto 1fr auto; column-gap: 14px; margin-top: 4px; }
+  .names-grid { justify-content: stretch; grid-template-columns: 1fr auto; column-gap: 14px; margin-top: 4px; }   /* 一列一組，長名字也不會擠 */
   .names-grid .nm, .names-grid .ct { padding: 7px 0; border-bottom: 1px dotted var(--line); font-size: 16px; }
   .names-grid .ct { font-size: 14px; }
-  @media (max-width: 340px) { .names-grid { grid-template-columns: 1fr auto; } }
   /* 座位條 */
   .card .meter { display: flex; gap: 4px; margin-top: auto; padding-top: 12px; }
   .meter i { width: 6px; height: 6px; border-radius: 50%; border: 1px solid var(--accent); }
