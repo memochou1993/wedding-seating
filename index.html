@@ -132,7 +132,9 @@
 
   /* 找座位列：捲動時固定在畫面頂端 */
   /* 找座位列：外面包一層和頁面同色的底（上下各留一點空），固定在頂端時後面的內容不會從縫隙透出來 */
-  .bar-dock { position: sticky; top: 0; z-index: 10; background: var(--ground); padding: 10px 0; margin: -10px 0; }
+  .bar-dock { position: sticky; top: 0; z-index: 10; padding: 10px 0; margin: -10px 0; }
+  .bar-dock.stuck { background: var(--ground); }   /* 只有真的固定在頂端時才鋪底色，平常不會蓋到上一張卡片的陰影 */
+  .bar-sentinel { height: 0; margin: 0; }
   .bar { position: relative; background: var(--paper); box-shadow: 0 1px 2px rgba(78,58,42,.06), 0 10px 30px rgba(78,58,42,.07); padding: 12px 16px; display: grid; gap: 6px; }   /* 和其他卡片一樣用陰影 */
   .bar-row { display: flex; align-items: center; gap: 12px; }
   .bar-label { font-size: 13px; font-weight: 500; letter-spacing: .3em; color: var(--accent); white-space: nowrap; }
@@ -363,10 +365,11 @@
     <div class="rule"><span></span></div>
   </header>
 
+  <div class="bar-sentinel" aria-hidden="true"></div>
   <div class="bar-dock">
-  <section class="bar" aria-label="找座位">
+  <section class="bar" aria-label="尋找座位">
     <div class="bar-row">
-      <label class="bar-label" for="q">找座位</label>
+      <label class="bar-label" for="q">尋找座位</label>
       <input id="q" type="search" placeholder="輸入姓名，例如：王小明" autocomplete="off" enterkeyhint="search">
     </div>
     <ul class="results" id="results"></ul>
@@ -932,6 +935,9 @@ function setMode(m) {
 
 /* ───────────── 事件 ───────────── */
 $("guest-link").href = location.pathname;
+// 找座位列一捲到頂端就加上 .stuck（鋪底色擋住後面的內容）
+new IntersectionObserver(([e]) => document.querySelector(".bar-dock").classList.toggle("stuck", !e.isIntersecting), { rootMargin: "-1px 0px 0px 0px" })
+  .observe(document.querySelector(".bar-sentinel"));
 $("close-detail").onclick = () => select(null, true);
 addEventListener("keydown", (e) => { if (e.key === "Escape" && mode === "guest" && selected) select(null, true); });
 $("q").addEventListener("input", (e) => { query = e.target.value; renderPlan(); renderSearch(); });
