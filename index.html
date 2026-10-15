@@ -110,7 +110,7 @@
   .plan .plan-legend circle[data-side="主婚人親友"] { fill: var(--parents); }
   .plan .plan-legend circle[data-side="新人親友"] { fill: var(--couple); }
   .plan .plan-legend text { letter-spacing: .1em; }
-  .plan .hall-name { font-family: var(--latin); font-size: 14px; letter-spacing: .3em; fill: var(--accent); }
+  .plan .hall-name { font-family: var(--latin); font-size: 14px; letter-spacing: .3em; fill: var(--body); }   /* 和中文廳名同色 */
 
   .tbl { cursor: pointer; }
   .tbl circle.disc { fill: var(--paper); stroke: var(--accent); stroke-width: 1.6; transition: stroke-width .15s, fill .15s; }
@@ -390,7 +390,7 @@
   .poster {
     --k: calc(var(--ph) / 420mm);   /* 相對 A2 的倍率 */
     width: var(--pw); height: var(--ph); box-sizing: border-box; background: #fff;   /* 印刷用純白：紙本身就是白的，不用滿版上一層淡米白（印不到邊會留白邊，也容易印不均勻） */
-    padding: calc(40mm * var(--k)) calc(26mm * var(--k)) calc(24mm * var(--k)) calc(26mm * var(--k)); display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;
+    padding: calc(24mm * var(--k)) calc(26mm * var(--k)) calc(24mm * var(--k)) calc(26mm * var(--k));   /* 上下都是小捲飾，留白一樣，重心置中 */ display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;
     column-gap: calc(14mm * var(--k)); row-gap: calc(5mm * var(--k)); box-shadow: none;
   }
   .poster > .frame-art { inset: calc(8mm * var(--k)); width: calc(100% - 16mm * var(--k)); height: calc(100% - 16mm * var(--k)); }
@@ -399,14 +399,14 @@
   .p-head { grid-column: 1; grid-row: 1; height: calc(44mm * var(--k)); box-sizing: border-box; }
   .p-list { grid-column: 2; grid-row: 1 / span 2; }
   /* 實驗：平面圖佔滿左欄（跨標題列），外牆往上延伸，標題寫在牆內、舞台上方；viewBox 與比例由 extendPlanForPoster() 依標題高度算出 */
-  .p-plan { grid-column: 1; grid-row: 1 / span 2; height: calc(var(--ph) - 64mm * var(--k)); aspect-ratio: 744.4 / 1202.2; }
+  .p-plan { grid-column: 1; grid-row: 1 / span 2; height: calc(var(--ph) - 48mm * var(--k)); aspect-ratio: 744.4 / 1202.2; }
   .p-head { position: relative; z-index: 1; }
   /* 實驗：輸出版不畫外牆、門和柱子，入口改用一條長條標示 */
   body.poster-mode .plan .wall, body.poster-mode .plan .door, body.poster-mode .plan .pillar, body.poster-mode .plan > .entrance { display: none; }
   .plan .entrance-mark { display: none; }
   body.poster-mode .plan .entrance-mark { display: inline; }
-  .plan .entrance-mark rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.4; }   /* 和平面圖 viewBox 同比例；上、左、右都切齊外牆線的外緣（牆線 x=90／832、y=105，線寬 2.4） */
-  .p-plan svg.plan { width: 100%; height: 100%; }
+  .plan .entrance-mark line { stroke: var(--line); stroke-width: 4; stroke-linecap: round; }   /* 和卡片框線同色，比桌框淡，不搶眼 */
+  .p-plan svg.plan { width: 100%; height: 100%; overflow: visible; }
   /* 標題區左右兩欄：左「席次表／SEATING CHART」靠右對齊，右「林府文定／新人／日期」靠左對齊，中間一條淡金直線；左右等寬，直線落在花冠的中線上 */
   .p-head { display: grid; grid-template-columns: 1fr 1fr; align-content: center; padding-bottom: calc(4mm * var(--k)); }
   .p-head > * { grid-column: 2; text-align: left; padding-left: calc(8mm * var(--k)); border-left: calc(.66mm * var(--k)) solid var(--line); }   /* 和花框線同粗（1px × 2.5 ≈ 0.66mm），印出來才不會太細 */
@@ -591,7 +591,7 @@
  * 與牆、伸展台保持 GAP 的走道；同一區兩欄左右錯開半排。
  */
 const TABLE_R = 30, SEAT = 37;            // 桌面半徑、連椅子的佔地半徑（桌面放大，桌名可放 6 個字）
-const PITCH = 150, ROW_A = 380, ROW_B = ROW_A + PITCH / 2;
+const PITCH = 158, ROW_A = 365, ROW_B = ROW_A + PITCH / 2;   // 主桌往上移，第一排跟著往上；排與排之間加寬，填滿到圖例上方
 const rowsA = [0, 1, 2, 3, 4].map(k => ROW_A + k * PITCH);
 const rowsB = [0, 1, 2, 3, 4].map(k => ROW_B + k * PITCH);
 // 區塊邊界：左牆 90｜伸展台 250–300｜伸展台 622–672｜右牆 832（以 x=461 左右鏡像）
@@ -605,8 +605,9 @@ const COLS = [
 const SPOTS = COLS.flatMap(([x, ys]) => ys.map(y => [x, y]));
 // 依「由前往後、由左往右」排序，作為預設桌號順序
 const row = ([, y]) => Math.round((y - ROW_A) / (PITCH / 2));
-// 主桌放在兩座舞台、兩條伸展台的正中線（x≈461），不是外牆的中線（外牆左右本來就不對稱）
-const TABLES = [{ id: "main", x: 461, y: 290, r: 35, seat: 45, main: true }].concat(
+// 主桌放在兩座舞台、兩條伸展台的正中線（x≈461），不是外牆的中線（外牆左右本來就不對稱）；
+// 上下放在舞台下緣（y=218）和第一排桌子中心（ROW_A）的正中間
+const TABLES = [{ id: "main", x: 461, y: 291.5, r: 35, seat: 45, main: true }].concat(
   SPOTS.slice().sort((a, b) => row(a) - row(b) || a[0] - b[0]).map(([x, y], i) => ({ id: "t" + (i + 1), x, y, r: TABLE_R, seat: SEAT }))
 );
 // 桌號：由舞台往入口、由中間往兩側。最靠近主桌的兩區先編，每區都沿交錯的兩欄由上往下：
@@ -782,7 +783,8 @@ function showSync(msg) {
 
 /* ───────────── 花框（同告示牌：上方大花冠、下方小捲飾、四角內凹圓弧）───────────── */
 // lw：線寬倍率。線寬是固定像素（不隨花飾縮放）；網頁版 1.6 倍，A2 實際尺寸列印時 1px 只有 0.26mm，輸出版放大 2.5 倍
-function frameSVG(W, H, lw = 1) {
+// simpleTop：上方也用下方那組小捲飾（菱形＋兩道捲紋），不用大花冠
+function frameSVG(W, H, lw = 1, simpleTop = false) {
   const CX = W / 2;
   const ln = (w) => `fill="none" stroke="currentColor" stroke-width="${w * lw}" vector-effect="non-scaling-stroke"`;
   const dot = `fill="currentColor"`;
@@ -801,7 +803,8 @@ function frameSVG(W, H, lw = 1) {
   const crest = scaleAt(1.25, CX, 0, arm(1) + arm(-1) + diamond(CX, 7, 2.8) + `<circle cx="${CX}" cy="13" r="1.2" ${dot}/>`);
   const curl = (s) => `<path d="M${CX + s * 4},4 C${CX + s * 10},4 ${CX + s * 12},8 ${CX + s * 17},7 C${CX + s * 20.5},6.2 ${CX + s * 20},2.8 ${CX + s * 17.5},3.4" ${ln(0.9)}/>`;
   const foot = `<g transform="translate(0,${H}) scale(1,-1)">${diamond(CX, 4, 2.4) + curl(1) + curl(-1)}</g>`;
-  return `<rect x="0" y="0" width="${W}" height="${H}" ${ln(1)}/>` + four(corner) + crest + foot;
+  const top = simpleTop ? diamond(CX, 4, 2.4) + curl(1) + curl(-1) : crest;
+  return `<rect x="0" y="0" width="${W}" height="${H}" ${ln(1)}/>` + four(corner) + top + foot;
 }
 function decorate(el) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -809,10 +812,12 @@ function decorate(el) {
   el.prepend(svg);
   const draw = () => {
     const w = el.clientWidth - 28, h = el.clientHeight - 28;
-    const u = Math.min(2.6, w / 130) * (+el.dataset.frameScale || 1);      // 1 單位 = u 像素；窄螢幕時縮小花飾（海報放大）
+    // 1 單位 = u 像素；窄螢幕時縮小花飾。海報（data-frame-scale）以 A2 為準，跟著紙張高度等比縮放，A3 的花冠才不會壓到卡片
+    const paper = el.dataset.frameScale ? el.offsetHeight / (420 * 96 / 25.4) : 1;
+    const u = Math.min(2.6, w / 130) * (+el.dataset.frameScale || 1) * paper;
     const W = w / u, H = h / u;
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-    svg.innerHTML = frameSVG(W, H, +el.dataset.lineScale || 1.6);   // 網頁版 1.6 倍，輸出版由 data-line-scale 指定
+    svg.innerHTML = frameSVG(W, H, +el.dataset.lineScale || 1.6, !!el.dataset.frameScale);   // 線寬：網頁版 1.6 倍、輸出版由 data-line-scale 指定；上方花飾：網頁版用大花冠、輸出版用小捲飾
   };
   new ResizeObserver(draw).observe(el);
 }
@@ -852,10 +857,10 @@ function staticPlan() {
     // 舞台、階梯、伸展台
     stage(L.stage), stage(M(L.stage + L.stageW)),
     // 舞台框內三行：中文廳名、英文廳名（小字）、舞台
-    txt(L.stage + L.stageW / 2, 147, "聖雅典", "label-lg"), txt(L.stage + L.stageW / 2, 171, "SAINT ATHENS", "hall-name"), txt(L.stage + L.stageW / 2, 202, "舞　台", "label", `style="font-size:21px"`),
-    txt(M(L.stage + L.stageW / 2), 147, "威尼斯", "label-lg"), txt(M(L.stage + L.stageW / 2), 171, "VENICE", "hall-name"), txt(M(L.stage + L.stageW / 2), 202, "舞　台", "label", `style="font-size:21px"`),
+    txt(L.stage + L.stageW / 2, 147, "聖雅典", "label-lg"), txt(L.stage + L.stageW / 2, 166, "SAINT ATHENS", "hall-name"), txt(L.stage + L.stageW / 2, 202, "舞　台", "label", `style="font-size:21px"`),
+    txt(M(L.stage + L.stageW / 2), 147, "威尼斯", "label-lg"), txt(M(L.stage + L.stageW / 2), 166, "VENICE", "hall-name"), txt(M(L.stage + L.stageW / 2), 202, "舞　台", "label", `style="font-size:21px"`),
     stairs(L.stairsOut, 178), stairs(L.stairsIn, 178), stairs(M(L.stairsIn + 30), 178), stairs(M(L.stairsOut + 30), 178),
-    rect(L.runway, 218, L.runwayW, 760, "runway"), rect(M(L.runway + L.runwayW), 218, L.runwayW, 760, "runway"),   // 伸展台延伸到最後一排桌子旁
+    rect(L.runway, 218, L.runwayW, 795, "runway"), rect(M(L.runway + L.runwayW), 218, L.runwayW, 795, "runway"),   // 伸展台延伸到 29、19 號桌旁
     txt(L.runway + L.runwayW / 2, 560, "伸展台", "label", `writing-mode="vertical-rl" style="letter-spacing:.6em"`),
     txt(M(L.runway + L.runwayW / 2), 560, "伸展台", "label", `writing-mode="vertical-rl" style="letter-spacing:.6em"`),
     // 入口門：左右門廊互為鏡像，中央門廊置中
@@ -863,11 +868,13 @@ function staticPlan() {
     pillar(L.pillar), pillar(M(L.pillar)),
     txt(AX, 1298, "入　口", "entrance"),
     // 輸出版（不畫牆）用的入口標示：一條跨過三個門廊的淡金色長條，中間寫「入口」
-    `<g class="entrance-mark"><rect x="${v[0]}" y="1216" width="${vr[3] - v[0]}" height="40" rx="3"/>` + txt(AX, 1243, "入　口", "entrance") + `</g>`,
+    // 實際只有左右兩個門廊是入口（中間是背板區）：各畫一條粗線，下方寫「入口」
+    `<g class="entrance-mark">` + [[v[0], v[3]], [vr[0], vr[3]]].map(([a, b]) =>
+      `<line x1="${a}" y1="1226" x2="${b}" y2="1226"/>` + txt((a + b) / 2, 1258, "入口", "entrance", `style="font-size:24px;letter-spacing:.4em"`)).join("") + `</g>`,
     // 圖例：輸出版放在 10、20 桌下方的空地（網頁版圖例在平面圖卡片下方，這裡隱藏）
     `<g class="plan-legend">` +
-      `<circle cx="345" cy="1160" r="8" data-side="主婚人親友"/>` + txt(405, 1166, "主婚人親友", "label", `style="font-size:17px"`) +
-      `<circle cx="491" cy="1160" r="8" data-side="新人親友"/>` + txt(542, 1166, "新人親友", "label", `style="font-size:17px"`) +
+      `<circle cx="316" cy="1174" r="10" data-side="主婚人親友"/>` + txt(394.5, 1182, "主婚人親友", "label", `style="font-size:22px"`) +
+      `<circle cx="501" cy="1174" r="10" data-side="新人親友"/>` + txt(567.5, 1182, "新人親友", "label", `style="font-size:22px"`) +
     `</g>`,
   ].join("");
 }
@@ -920,7 +927,7 @@ function renderPlan() {
     const num = g.querySelector(".num"), tn = g.querySelector(".tn");
     const t = TABLES.find(x => x.id === g.dataset.id);
     // 賓客版、輸出版不畫椅子，桌面放大到原本連椅子的範圍；字跟著桌面等比放大
-    const bare = mode !== "staff" || !!POSTER, R = bare ? t.seat + 2 : t.r, k = R / t.r;
+    const bare = mode !== "staff" || !!POSTER, R = bare ? t.seat + 4 : t.r, k = R / t.r;
     g.querySelector(".disc").setAttribute("r", R);
     num.textContent = d.num || (mode === "staff" ? "＋" : "");
     num.classList.toggle("empty", !d.num);
@@ -1403,7 +1410,7 @@ function extendPlanForPoster() {
   const H = box.clientHeight, top = head.offsetHeight + gap;
   if (!H || H <= top) return;
   // 不畫牆之後，可視範圍改成切齊內容（桌子、舞台、入口條）的外緣再留 1.5 單位，左右下都更貼
-  const X0 = 106.5, W = 709, Y0 = 103.8, VH = 1153.5;   // 桌子放大後，左右各多留 4 單位
+  const X0 = 104.5, W = 713, Y0 = 103.8, VH = 1153.5;   // 平面圖比例以入口線為準；「入口」字超出下緣的部分畫在海報的下方留白裡（overflow: visible）   // 桌子放大後，左右各多留 6 單位
   const u = (H - top) / VH;                  // 每單位幾 px
   const E = top / u;                         // 往上多畫的單位數
   plan.setAttribute("viewBox", `${X0} ${(Y0 - E).toFixed(2)} ${W} ${(VH + E).toFixed(2)}`);
