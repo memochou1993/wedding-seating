@@ -322,6 +322,10 @@
   .pool-list .meta .warn { color: var(--warn); }
   .pool-list .party { flex: none; font-size: 13px; font-variant-numeric: lining-nums; color: var(--accent); border: 1px solid var(--line); border-radius: 999px; padding: 0 9px; }
   .pool-list .plus { flex: none; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--accent); color: var(--accent); display: grid; place-items: center; font-size: 16px; }
+  .pool-list li { display: flex; align-items: stretch; }
+  .pool-list li > button[data-name] { flex: 1; min-width: 0; }
+  .pool-list .pool-del { flex: none; width: 40px; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 18px; cursor: pointer; }
+  .pool-list .pool-del:hover { color: var(--warn); background: var(--accent-soft); }
   .pool-list .empty { padding: 12px 10px; color: var(--muted); font-size: 14px; }
   .btn { border: 1px solid var(--accent); background: transparent; color: var(--body); min-height: 44px; padding: 8px 16px; cursor: pointer; letter-spacing: .1em; font-size: 15px; }
   .btn:hover { background: var(--accent-soft); }
@@ -344,7 +348,7 @@
   .card .mini-rule i { width: 5px; height: 5px; background: currentColor; transform: rotate(45deg); }
   .card .tname { font-size: 15px; font-weight: 600; letter-spacing: .25em; padding-left: .25em; color: var(--body); margin: 8px 0 0; }
   .card .who { font-size: 15px; color: var(--body); line-height: 1.9; }
-  .card .who.none { color: #c2b39c; font-size: 14px; }
+  .card .who.none { color: #c2b39c; font-size: 16px; }
   .card .who.none.rsv { font-family: var(--latin); font-style: italic; font-size: 16px; letter-spacing: .06em; color: var(--accent); }   /* 賓客版、輸出版的空桌 */
   /* 姓名｜人數 兩欄對齊 */
   .party-grid { display: grid; grid-template-columns: auto auto; justify-content: center; align-items: baseline; column-gap: 12px; text-align: left; }
@@ -435,7 +439,8 @@
   .p-list .p-names .grp { grid-column: 1 / -1; white-space: normal; contain: inline-size; }
   .p-list .p-names.solo { grid-template-columns: 1fr; justify-content: stretch; }
   .p-list .p-names .grp small { margin-left: .5em; font-size: .8em; color: var(--muted); white-space: nowrap; }
-  .p-list .card .who.none { font-size: calc(2.8mm * var(--k)); text-align: center; }
+  /* 「尚未安排」和 Reserved 同大小、同一條基線（和其他卡片第一行名字對齊），只是用中文字、淡色 */
+  .p-list .card .who.none { font-size: calc(5mm * var(--k)); text-align: center; line-height: calc(5.8mm * 1.4 * var(--k)); position: relative; top: calc(.15mm * var(--k)); }
   /* Reserved 水平置中，垂直和其他卡片的第一行名字同一條基線（同一個行高：名字常見字級 5.8mm × 1.4） */
   .p-list .card .who.none.rsv { font-size: calc(5mm * var(--k)); text-align: center; line-height: calc(5.8mm * 1.4 * var(--k)); position: relative; top: calc(.8mm * var(--k)); }   /* 英文字的基線比中文高，往下補 0.8mm 才和名字同一條線 */
   .p-list .card .meter { display: none; }
@@ -1010,7 +1015,7 @@ function renderRoster() {
       <span class="eyebrow">TABLE</span><span class="n">${esc(d.num)}</span>
       ${d.name ? `<div class="tname">${esc(d.name)}</div>` : ""}
       <span class="mini-rule"><i></i></span>
-      ${shownGuests(d).length ? `<div class="who party-grid">${d.guests.map(g => partyCells(g)).join("")}</div>` : (mode === "staff" ? `<div class="who none">${d.reserved ? "保留席（尚未填人數）" : "尚未安排"}</div>` : `<div class="who none rsv">Reserved</div>`)}
+      ${shownGuests(d).length ? `<div class="who party-grid">${d.guests.map(g => partyCells(g)).join("")}</div>` : (mode === "staff" && !d.reserved ? `<div class="who none">尚未安排</div>` : `<div class="who none rsv">Reserved</div>`)}
       ${meterHTML(d)}</button>`;
   }).join("");
 }
@@ -1033,7 +1038,9 @@ function renderSearch() {
 
 // 已入座的人（依代表人姓名比對）
 function assignedNames() { const set = new Set(); for (const id of ORDER) for (const g of state.tables[id].guests) if (g.name) set.add(g.name); return set; }
-function unassigned() { const a = assignedNames(); return (roster || []).filter(p => !a.has(p.name)); }
+// 出席名單的一筆可能一次寫好幾個人（「林庭郁、林子瑜」），桌上卻拆成兩筆：拆開來看，每個人都排進某桌就算已安排
+const splitNames = (n) => n.split(/[、，,／\/]+/).map(x => x.trim()).filter(Boolean);
+function unassigned() { const a = assignedNames(); return (roster || []).filter(p => !a.has(p.name) && !splitNames(p.name).every(n => a.has(n))); }
 function renderPool() {
   $("pool").hidden = mode !== "staff" || !roster || !selected;
   if ($("pool").hidden) return;
@@ -1047,7 +1054,7 @@ function renderPool() {
   $("pool-list").innerHTML = list.length ? list.map(p => {
     const meta = [p.relation, p.unit, p.veg ? `素食 ${p.veg}` : "", p.child ? `兒童椅 ${p.child}` : ""].filter(Boolean).map(esc);
     if (p.note) meta.push(`<span class="warn">${esc(p.note)}</span>`);
-    return `<li><button type="button" role="option" tabindex="-1" data-name="${esc(p.name)}"><span class="who-line">${esc(p.name)}<span class="meta">${meta.join("・") || "&nbsp;"}</span></span>${p.count > 1 ? `<span class="party">${p.count} 位</span>` : ""}<span class="plus" aria-hidden="true">＋</span></button></li>`;
+    return `<li><button type="button" role="option" tabindex="-1" data-name="${esc(p.name)}"><span class="who-line">${esc(p.name)}<span class="meta">${meta.join("・") || "&nbsp;"}</span></span>${p.count > 1 ? `<span class="party">${p.count} 位</span>` : ""}<span class="plus" aria-hidden="true">＋</span></button><button type="button" class="pool-del" tabindex="-1" data-del="${esc(p.name)}" aria-label="從出席名單移除 ${esc(p.name)}" title="從出席名單移除（不會出席）">×</button></li>`;
   }).join("") : `<li class="empty">${left.length ? "沒有符合的人。" : "出席名單都已安排好了。"}</li>`;
   poolActive = Math.min(poolActive, list.length - 1);
   markActive();
@@ -1211,7 +1218,29 @@ function addFromPool(name) {
 }
 // 點選項時先擋掉 mousedown，輸入框才不會失焦、選單也不會收起，可以連續加好幾組
 $("combo").addEventListener("mousedown", (e) => { if (e.target.closest("button")) e.preventDefault(); });
-$("pool-list").addEventListener("click", (e) => { const b = e.target.closest("button[data-name]"); if (b) addFromPool(b.dataset.name); });
+$("pool-list").addEventListener("click", (e) => {
+  const del = e.target.closest("button[data-del]"); if (del) { removeFromRoster(del.dataset.del); return; }
+  const b = e.target.closest("button[data-name]"); if (b) addFromPool(b.dataset.name);
+});
+// 從出席名單移除一筆（例如不會出席）：先讀雲端最新的名單再寫回，免得蓋掉別人剛匯入的資料。
+// 注意：重新執行 tools/import_roster.py 會依試算表整份覆蓋，被移除的人會再出現，要一併改試算表
+async function removeFromRoster(name) {
+  if (!canSync) { showToast("編輯金鑰不正確，無法修改出席名單"); return; }
+  if (!confirm(`從出席名單移除「${name}」？\n（只影響待安排清單，不會動到已排好的座位）`)) return;
+  try {
+    const people = (await rpc("seating_get_roster", { p_event: EVENT, p_key: EDIT_KEY })).people || [];
+    const next = people.filter(p => p.name !== name);
+    if (next.length === people.length) return;
+    await rpc("seating_set_roster", { p_event: EVENT, p_key: EDIT_KEY, p_people: next });
+    roster = next; renderPool(); renderStats();
+    showToast(`已從出席名單移除「${name}」`, async () => {   // 復原：加回去
+      const cur = (await rpc("seating_get_roster", { p_event: EVENT, p_key: EDIT_KEY })).people || [];
+      const back = cur.concat(people.filter(p => p.name === name));
+      await rpc("seating_set_roster", { p_event: EVENT, p_key: EDIT_KEY, p_people: back });
+      roster = back; renderPool(); renderStats();
+    });
+  } catch (err) { showToast("移除失敗，請檢查網路後再試一次"); }
+}
 $("pool-q").addEventListener("focus", () => { $("pool-q").setAttribute("aria-expanded", "true"); poolActive = -1; renderPool(); });
 $("pool-q").addEventListener("blur", () => $("pool-q").setAttribute("aria-expanded", "false"));
 $("pool-q").addEventListener("keydown", (e) => {
@@ -1261,6 +1290,7 @@ function swapTables(a, b) {
 }
 function showToast(text, undo) {
   $("toast-text").textContent = text; $("toast").hidden = false;
+  $("toast-undo").hidden = !undo;   // 沒有可以復原的動作（例如錯誤訊息）就不顯示「復原」
   $("toast-undo").onclick = () => { undo(); $("toast").hidden = true; };
   clearTimeout(toastTimer); toastTimer = setTimeout(() => $("toast").hidden = true, 6000);
 }
