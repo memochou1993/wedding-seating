@@ -389,7 +389,7 @@
   /* 海報留白：左右等寬；四角花飾只剩小菱形和細弧，留白收窄讓平面圖與名單放大 */
   .poster {
     --k: calc(var(--ph) / 420mm);   /* 相對 A2 的倍率 */
-    width: var(--pw); height: var(--ph); box-sizing: border-box; background: var(--paper);
+    width: var(--pw); height: var(--ph); box-sizing: border-box; background: #fff;   /* 印刷用純白：紙本身就是白的，不用滿版上一層淡米白（印不到邊會留白邊，也容易印不均勻） */
     padding: calc(40mm * var(--k)) calc(26mm * var(--k)) calc(24mm * var(--k)) calc(26mm * var(--k)); display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;
     column-gap: calc(14mm * var(--k)); row-gap: calc(5mm * var(--k)); box-shadow: none;
   }
