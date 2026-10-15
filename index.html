@@ -297,22 +297,20 @@
   body.board-mode dialog.sheet::backdrop { background: rgba(43,37,34,.12); }
   body.board-mode .p-list .card { cursor: pointer; }
   body.board-mode .p-list .card:hover { border-color: var(--accent); }
-  body.board-mode .p-list .card .meter { display: flex; grid-column: 1 / -1; align-self: end; justify-content: center; gap: calc(1.2mm * var(--k)); padding-top: calc(1.2mm * var(--k)); }
-  body.board-mode .p-list .card .meter i { width: calc(1.6mm * var(--k)); height: calc(1.6mm * var(--k)); }
-  body.board-mode .p-list .card { grid-template-rows: auto 1fr auto; }
+
   .poster {
     --k: calc(var(--ph) / 420mm);   /* 相對 A2 的倍率 */
     width: var(--pw); height: var(--ph); box-sizing: border-box; background: var(--paper);
     padding: calc(30mm * var(--k)) calc(28mm * var(--k)) calc(26mm * var(--k)); display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;
-    column-gap: calc(14mm * var(--k)); row-gap: calc(6mm * var(--k)); box-shadow: none;
+    column-gap: calc(14mm * var(--k)); row-gap: calc(5mm * var(--k)); box-shadow: none;
   }
   .poster > .frame-art { inset: calc(8mm * var(--k)); width: calc(100% - 16mm * var(--k)); height: calc(100% - 16mm * var(--k)); }
   .p-plan { grid-row: 1 / 3; height: calc(var(--ph) - 56mm * var(--k)); aspect-ratio: 752 / 1232; }
   .p-plan svg.plan { width: 100%; height: 100%; }
-  .p-head { text-align: center; padding-top: calc(10mm * var(--k)); }
+  .p-head { text-align: center; padding-top: calc(2mm * var(--k)); }
   .p-kicker { font-size: calc(5mm * var(--k)); letter-spacing: .6em; color: var(--accent); }
   .p-kicker span { display: block; font-family: var(--latin); font-size: .7em; letter-spacing: .4em; margin-top: .3em; }
-  .p-head h1 { margin: calc(3mm * var(--k)) 0 calc(1.5mm * var(--k)); font-size: calc(15mm * var(--k)); letter-spacing: .14em; color: var(--body); line-height: 1.15; }
+  .p-head h1 { margin: calc(2mm * var(--k)) 0 calc(1mm * var(--k)); font-size: calc(13mm * var(--k)); letter-spacing: .14em; color: var(--body); line-height: 1.15; }
   .p-date { font-size: calc(5mm * var(--k)); letter-spacing: .1em; }
   .p-date em { font-family: var(--latin); font-style: italic; color: var(--accent); margin-left: 1em; }
   .p-list { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: repeat(6, minmax(0, 1fr)); gap: calc(3mm * var(--k)); min-height: 0; }
@@ -327,8 +325,13 @@
   .p-list .card .n { font-weight: 700; font-variant-numeric: lining-nums; }
   .p-list .card .tname { font-weight: 500; }
   .p-list .card { align-items: baseline; }
-  .p-list .card .who { grid-column: 1 / -1; align-self: start; font-size: calc(3.1mm * var(--k)); line-height: 1.5;
+  .p-list .card .who { grid-column: 1 / -1; align-self: start; font-size: calc(3.1mm * var(--k)); line-height: 1.4;
     border-top: 1px solid var(--accent-soft); margin-top: calc(1.8mm * var(--k)); padding-top: calc(1.6mm * var(--k)); }
+  /* 名字太長就截成「…」，不折行，免得把後面的人擠出卡片 */
+  .p-list .party-grid { grid-template-columns: minmax(0, max-content) auto; max-width: 100%; }
+  .p-list .party-grid .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* 超過 7 組：名單改成兩欄，10 組也放得下 */
+  .p-list .card.many .party-grid { grid-template-columns: repeat(2, minmax(0, max-content) auto); column-gap: calc(1.6mm * var(--k)); font-size: calc(2.9mm * var(--k)); }
   .p-list .card .who.none { font-size: calc(2.8mm * var(--k)); text-align: center; }
   .p-list .card .meter { display: none; }
   .p-list .note { border: 1px solid var(--line); background: #fff; padding: calc(3mm * var(--k)); display: flex; flex-direction: column; justify-content: center; gap: calc(2mm * var(--k)); font-size: calc(3mm * var(--k)); color: var(--muted); }
@@ -853,7 +856,7 @@ function renderRoster() {
     const d = state.tables[id];
     // --hw：桌號＋桌名一行的總字寬（中文 1、數字約 0.62、間距 0.5），海報版用來把整行放到剛好塞滿
     const hw = [...d.num].length * 0.62 + (d.name ? 0.5 + nameWidth(d.name) : 0);
-    return `<button class="card" style="--hw:${hw.toFixed(2)}" data-id="${id}" aria-label="${esc(label(d))}${d.name ? "・" + esc(d.name) : ""}">
+    return `<button class="card${d.guests.length > 7 ? " many" : ""}" style="--hw:${hw.toFixed(2)}" data-id="${id}" aria-label="${esc(label(d))}${d.name ? "・" + esc(d.name) : ""}">
       <span class="eyebrow">TABLE</span><span class="n">${esc(d.num)}</span>
       <span class="mini-rule"><i></i></span>
       ${d.name ? `<div class="tname">${esc(d.name)}</div>` : ""}
