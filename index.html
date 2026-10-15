@@ -261,7 +261,7 @@
   .place .mini-rule::before, .place .mini-rule::after { content: ""; flex: 1; height: 1px; background: currentColor; opacity: .7; }
   .place .mini-rule i { width: 5px; height: 5px; background: currentColor; transform: rotate(45deg); }
   .reserved { margin: 6px 0 4px; text-align: center; font-size: 15px; letter-spacing: .3em; padding-left: .3em; color: var(--muted); }
-  .reserved em { display: block; margin-top: 4px; font-family: var(--latin); font-size: 15px; letter-spacing: .08em; color: var(--accent); }
+  .reserved em { display: block; margin-top: 4px; font-family: var(--latin); font-size: 15px; letter-spacing: .08em; color: var(--body); }
   .place .tname { font-size: 17px; font-weight: 600; letter-spacing: .3em; padding-left: .3em; color: var(--body); margin: 10px 0 0; }   /* 桌名是標題的一部分：字距拉開、稍粗，和下方名單區分 */
 
   /* 編輯面板 */
@@ -350,7 +350,7 @@
   .card .tname { font-size: 15px; font-weight: 600; letter-spacing: .25em; padding-left: .25em; color: var(--body); margin: 8px 0 0; }
   .card .who { font-size: 15px; color: var(--body); line-height: 1.9; }
   .card .who.none { color: #c2b39c; font-size: 16px; }
-  .card .who.none.rsv { font-family: var(--latin); font-style: italic; font-size: 16px; letter-spacing: .06em; color: var(--accent); }   /* 賓客版、輸出版的空桌 */
+  .card .who.none.rsv { font-family: var(--latin); font-style: italic; font-size: 16px; letter-spacing: .06em; color: var(--body); }   /* 賓客版、輸出版的空桌 */
   /* 姓名｜人數 兩欄對齊 */
   .party-grid { display: grid; grid-template-columns: auto auto; justify-content: center; align-items: baseline; column-gap: 12px; text-align: left; }
   .party-grid .ct { text-align: right; color: var(--muted); font-size: .85em; white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; }
@@ -450,7 +450,7 @@
   .p-list .card, .p-list .note { border-width: calc(.4mm * var(--k)); }
   .p-list .note { border: calc(.4mm * var(--k)) solid var(--line); background: var(--card); padding: calc(2.6mm * var(--k)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(1.5mm * var(--k)); font-size: calc(3mm * var(--k)); color: var(--muted); text-align: center; }
   .p-list .note .qr { flex: 0 1 auto; height: 72%; min-height: 0; max-width: 100%; aspect-ratio: 1; color: var(--body); }   /* QR 只佔自己的正方形，和標題一組上下置中 */
-  .p-list .note b { color: var(--body); font-weight: 500; font-size: 1.05em; letter-spacing: .1em; }
+  .p-list .note b { color: var(--body); font-weight: 400; font-size: var(--name-fs, 1.05em); letter-spacing: .1em; text-indent: .1em; line-height: 1.3; }
 
   @media print {
     @page { size: A4 portrait; margin: 10mm; }
@@ -1494,6 +1494,11 @@ function fitPosterNames() {
       card.style.setProperty("--nfs", lo.toFixed(2) + "px");
     }
   }
+  // 最後一格的「查找座位」用人名最常見的字級（各卡字級的眾數）
+  const sizes = [...list.querySelectorAll(".card[data-id]")].map(c => c.style.getPropertyValue("--nfs")).filter(Boolean);
+  const freq = sizes.reduce((m, v) => (m[v] = (m[v] || 0) + 1, m), {});
+  const common = Object.keys(freq).sort((a, b) => freq[b] - freq[a])[0];
+  if (common) list.style.setProperty("--name-fs", common);
 }
 document.fonts.ready.then(() => fitPosterNames());   // 字型載入後字寬會變，重算一次
 if (POSTER) { mode = "guest"; setupPoster(); }
