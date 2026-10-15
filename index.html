@@ -589,8 +589,9 @@ const EDIT_KEY = new URLSearchParams(location.search).get("edit") || "";
 let canSync = false;                 // 金鑰驗證通過的工作人員才會寫入
 let roster = null;                   // 出席名單（工作人員才讀得到）：[{ name, count, side, relation, unit, veg, child, note }]
 let poolSide = "", poolQ = "";
-const dirty = new Set();             // 還沒送上雲端的桌
-let pushTimer = null, syncedAt = null, offline = false;
+const dirty = new Set();             // 還沒送上雲端的桌（上傳成功才移除，上傳途中仍算）
+const rev = {};                      // 每桌本機修改次數：用來判斷上傳／下載途中又被改過
+let pushTimer = null, pushing = false, syncedAt = null, offline = false;
 
 async function rpc(fn, args) {
   const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
@@ -604,23 +605,30 @@ const pick = (d) => ({ num: d.num, name: d.name, side: d.side, cap: d.cap, guest
 function save(ids) {
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
   if (!canSync) return;
-  (ids || (selected ? [selected] : [])).forEach(id => dirty.add(id));
+  (ids || (selected ? [selected] : [])).forEach(id => { dirty.add(id); rev[id] = (rev[id] || 0) + 1; });
   clearTimeout(pushTimer);
   pushTimer = setTimeout(push, 600);
 }
 async function push() {
-  if (!canSync || !dirty.size) return;
-  const ids = [...dirty], payload = {};
-  ids.forEach(id => payload[id] = pick(state.tables[id]));
-  ids.forEach(id => dirty.delete(id));
+  if (!canSync || !dirty.size || pushing) return;
+  pushing = true;
+  const ids = [...dirty], payload = {}, sent = {};
+  ids.forEach(id => { payload[id] = pick(state.tables[id]); sent[id] = rev[id]; });
   showSync("同步中…");
-  try { await rpc("seating_save", { p_event: EVENT, p_key: EDIT_KEY, p_tables: payload }); syncedAt = new Date(); offline = false; }
-  catch (e) { ids.forEach(id => dirty.add(id)); offline = true; }
+  try {
+    await rpc("seating_save", { p_event: EVENT, p_key: EDIT_KEY, p_tables: payload });
+    ids.forEach(id => { if (rev[id] === sent[id]) dirty.delete(id); });   // 上傳途中又改過的桌留著，下一輪再送
+    syncedAt = new Date(); offline = false;
+  } catch (e) { offline = true; }
+  pushing = false;
   showSync();
+  if (dirty.size && !offline) { clearTimeout(pushTimer); pushTimer = setTimeout(push, 600); }
 }
 // 讀雲端：套用別人改過的桌，但不覆蓋自己還沒送出、或正在編輯的那一桌
 async function pull() {
   if (canSync) { try { roster = (await rpc("seating_get_roster", { p_event: EVENT, p_key: EDIT_KEY })).people || []; } catch (e) {} }
+  // 下載途中本機有改、或開始下載時還沒上傳完成的桌，雲端那份可能是舊的，不能拿來覆蓋
+  const skip = new Set(dirty), revAtStart = { ...rev };
   try {
     const remote = await rpc("seating_get", { p_event: EVENT });
     offline = false;
@@ -629,7 +637,7 @@ async function pull() {
       if (canSync) save(ORDER);
     } else {
       const editing = mode === "staff" && document.activeElement?.closest?.("#editor") ? selected : null;
-      for (const id of ids) if (ORDER.includes(id) && !dirty.has(id) && id !== editing) Object.assign(state.tables[id], pick(remote.tables[id]));
+      for (const id of ids) if (ORDER.includes(id) && !dirty.has(id) && !skip.has(id) && rev[id] === revAtStart[id] && id !== editing) Object.assign(state.tables[id], pick(remote.tables[id]));
       state = merge(state);
       try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
       renderAll();
@@ -952,7 +960,7 @@ $("results").addEventListener("click", (e) => {
 });
 $("roster").addEventListener("click", (e) => { const b = e.target.closest("button[data-id]"); if (b) select(b.dataset.id, false); });
 
-const edit = (fn) => { if (!selected) return; fn(state.tables[selected]); save(); renderPlan(); renderStats(); renderRoster(); renderSearch(); renderPool(); };
+const edit = (fn) => { if (!selected) return; fn(state.tables[selected]); save(); renderPlan(); renderStats(); renderRoster(); renderSearch(); renderPool(); renderPosterList(); };
 $("f-side").addEventListener("click", (e) => {
   const b = e.target.closest("button[data-v]"); if (!b) return;
   edit(d => d.side = b.dataset.v);
