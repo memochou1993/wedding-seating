@@ -845,7 +845,7 @@ function staticPlan() {
     pillar(L.pillar), pillar(M(L.pillar)),
     txt(AX, 1298, "入　口", "entrance"),
     // 輸出版（不畫牆）用的入口標示：一條跨過三個門廊的淡金色長條，中間寫「入口」
-    `<g class="entrance-mark"><rect x="${v[0]}" y="1246" width="${vr[3] - v[0]}" height="40" rx="3"/>` + txt(AX, 1273, "入　口", "entrance") + `</g>`,
+    `<g class="entrance-mark"><rect x="${v[0]}" y="1216" width="${vr[3] - v[0]}" height="40" rx="3"/>` + txt(AX, 1243, "入　口", "entrance") + `</g>`,
     // 圖例：輸出版放在 10、20 桌下方的空地（網頁版圖例在平面圖卡片下方，這裡隱藏）
     `<g class="plan-legend">` +
       `<circle cx="345" cy="1160" r="8" data-side="主婚人親友"/>` + txt(405, 1166, "主婚人親友", "label", `style="font-size:17px"`) +
@@ -935,6 +935,8 @@ function renderPlan() {
     g.classList.toggle("selected", g.dataset.id === selected);
     g.classList.toggle("dup", mode === "staff" && dups.has(d.num));
     g.classList.toggle("match", !!q && (d.guests.some(p => p.name.includes(q)) || d.name.includes(q)));
+    // SVG 後畫的蓋在上面：找到或選取中的桌子移到最後畫，擴散的波紋才不會被旁邊的桌子擋住
+    if (g.classList.contains("match") || g.classList.contains("selected")) plan.append(g);
     g.setAttribute("aria-label", `${label(d)}${d.name ? "・" + d.name : ""}，${d.side || "未設定"}，${used} 位賓客`);
   }
 }
@@ -1345,7 +1347,7 @@ function extendPlanForPoster() {
   const H = box.clientHeight, top = head.offsetHeight + gap;
   if (!H || H <= top) return;
   // 不畫牆之後，可視範圍改成切齊內容（桌子、舞台、入口條）的外緣再留 1.5 單位，左右下都更貼
-  const X0 = 106.5, W = 709, Y0 = 103.8, VH = 1183.5;   // 桌子放大後，左右各多留 4 單位
+  const X0 = 106.5, W = 709, Y0 = 103.8, VH = 1153.5;   // 桌子放大後，左右各多留 4 單位
   const u = (H - top) / VH;                  // 每單位幾 px
   const E = top / u;                         // 往上多畫的單位數
   plan.setAttribute("viewBox", `${X0} ${(Y0 - E).toFixed(2)} ${W} ${(VH + E).toFixed(2)}`);
