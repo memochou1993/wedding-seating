@@ -70,21 +70,21 @@
   /* 平面圖 */
   .plan text { font-family: var(--serif); fill: var(--body); }
   .plan .wall { fill: none; stroke: #b9a891; stroke-width: 2.4; stroke-linejoin: miter; stroke-linecap: butt; }
-  .plan .door { fill: none; stroke: #b9a891; stroke-width: 1.1; }
+  .plan .door { fill: none; stroke: #b9a891; stroke-width: 2.4; }   /* 門弧、門片和牆一樣粗 */
   .plan .pillar { fill: #b9a891; }
   .plan .entrance { font-size: 15px; letter-spacing: .5em; fill: var(--accent); }
   .plan .stage { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.4; }
   .plan .stair { fill: var(--paper); stroke: #c7b394; stroke-width: 1; }
   .plan .runway { fill: #f6f0e5; stroke: #cdb894; stroke-width: 1.2; }
   .plan .label { font-size: 17px; letter-spacing: .2em; fill: var(--muted); }
-  .plan .label-lg { font-size: 22px; letter-spacing: .3em; fill: var(--body); font-weight: 500; }
+  .plan .label-lg { font-size: 30px; letter-spacing: .3em; fill: var(--body); font-weight: 500; }
   .plan .plan-legend { display: none; }
   body.poster-mode .plan .plan-legend { display: inline; }
   .plan .plan-legend circle { stroke: var(--accent); stroke-width: 1.4; }
   .plan .plan-legend circle[data-side="主婚人親友"] { fill: var(--parents); }
   .plan .plan-legend circle[data-side="新人親友"] { fill: var(--couple); }
   .plan .plan-legend text { letter-spacing: .1em; }
-  .plan .hall-name { font-family: var(--latin); font-size: 15px; letter-spacing: .35em; fill: var(--accent); }
+  .plan .hall-name { font-family: var(--latin); font-size: 14px; letter-spacing: .3em; fill: var(--accent); }
 
   .tbl { cursor: pointer; }
   .tbl circle.disc { fill: var(--paper); stroke: var(--accent); stroke-width: 1.6; transition: stroke-width .15s, fill .15s; }
@@ -422,7 +422,7 @@
   </div>
 
   <div class="plan-card">
-    <svg class="plan" id="plan" viewBox="87 82 748 1224" role="group" aria-label="宴會廳平面圖"></svg>
+    <svg class="plan" id="plan" viewBox="87 103.8 748 1202.2" role="group" aria-label="宴會廳平面圖"></svg>
     <div class="legend">
       <span class="side-tag" data-side="主婚人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>主婚人親友</span>
       <span class="side-tag" data-side="新人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>新人親友</span>
@@ -746,7 +746,7 @@ function staticPlan() {
   const stairs = (x, y) => [0, 1, 2].map(k => rect(x + k * 10, y, 10, 40, "stair")).join("");
   // 入口：三個內凹的門廊，門畫在門廊底部（取自 PDF 第 1 頁下緣）
   const WALL_Y = 1231, DOOR_Y = 1266;
-  const SILL = DOOR_Y + 0.55;   // 側牆多延伸半個門弧線寬，牆底才會和門弧的外緣齊平
+  const SILL = DOOR_Y + 1.2;   // 側牆多延伸半個線寬，牆底才會和門弧的外緣齊平
   const swing = (x0, x1) => {  // 一片門：從 x0 的門廊底部，向上弧到 x1 的牆線高度
     const r = Math.abs(x1 - x0);
     return `<path class="door" d="M${x0},${DOOR_Y} A${r},${DOOR_Y - WALL_Y} 0 0 ${x1 > x0 ? 0 : 1} ${x1},${WALL_Y}"/>`;
@@ -760,26 +760,22 @@ function staticPlan() {
   };
   // 會場以中軸 x=461（兩座舞台、兩條伸展台的正中）左右鏡像：右半邊一律由左半邊算出來
   const AX = 461, M = (x) => 2 * AX - x;
-  const L = { wall: 90, topDoor: 120, topLine: 125, topGap: 421, stage: 160, stageW: 234, dj: 137, djW: 21,
+  const L = { wall: 90, stage: 160, stageW: 234,
               stairsOut: 130, stairsIn: 394, runway: 250, runwayW: 50, vest: [201, 237, 309, 345], midVest: 425, pillar: 369 };
-  const stage = (x) => rect(x, 117, L.stageW, 101, "stage");
+  const stage = (x) => rect(x, 105, L.stageW, 113, "stage");   // 上緣貼著外牆
   const v = L.vest, vr = v.map(M).reverse();
   return [
-    // 外牆一筆畫完（含三個門廊的側牆），轉角才會接得密合；上方左右各一扇門
-    `<path class="wall" d="M${L.topDoor},105 H${L.wall} V${WALL_Y} H${v[0]} V${SILL} M${v[3]},${SILL} V${WALL_Y} H${L.midVest} V${SILL} M${M(L.midVest)},${SILL} V${WALL_Y} H${vr[0]} V${SILL} M${vr[3]},${SILL} V${WALL_Y} H${M(L.wall)} V105 H${M(L.topDoor)}"/>`,
-    `<path class="wall" d="M${L.topLine},105 L${L.topGap},105 M${M(L.topGap)},105 L${M(L.topLine)},105" style="stroke-width:1.2"/>`,
-    // 舞台、DJ 台、階梯、伸展台
+    // 外牆一筆畫完：從右門廊起筆，經右牆、上緣（一條連續線）、左牆，再接左、中門廊的側牆；轉角都在同一筆裡才接得密合
+    `<path class="wall" d="M${vr[3]},${SILL} V${WALL_Y} H${M(L.wall)} V105 H${L.wall} V${WALL_Y} H${v[0]} V${SILL} M${v[3]},${SILL} V${WALL_Y} H${L.midVest} V${SILL} M${M(L.midVest)},${SILL} V${WALL_Y} H${vr[0]} V${SILL}"/>`,
+    // 舞台、階梯、伸展台
     stage(L.stage), stage(M(L.stage + L.stageW)),
-    txt(L.stage + L.stageW / 2, 160, "聖雅典", "label-lg"), txt(L.stage + L.stageW / 2, 192, "舞　台", "label"),
-    txt(M(L.stage + L.stageW / 2), 160, "威尼斯", "label-lg"), txt(M(L.stage + L.stageW / 2), 192, "舞　台", "label"),
-    rect(L.dj, 130, L.djW, 36, "stair"), rect(M(L.dj + L.djW), 130, L.djW, 36, "stair"),
-    `<text x="${L.dj + L.djW / 2}" y="152" class="label" text-anchor="middle" style="font-size:10px;letter-spacing:0">DJ</text>`,
-    `<text x="${M(L.dj + L.djW / 2)}" y="152" class="label" text-anchor="middle" style="font-size:10px;letter-spacing:0">DJ</text>`,
+    // 舞台框內三行：中文廳名、英文廳名（小字）、舞台
+    txt(L.stage + L.stageW / 2, 147, "聖雅典", "label-lg"), txt(L.stage + L.stageW / 2, 171, "SAINT ATHENS", "hall-name"), txt(L.stage + L.stageW / 2, 202, "舞　台", "label", `style="font-size:21px"`),
+    txt(M(L.stage + L.stageW / 2), 147, "威尼斯", "label-lg"), txt(M(L.stage + L.stageW / 2), 171, "VENICE", "hall-name"), txt(M(L.stage + L.stageW / 2), 202, "舞　台", "label", `style="font-size:21px"`),
     stairs(L.stairsOut, 178), stairs(L.stairsIn, 178), stairs(M(L.stairsIn + 30), 178), stairs(M(L.stairsOut + 30), 178),
     rect(L.runway, 218, L.runwayW, 707, "runway"), rect(M(L.runway + L.runwayW), 218, L.runwayW, 707, "runway"),
     txt(L.runway + L.runwayW / 2, 560, "伸展台", "label", `writing-mode="vertical-rl" style="letter-spacing:.6em"`),
     txt(M(L.runway + L.runwayW / 2), 560, "伸展台", "label", `writing-mode="vertical-rl" style="letter-spacing:.6em"`),
-    txt(L.stage + L.stageW / 2, 98, "SAINT ATHENS", "hall-name"), txt(M(L.stage + L.stageW / 2), 98, "VENICE", "hall-name"),
     // 入口門：左右門廊互為鏡像，中央門廊置中
     triple(...v), swing(L.midVest, AX) + swing(M(L.midVest), AX), triple(...vr),
     pillar(L.pillar), pillar(M(L.pillar)),
