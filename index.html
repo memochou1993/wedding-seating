@@ -34,6 +34,8 @@
   }
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
+  /* 手機：任何元素都不能把畫面撐寬（撐寬會讓瀏覽器自動縮放）；關掉連點兩下放大，保留雙指縮放看平面圖 */
+  html, body { overflow-x: clip; touch-action: manipulation; }
   body {
     margin: 0; padding: 32px 16px 64px;
     background: var(--ground); color: var(--body);
@@ -49,7 +51,7 @@
   .framed > .frame-art { position: absolute; inset: 14px; width: calc(100% - 28px); height: calc(100% - 28px); pointer-events: none; color: var(--accent); overflow: visible; }
 
   /* 標題 */
-  .hero { padding: 92px 40px 64px; text-align: center; }
+  .hero { padding: 92px 40px 32px; text-align: center; }
   .hero .zh-kicker { font-size: 15px; letter-spacing: 1.2em; padding-left: 1.2em; color: var(--accent); font-weight: 500; }
   .hero .en-kicker { font-family: var(--latin); font-size: 13px; letter-spacing: .4em; padding-left: .4em; color: var(--accent); margin-top: 2px; }
   .hero h1 { margin: 22px 0 6px; font-size: clamp(32px, 6vw, 56px); font-weight: 700; letter-spacing: .14em; padding-left: .14em; color: var(--body); line-height: 1.25; text-wrap: balance; }
@@ -59,8 +61,10 @@
   .rule span { width: 7px; height: 7px; background: currentColor; transform: rotate(45deg); }
 
   /* 版面：手機優先的單欄。標題 → 固定在頂端的找座位列 → 平面圖 → 席次一覽；電腦上置中最寬 880px */
-  @media (max-width: 560px) { body { padding: 16px 8px 48px; } .hero { padding: 72px 20px 48px; } .plan-card { padding: 104px 36px 92px; } .roster { padding: 56px 16px 156px; } }
-  .plan-card { padding: 116px 36px 104px; }   /* 左右：花框內線往內再留 14px（同花框到卡片邊的距離）；上下拉長避開四角花飾 */
+  /* 搜尋列夾在標題與平面圖之間，左右和平面圖對齊；下方拉長避開四角花飾 */
+  .intro .bar-dock { padding: 10px 52px; margin: 0; }
+  .plan-card { padding: 28px 36px 104px; }   /* 左右：花框內線往內再留 14px（同花框到卡片邊的距離） */
+  @media (max-width: 560px) { body { padding: 16px 8px 48px; } .hero { padding: 72px 20px 24px; } .intro .bar-dock { padding: 8px 40px; } .plan-card { padding: 20px 28px 92px; } .roster { padding: 56px 16px 156px; } }
   .plan-card svg.plan { display: block; width: 100%; height: auto; }
 
   /* 平面圖 */
@@ -141,17 +145,34 @@
   /* 找座位列：外面包一層和頁面同色的底（上下各留一點空），固定在頂端時後面的內容不會從縫隙透出來 */
   .bar-dock { position: sticky; top: 0; z-index: 10; padding: 10px 0; margin: -10px 0; }
   .bar-dock.stuck { background: var(--ground); }   /* 只有真的固定在頂端時才鋪底色，平常不會蓋到上一張卡片的陰影 */
+  /* 第一張卡裡的搜尋列：平常和卡片融在一起；固定在頂端時變成一條有陰影的浮動列 */
+  .intro .bar-dock.stuck { background: transparent; }
+  .intro .bar { box-shadow: none; padding: 14px 0 8px; }
+  .intro .bar-dock.stuck .bar { padding: 16px 12px 10px; box-shadow: 0 6px 20px rgba(78,58,42,.14); }
   .bar-sentinel { height: 0; margin: 0; }
-  .bar { position: relative; background: var(--paper); box-shadow: 0 1px 2px rgba(78,58,42,.06), 0 10px 30px rgba(78,58,42,.07); padding: 12px 16px; display: grid; gap: 6px; }   /* 和其他卡片一樣用陰影 */
-  .bar-row { display: flex; align-items: center; gap: 12px; }
-  .bar-label { font-size: 13px; font-weight: 500; letter-spacing: .3em; color: var(--accent); white-space: nowrap; }
-  .bar input { flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); background: #fff; font-size: 16px; }
-  .bar input:focus { border-color: var(--accent); outline: none; }
+  .bar { position: relative; grid-template-columns: minmax(0, 1fr); background: var(--paper); box-shadow: 0 1px 2px rgba(78,58,42,.06), 0 10px 30px rgba(78,58,42,.07); padding: 12px 16px; display: grid; gap: 6px; }   /* 和其他卡片一樣用陰影 */
+  /* 搜尋框：空著時「搜尋」在框裡；點進去或有輸入時，縮小浮到外框上緣（外框在標籤處斷開），外框與標籤轉成香檳金。
+     placeholder 是一個空白，只用來偵測欄位是不是空的（:placeholder-shown） */
+  .bar-row { position: relative; display: flex; }
+  .bar input { flex: 1; min-width: 0; padding: 14px 14px 12px 44px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); font-size: 16px; }
+  .bar input:focus { border-color: var(--accent); outline: none; box-shadow: inset 0 0 0 1px var(--accent); }
+  .notch-label { position: absolute; top: 0; left: 10px; transform: translateY(-50%); padding: 0 6px; background: var(--paper); font-size: 13px; line-height: 1; color: var(--muted); pointer-events: none;
+    transition: top .18s ease, left .18s ease, font-size .18s ease, color .18s ease; }
+  .bar input:placeholder-shown:not(:focus) + .notch-label { top: 50%; left: 38px; font-size: 16px; color: var(--muted); }
+  /* 放大鏡：放在框內左側，標籤躺在框裡時排在它右邊 */
+  .search-icon { position: absolute; left: 14px; top: 50%; width: 20px; height: 20px; transform: translateY(-50%); fill: none; stroke: var(--muted); stroke-width: 1.6; stroke-linecap: round; pointer-events: none; transition: stroke .18s; }
+  .bar-row:focus-within .search-icon { stroke: var(--accent); }
+  .bar-row:focus-within .notch-label { color: var(--accent); }
+  /* 清除鈕（×）：換掉瀏覽器預設的藍色，改用和文字同色系的細線 */
+  .bar input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; cursor: pointer; background: var(--muted);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 2l10 10M12 2L2 12' stroke='black' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 2l10 10M12 2L2 12' stroke='black' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat; }
   .results { list-style: none; position: absolute; left: 12px; right: 12px; top: calc(100% - 4px); margin: 0; padding: 8px; display: grid; gap: 6px; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(78,58,42,.12); max-height: 50vh; overflow: auto; }
   .results:empty, .bar:not(:focus-within) .results { display: none; }
-  .results button { width: 100%; text-align: left; border: 1px solid var(--line); background: #fff; padding: 10px 12px; cursor: pointer; display: flex; justify-content: space-between; gap: 12px; }
+  .results button { width: 100%; min-width: 0; text-align: left; border: 1px solid var(--line); background: #fff; padding: 10px 12px; cursor: pointer; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 12px; }
+  .results button > span { min-width: 0; overflow-wrap: anywhere; }
   .results button:hover { border-color: var(--accent); }
-  .results b { color: var(--accent); white-space: nowrap; }
+  .results b { color: var(--accent); margin-left: auto; text-align: right; }   /* 放不下就整段換到下一行靠右，長桌名不會撐寬畫面 */
   .hint { color: var(--muted); font-size: 13px; margin: 0; }
   .hint:empty { display: none; }
   .status { margin: 0; font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: baseline; font-variant-numeric: tabular-nums; }
@@ -376,7 +397,9 @@
 <body>
 <div class="wrap">
 
-  <header class="hero framed">
+  <!-- 第一張卡：標題、找座位、平面圖合在同一個花框裡 -->
+  <section class="intro framed">
+  <header class="hero">
     <div class="zh-kicker">席次表</div>
     <div class="en-kicker">SEATING CHART</div>
     <h1>聖雅典・威尼斯</h1>
@@ -388,8 +411,9 @@
   <div class="bar-dock">
   <section class="bar" aria-label="尋找座位">
     <div class="bar-row">
-      <label class="bar-label" for="q">尋找座位</label>
-      <input id="q" type="search" placeholder="輸入姓名，例如：王小明" autocomplete="off" enterkeyhint="search">
+      <svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.75"/><path d="M12.8 12.8 17 17"/></svg>
+      <input id="q" type="search" placeholder=" " autocomplete="off" enterkeyhint="search">
+      <label class="notch-label" for="q">搜尋</label>
     </div>
     <ul class="results" id="results"></ul>
     <p class="hint" id="search-hint"></p>
@@ -397,7 +421,7 @@
   </section>
   </div>
 
-  <section class="plan-card framed">
+  <div class="plan-card">
     <svg class="plan" id="plan" viewBox="87 82 748 1224" role="group" aria-label="宴會廳平面圖"></svg>
     <div class="legend">
       <span class="side-tag" data-side="主婚人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>主婚人親友</span>
@@ -405,6 +429,7 @@
       <span class="side-tag staff-only" data-side=""><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>未設定</span>
       <span class="side-tag kid-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><rect class="kid-icon" x="2.5" y="2.5" width="9" height="9" rx="1.2"/></svg>兒童座椅</span>
     </div>
+  </div>
   </section>
 
   <div class="toast" id="toast" role="status" hidden><span id="toast-text"></span><button type="button" id="toast-undo">復原</button></div>
@@ -972,7 +997,6 @@ function select(id, fromPlan) {
 function setMode(m) {
   mode = m;
   document.body.dataset.mode = m;
-  $("q").placeholder = m === "guest" ? "請輸入姓名" : "輸入姓名，例如：王小明";
   renderAll();
 }
 
