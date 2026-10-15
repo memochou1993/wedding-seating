@@ -32,7 +32,8 @@
     --couple: #f6e6e3;      /* 新人親友桌底色 */
     --couple-ink: #8a5149;
     --warn: #a3402f;
-    --kid: #6f9a86;           /* 兒童座椅 */
+    --kid: #8fbfa8;           /* 兒童座椅（平面圖方塊、圖例）：淺一點，和深色椅子分得清楚 */
+    --kid-ink: #5f8a76;       /* 兒童座椅的文字：深一點才讀得清楚 */
     --serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
     --latin: "Cormorant Garamond", "Times New Roman", serif;
   }
@@ -290,8 +291,8 @@
   .add .g-count input { padding: 10px 4px; }
   .g-count.kid { font-size: 12px; }
   .g-count.kid input { width: 2.6em; }
-  .g-count.kid.on input { border-color: var(--kid); color: var(--kid); font-weight: 600; }
-  .kid-n { margin-left: 6px; font-size: .8em; color: var(--kid); }
+  .g-count.kid.on input { border-color: var(--kid); color: var(--kid-ink); font-weight: 600; }
+  .kid-n { margin-left: 6px; font-size: .8em; color: var(--kid-ink); }
   .party-n { margin-left: 6px; font-size: .8em; color: var(--muted); font-variant-numeric: lining-nums; }
   .guest-list .del { width: 44px; height: 44px; border: 0; background: transparent; color: var(--muted); font-size: 20px; cursor: pointer; flex: none; }
   .guest-list:empty { display: none; }
