@@ -923,6 +923,7 @@ function select(id, fromPlan) {
 function setMode(m) {
   mode = m;
   document.body.dataset.mode = m;
+  $("q").placeholder = m === "guest" ? "請輸入姓名" : "輸入姓名，例如：王小明";
   renderAll();
 }
 
