@@ -330,6 +330,7 @@
   /* 名字太長就截成「…」，不折行，免得把後面的人擠出卡片 */
   .p-list .party-grid { grid-template-columns: minmax(0, max-content) auto; max-width: 100%; }
   .p-list .party-grid .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .p-list .kid-n { display: none; }   /* 兒童座椅看平面圖上的綠色方塊就好 */
   /* 超過 7 組：名單改成兩欄，10 組也放得下 */
   .p-list .card.many .party-grid { grid-template-columns: repeat(2, minmax(0, max-content) auto); column-gap: calc(1.6mm * var(--k)); font-size: calc(2.9mm * var(--k)); }
   .p-list .card .who.none { font-size: calc(2.8mm * var(--k)); text-align: center; }
