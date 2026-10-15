@@ -146,9 +146,9 @@
   .bar-dock { position: sticky; top: 0; z-index: 10; padding: 10px 0; margin: -10px 0; }
   .bar-dock.stuck { background: var(--ground); }   /* 只有真的固定在頂端時才鋪底色，平常不會蓋到上一張卡片的陰影 */
   /* 第一張卡裡的搜尋列：平常和卡片融在一起；固定在頂端時變成一條有陰影的浮動列 */
-  .intro .bar-dock.stuck { background: transparent; }
+  /* 黏在頂端時整條（含上方與左右的留白）鋪卡片底色，後面捲動的平面圖不會透出來；陰影加在整條下方 */
+  .intro .bar-dock.stuck { background: var(--paper); box-shadow: 0 6px 16px rgba(78,58,42,.12); }
   .intro .bar { box-shadow: none; padding: 14px 0 8px; }
-  .intro .bar-dock.stuck .bar { padding: 16px 12px 10px; box-shadow: 0 6px 20px rgba(78,58,42,.14); }
   .bar-sentinel { height: 0; margin: 0; }
   .bar { position: relative; grid-template-columns: minmax(0, 1fr); background: var(--paper); box-shadow: 0 1px 2px rgba(78,58,42,.06), 0 10px 30px rgba(78,58,42,.07); padding: 12px 16px; display: grid; gap: 6px; }   /* 和其他卡片一樣用陰影 */
   /* 搜尋框：空著時「搜尋」在框裡；點進去或有輸入時，縮小浮到外框上緣（外框在標籤處斷開），外框與標籤轉成香檳金。
@@ -330,6 +330,7 @@
   body.board-mode .bar .hint { display: none; }
   body.board-mode .status { flex: 1; font-size: 13px; margin: 0; }
   .plan-card .status { margin: 0 0 14px; }
+  @media (max-width: 560px) { #s-stats { display: none; } }   /* 手機版太擠：不顯示排桌統計，只留連結與同步異常提示 */
   /* 編輯面板靠右，平面圖保持看得到 */
   body.board-mode dialog.sheet { inset: auto 24px 24px auto; transform: none; height: calc(100vh - 110px); max-height: none; width: 480px; }
   body.board-mode dialog.sheet::backdrop { background: rgba(43,37,34,.12); }
