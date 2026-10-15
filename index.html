@@ -322,7 +322,7 @@
   .p-list .card .eyebrow, .p-list .card .mini-rule { display: none; }
   .p-list .card .n { grid-column: 1; font-size: calc(8mm * var(--k)); line-height: 1; margin: 0; }
   /* 桌名一行放到最大：依字寬（--nw，中文 1、英數 0.55）把可用寬度平均分給每個字，最大 5.4mm，不折行 */
-  .p-list .card .tname { grid-column: 2; margin: 0; letter-spacing: 0; line-height: 1.15; white-space: nowrap; overflow: hidden;
+  .p-list .card .tname { grid-column: 2; margin: 0; letter-spacing: 0; line-height: 1.15; white-space: nowrap; overflow: hidden; color: var(--body);
     font-size: min(calc(5.4mm * var(--k)), calc(25.5mm * var(--k) / var(--nw, 6))); }
   .p-list .card .who { grid-column: 1 / -1; align-self: start; font-size: calc(3.1mm * var(--k)); line-height: 1.5;
     border-top: 1px solid var(--accent-soft); margin-top: calc(1.8mm * var(--k)); padding-top: calc(1.6mm * var(--k)); }
