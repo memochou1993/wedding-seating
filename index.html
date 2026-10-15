@@ -285,8 +285,21 @@
   /* ───── 輸出版海報：尺寸由 --pw/--ph 決定（預設 A2 橫式 594×420mm），字級跟著紙張等比放大 ───── */
   body.poster-mode { padding: 0; background: #d9d4cc; overflow: auto; }
   body.poster-mode .wrap { display: none; }
-  body.poster-mode .sheet, body.poster-mode .toast { display: none !important; }
+  body.poster-mode:not(.board-mode) .sheet, body.poster-mode:not(.board-mode) .toast { display: none !important; }
   .poster-stage { transform-origin: 0 0; }
+  .poster-stage { position: relative; width: 0; }
+  body.board-mode .bar { position: fixed; top: 0; left: 0; right: 0; z-index: 15; display: flex; align-items: center; gap: 8px 20px; padding: 8px 20px; border-width: 0 0 1px; }
+  body.board-mode .bar-row { flex: 0 0 380px; }
+  body.board-mode .bar .hint { display: none; }
+  body.board-mode .status { flex: 1; font-size: 13px; }
+  /* 編輯面板靠右，平面圖保持看得到 */
+  body.board-mode dialog.sheet { inset: auto 24px 24px auto; transform: none; height: calc(100vh - 110px); max-height: none; width: 480px; }
+  body.board-mode dialog.sheet::backdrop { background: rgba(43,37,34,.12); }
+  body.board-mode .p-list .card { cursor: pointer; }
+  body.board-mode .p-list .card:hover { border-color: var(--accent); }
+  body.board-mode .p-list .card .meter { display: flex; grid-column: 1 / -1; align-self: end; justify-content: center; gap: calc(1.2mm * var(--k)); padding-top: calc(1.2mm * var(--k)); }
+  body.board-mode .p-list .card .meter i { width: calc(1.6mm * var(--k)); height: calc(1.6mm * var(--k)); }
+  body.board-mode .p-list .card { grid-template-rows: auto 1fr auto; }
   .poster {
     --k: calc(var(--ph) / 420mm);   /* 相對 A2 的倍率 */
     width: var(--pw); height: var(--ph); box-sizing: border-box; background: var(--paper);
@@ -1119,23 +1132,38 @@ addEventListener("keydown", (e) => { if (e.key === "Escape" && drag) endDrag(fal
 /* ───────────── 輸出版（?poster=a2｜a1｜a3，預設 A2 橫式）───────────── */
 const POSTER = new URLSearchParams(location.search).get("poster");
 const PAPER = { a1: [841, 594], a2: [594, 420], a3: [420, 297] };
+// 桌機的工作人員版也用這個版面當編輯畫面（BOARD）：上方找座位列，下方整張海報縮放到剛好塞滿視窗
+const BOARD = STAFF && !POSTER && matchMedia("(min-width: 1100px)").matches;
 function setupPoster() {
   const [pw, ph] = PAPER[(POSTER || "a2").toLowerCase()] || PAPER.a2;
   document.body.classList.add("poster-mode");
+  if (BOARD) document.body.classList.add("board-mode");
   const poster = $("poster");
   poster.style.setProperty("--pw", pw + "mm"); poster.style.setProperty("--ph", ph + "mm");
   poster.hidden = false;
   $("p-plan").append(plan);                 // 同一張平面圖搬進海報
   const stage = document.createElement("div"); stage.className = "poster-stage";
   document.body.prepend(stage); stage.append(poster);   // 移出 .wrap（海報模式會把 .wrap 藏起來）
-  document.head.insertAdjacentHTML("beforeend", `<style>@media print { @page { size: ${pw}mm ${ph}mm; margin: 0; } body.poster-mode { background: none; } .poster-stage { transform: none !important; } }</style>`);
-  const fit = () => { const k = Math.min((innerWidth - 32) / poster.offsetWidth, (innerHeight - 32) / poster.offsetHeight, 1);
-    stage.style.transform = `translate(16px, 16px) scale(${k})`; };
-  addEventListener("resize", fit); requestAnimationFrame(fit);
+  const bar = document.querySelector(".bar");
+  if (BOARD) {
+    document.body.prepend(bar);                                  // 找座位與同步狀態留在最上方
+    document.body.append($("editor"), $("toast"), $("detail"));  // 對話框也移出被藏起來的 .wrap
+  }
+  document.head.insertAdjacentHTML("beforeend", `<style>@media print { @page { size: ${pw}mm ${ph}mm; margin: 0; } body.poster-mode { background: none; } .poster-stage { transform: none !important; } .bar { display: none !important; } }</style>`);
+  const fit = () => {
+    const top = BOARD ? bar.offsetHeight + 16 : 16;
+    // 編輯畫面以寬度為準（字比較大，可往下捲）；預覽／列印則整張塞進視窗
+    const k = BOARD ? (innerWidth - 32) / poster.offsetWidth : Math.min((innerWidth - 32) / poster.offsetWidth, (innerHeight - top - 16) / poster.offsetHeight, 1);
+    stage.style.transform = `translate(${(innerWidth - poster.offsetWidth * k) / 2}px, ${top}px) scale(${k})`;
+    stage.style.height = (top + poster.offsetHeight * k + 16) + "px";
+  };
+  addEventListener("resize", fit); requestAnimationFrame(fit); document.fonts?.ready.then(fit);
+  // 點右邊的桌卡＝點平面圖上那一桌
+  $("p-list").addEventListener("click", (e) => { const c = e.target.closest(".card[data-id]"); if (c) select(c.dataset.id, true); });
 }
 // 海報右邊的 7×6 格：41 桌＋最後一格放圖例與網址
 function renderPosterList() {
-  if (!POSTER) return;
+  if (!POSTER && !BOARD) return;
   $("p-list").innerHTML = $("roster").innerHTML + `<div class="note">
     <span class="side-tag" data-side="主婚人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>主婚人親友</span>
     <span class="side-tag" data-side="新人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>新人親友</span>
@@ -1143,6 +1171,7 @@ function renderPosterList() {
     <span><b>手機找座位</b><br><span class="url">memochou1993.github.io/wedding-seating</span></span></div>`;
 }
 if (POSTER) { mode = "guest"; setupPoster(); }
+else if (BOARD) setupPoster();
 
 buildPlan();
 setMode(mode);
