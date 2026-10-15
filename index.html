@@ -225,6 +225,10 @@
   .sheet-foot { flex: none; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); background: var(--paper); }
   .sheet-foot.nav { margin-top: 0; }
   .sheet-head .close { top: 0; right: 8px; }
+  /* 手機：面板往下滑就能關閉，不需要 × */
+  @media (max-width: 599px) { #close-detail, #close-editor { display: none; } }
+  .sheet.swiping { transition: none !important; }
+  .sheet.settling { transition: transform .2s ease; }
   @media (min-width: 600px) { .sheet::before { display: none; } .sheet-head { padding-top: 16px; } .sheet-foot { padding-bottom: 14px; } #detail .sheet-body { padding-top: 18px; } }
   dialog.sheet::backdrop { background: rgba(43,37,34,.35); }
   .sheet h2 { margin: 0 0 4px; font-size: 12px; font-weight: 500; letter-spacing: .4em; color: var(--accent); }
@@ -1034,6 +1038,44 @@ $("poster-link").href = location.pathname + "?poster=a1";   // 即時讀雲端�
 new IntersectionObserver(([e]) => document.querySelector(".bar-dock").classList.toggle("stuck", !e.isIntersecting), { rootMargin: "-1px 0px 0px 0px" })
   .observe(document.querySelector(".bar-sentinel"));
 $("close-detail").onclick = () => select(null, true);
+// 手機：從下方滑出的面板往下滑就關閉。內容捲到頂端時才開始拖；拖超過 80px 或快速往下一撥就關，不夠就彈回
+function swipeToClose(sheet, close) {
+  let start = null;
+  const body = () => sheet.querySelector(".sheet-body");
+  const setY = (y) => sheet.style.transform = y ? `translateX(-50%) translateY(${y}px)` : "";
+  // 用 touch 事件：第一下移動就要決定是不是在拖面板，並立刻擋下捲動（等瀏覽器開始捲動就來不及了）
+  sheet.addEventListener("touchstart", (e) => {
+    if (e.touches.length > 1 || innerWidth >= 600 || e.target.closest("input, textarea, select, .combo-pop")) { start = null; return; }
+    const p = e.touches[0];
+    start = { y: p.clientY, x: p.clientX, t: e.timeStamp, dy: 0, v: 0, on: null };
+  }, { passive: true });
+  sheet.addEventListener("touchmove", (e) => {
+    if (!start) return;
+    const p = e.touches[0], dy = p.clientY - start.y, dx = p.clientX - start.x;
+    if (start.on === null) {
+      // 往下、以垂直為主、內容已在最頂端 → 拖面板；否則交給內容捲動
+      start.on = dy > 0 && dy >= Math.abs(dx) && (body()?.scrollTop || 0) <= 0;
+      if (start.on) sheet.classList.add("swiping");
+    }
+    if (!start.on) return;
+    e.preventDefault();
+    start.v = (dy - start.dy) / Math.max(1, e.timeStamp - start.t); start.t = e.timeStamp;
+    start.dy = Math.max(0, dy);
+    setY(start.dy);
+  }, { passive: false });
+  const end = () => {
+    if (!start) return;
+    const { on, dy, v } = start; start = null;
+    sheet.classList.remove("swiping");
+    if (!on) return;
+    sheet.classList.add("settling");
+    if (dy > 80 || v > 0.6) { setY(sheet.offsetHeight); setTimeout(() => { sheet.classList.remove("settling"); setY(0); close(); }, 200); }
+    else { setY(0); setTimeout(() => sheet.classList.remove("settling"), 200); }
+  };
+  sheet.addEventListener("touchend", end);
+  sheet.addEventListener("touchcancel", end);
+}
+swipeToClose($("detail"), () => select(null, true));
 addEventListener("keydown", (e) => { if (e.key === "Escape" && mode === "guest" && selected) select(null, true); });
 $("q").addEventListener("input", (e) => { query = e.target.value; renderPlan(); renderSearch(); });
 $("results").addEventListener("click", (e) => {
@@ -1111,6 +1153,7 @@ $("pool-q").addEventListener("keydown", (e) => {
 $("editor").addEventListener("cancel", (e) => { if ($("combo").contains(document.activeElement)) e.preventDefault(); });   // Esc 只收起下拉，不關面板
 const step = (k) => { const i = ORDER.indexOf(selected); document.activeElement.blur(); select(ORDER[(i + k + ORDER.length) % ORDER.length], true); };
 $("close-editor").onclick = () => $("editor").close();
+swipeToClose($("editor"), () => $("editor").close());
 $("editor").addEventListener("close", () => { if (selected) select(null, true); });
 // 點面板外面（變暗的背景）就關閉；按下與放開都在外面才算，避免在面板裡拖選文字時誤關
 const outside = (dlg, e) => { const r = dlg.getBoundingClientRect(); return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom; };
