@@ -337,14 +337,16 @@
   .p-list .card .n { font-weight: 700; font-variant-numeric: lining-nums; }
   .p-list .card .tname { font-weight: 500; }
   .p-list .card { align-items: baseline; }
-  .p-list .card .who { grid-column: 1 / -1; align-self: start; font-size: calc(3.1mm * var(--k)); line-height: 1.4;
+  /* 名單：一家人每位寫一次名字（代表人 4 位就寫 4 次），團體寫一次加人數；兩欄。字級由 fitPosterNames() 依每張卡的人數各自放到最大 */
+  .p-list .card .who { grid-column: 1 / -1; align-self: start; font-size: var(--nfs, calc(3.1mm * var(--k))); line-height: 1.4;
     border-top: 1px solid var(--accent-soft); margin-top: calc(1.8mm * var(--k)); padding-top: calc(1.6mm * var(--k)); }
-  /* 名字太長就截成「…」，不折行，免得把後面的人擠出卡片 */
-  .p-list .party-grid { grid-template-columns: minmax(0, max-content) auto; max-width: 100%; }
-  .p-list .party-grid .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .p-list .kid-n { display: none; }   /* 兒童座椅看平面圖上的綠色方塊就好 */
-  /* 超過 7 組：名單改成兩欄，10 組也放得下 */
-  .p-list .card.many .party-grid { grid-template-columns: repeat(2, minmax(0, max-content) auto); column-gap: calc(1.6mm * var(--k)); font-size: calc(2.9mm * var(--k)); }
+  /* 兩欄放的都是 2–3 字的人名，欄寬就是名字寬，整組置中，左右留白一樣 */
+  .p-list .p-names { display: grid; grid-template-columns: repeat(2, max-content); justify-content: center; column-gap: 1.2em; }
+  .p-list .p-names span { white-space: nowrap; }
+  /* 團體／非人名：佔滿一整行、太長就折行；contain 讓它不把兩欄撐寬。整張卡都是團體時改成單欄滿版 */
+  .p-list .p-names .grp { grid-column: 1 / -1; white-space: normal; contain: inline-size; }
+  .p-list .p-names.solo { grid-template-columns: 1fr; justify-content: stretch; }
+  .p-list .p-names .grp small { margin-left: .5em; font-size: .8em; color: var(--muted); white-space: nowrap; }
   .p-list .card .who.none { font-size: calc(2.8mm * var(--k)); text-align: center; }
   .p-list .card .meter { display: none; }
   .p-list .note { border: 1px solid var(--line); background: #fff; padding: calc(3mm * var(--k)); display: flex; flex-direction: column; justify-content: center; gap: calc(2mm * var(--k)); font-size: calc(3mm * var(--k)); color: var(--muted); }
@@ -1219,7 +1221,47 @@ function renderPosterList() {
     <span class="side-tag" data-side="新人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>新人親友</span>
     <span class="side-tag kid-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><rect class="kid-icon" x="2.5" y="2.5" width="9" height="9" rx="1.2"/></svg>兒童座椅</span>
     <span><b>手機找座位</b><br><span class="url">memochou1993.github.io/wedding-seating</span></span></div>`;
+  for (const card of $("p-list").querySelectorAll(".card[data-id]")) {
+    const who = card.querySelector(".who:not(.none)"); if (!who) continue;
+    const groups = state.tables[card.dataset.id].guests.filter(g => g.name);
+    who.className = "who p-names" + (groups.some(perSeat) ? "" : " solo");
+    // 名字先由上往下排滿左欄、再排右欄；團體佔一整行，把名單切成幾段，每段各自上下排
+    let html = "", row = 1, seg = [];
+    const flush = () => {
+      const rows = Math.ceil(seg.length / 2);
+      html += seg.map((n, i) => `<span style="grid-row:${row + i % rows};grid-column:${i < rows ? 1 : 2}">${esc(n)}</span>`).join("");
+      row += rows; seg = [];
+    };
+    for (const g of groups) {
+      if (perSeat(g)) { seg.push(...Array(g.count).fill(showName(g.name))); continue; }
+      flush();
+      html += `<span class="grp" style="grid-row:${row++}">${esc(g.name)}${g.count > 1 ? `<small>${g.count} 位</small>` : ""}</span>`;
+    }
+    flush();
+    who.innerHTML = html;
+  }
+  fitPosterNames();
 }
+// 一家人（1–3 字的名字、4 位以內）每位寫一次名字；公司、社團、親屬稱謂、多人並列，或 5 位以上的團體聯絡人，只寫一次加人數
+const perSeat = (g) => /^[\u3400-\u9fff\uf900-\ufaff]{1,3}$/.test(g.name) && g.count <= 4;
+// 每張卡各自找出名單放得下的最大字級（二分法）：人少的卡字大、人多的照樣塞得下；兩欄不能比卡片寬，上限 6mm 免得各卡差太多
+function fitPosterNames() {
+  const list = $("p-list");
+  if (!list.clientHeight) return;
+  const max = 6 * $("poster").offsetHeight / 420;   // 6mm（海報高 420mm 對應 A2，其他尺寸等比）
+  for (const card of list.querySelectorAll(".card[data-id]")) {
+    const who = card.querySelector(".p-names");
+    if (!who) continue;
+    const fits = () => card.scrollHeight <= card.clientHeight + 1 && who.scrollWidth <= who.clientWidth + 1;
+    let lo = 6, hi = max;   // px
+    card.style.setProperty("--nfs", hi + "px");
+    if (!fits()) {
+      while (hi - lo > 0.2) { const mid = (lo + hi) / 2; card.style.setProperty("--nfs", mid + "px"); if (fits()) lo = mid; else hi = mid; }
+      card.style.setProperty("--nfs", lo.toFixed(2) + "px");
+    }
+  }
+}
+document.fonts.ready.then(() => fitPosterNames());   // 字型載入後字寬會變，重算一次
 if (POSTER) { mode = "guest"; setupPoster(); }
 else if (BOARD) setupPoster();
 
