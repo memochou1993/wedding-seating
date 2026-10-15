@@ -59,7 +59,7 @@
   .rule span { width: 7px; height: 7px; background: currentColor; transform: rotate(45deg); }
 
   /* 版面：手機優先的單欄。標題 → 固定在頂端的找座位列 → 平面圖 → 席次一覽；電腦上置中最寬 880px */
-  @media (max-width: 560px) { body { padding: 16px 8px 48px; } .hero { padding: 72px 20px 48px; } .plan-card { padding: 104px 36px 92px; } .roster { padding: 56px 16px 40px; } }
+  @media (max-width: 560px) { body { padding: 16px 8px 48px; } .hero { padding: 72px 20px 48px; } .plan-card { padding: 104px 36px 92px; } .roster { padding: 56px 16px 156px; } }
   .plan-card { padding: 116px 36px 104px; }   /* 左右：花框內線往內再留 14px（同花框到卡片邊的距離）；上下拉長避開四角花飾 */
   .plan-card svg.plan { display: block; width: 100%; height: auto; }
 
@@ -192,10 +192,12 @@
   .place .eyebrow { font-family: var(--latin); font-size: 12px; letter-spacing: .4em; padding-left: .4em; color: var(--accent); }
   .place .n { font-family: var(--latin); font-size: 52px; font-weight: 600; line-height: 1; color: var(--body); margin-top: 2px; }
   .place .n:not(:empty) { font-variant-numeric: lining-nums; }
-  .place .mini-rule { display: flex; align-items: center; gap: 6px; width: 72px; margin: 12px 0 10px; color: var(--accent); }
+  .place .mini-rule { display: flex; align-items: center; gap: 6px; width: 72px; margin: 14px 0 6px; color: var(--accent); }
   .place .mini-rule::before, .place .mini-rule::after { content: ""; flex: 1; height: 1px; background: currentColor; opacity: .7; }
   .place .mini-rule i { width: 5px; height: 5px; background: currentColor; transform: rotate(45deg); }
-  .place .tname { font-size: 15px; letter-spacing: .12em; color: var(--accent); margin: 0 0 10px; }
+  .reserved { margin: 6px 0 4px; text-align: center; font-size: 15px; letter-spacing: .3em; padding-left: .3em; color: var(--muted); }
+  .reserved em { display: block; margin-top: 4px; font-family: var(--latin); font-size: 15px; letter-spacing: .08em; color: var(--accent); }
+  .place .tname { font-size: 17px; font-weight: 600; letter-spacing: .3em; padding-left: .3em; color: var(--body); margin: 10px 0 0; }   /* 桌名是標題的一部分：字距拉開、稍粗，和下方名單區分 */
 
   /* 編輯面板 */
   .field-label { font-size: 13px; color: var(--muted); letter-spacing: .1em; margin: 16px 0 6px; }
@@ -254,30 +256,32 @@
   .btn.solid { background: var(--accent); color: #fff; }
 
   /* 席次一覽 */
-  .roster { padding: 72px 40px 52px; }
+  .roster { padding: 72px 40px 136px; }
   .roster-head { text-align: center; margin-bottom: 26px; }
   .roster-head h2 { margin: 0; font-size: 24px; letter-spacing: .5em; padding-left: .5em; font-weight: 700; color: var(--body); }
   .roster-head p { margin: 2px 0 0; font-family: var(--latin); font-size: 13px; letter-spacing: .4em; color: var(--accent); }
   .roster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-  /* 席次一覽：像婚宴的座位卡——TABLE、大號桌號、細線菱形、桌名，名單置中往下排 */
+  /* 席次一覽：像婚宴的座位卡——TABLE、大號桌號、桌名，細線菱形隔開，名單置中往下排 */
   .card { position: relative; border: 1px solid var(--line); padding: 16px 12px 16px; cursor: pointer; background: #fff; width: 100%;
     display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; }   /* <button> 預設垂直置中，改成置頂 */
   .card:hover { border-color: var(--accent); }
   .card .eyebrow { font-family: var(--latin); font-size: 11px; letter-spacing: .4em; padding-left: .4em; color: var(--accent); }
   .card .n { font-family: var(--latin); font-size: 40px; font-weight: 600; line-height: 1; color: var(--body); margin-top: 2px; font-variant-numeric: lining-nums; }
-  .card .mini-rule { display: flex; align-items: center; gap: 6px; width: 64px; margin: 10px 0 8px; color: var(--accent); }
+  .card .mini-rule { display: flex; align-items: center; gap: 6px; width: 64px; margin: 12px 0 10px; color: var(--accent); }
   .card .mini-rule::before, .card .mini-rule::after { content: ""; flex: 1; height: 1px; background: currentColor; opacity: .7; }
   .card .mini-rule i { width: 5px; height: 5px; background: currentColor; transform: rotate(45deg); }
-  .card .tname { font-size: 14px; letter-spacing: .12em; color: var(--accent); margin: 0 0 8px; }
+  .card .tname { font-size: 15px; font-weight: 600; letter-spacing: .25em; padding-left: .25em; color: var(--body); margin: 8px 0 0; }
   .card .who { font-size: 15px; color: var(--body); line-height: 1.9; }
   .card .who.none { color: #c2b39c; font-size: 14px; }
   /* 姓名｜人數 兩欄對齊 */
   .party-grid { display: grid; grid-template-columns: auto auto; justify-content: center; align-items: baseline; column-gap: 12px; text-align: left; }
   .party-grid .ct { text-align: right; color: var(--muted); font-size: .85em; white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; }
   .party-grid .kid-n { font-style: normal; display: block; font-size: .9em; line-height: 1.2; }
-  .names-grid { justify-content: stretch; grid-template-columns: 1fr auto; column-gap: 14px; margin-top: 4px; }   /* 一列一組，長名字也不會擠 */
-  .names-grid .nm, .names-grid .ct { padding: 7px 0; border-bottom: 1px dotted var(--line); font-size: 16px; }
-  .names-grid .ct { font-size: 14px; }
+  .names-grid { justify-content: stretch; grid-template-columns: 1fr auto; column-gap: 0; align-items: stretch; margin-top: 4px; }   /* 一列一組，長名字也不會擠 */
+  /* 底線整列接續不斷開：兩格等高、文字貼底，人數格用左內距代替欄距 */
+  .names-grid .nm, .names-grid .ct { display: flex; align-items: flex-end; padding: 7px 0; border-bottom: 1px dotted var(--line); font-size: 16px; line-height: 1.5; }
+  .names-grid .ct { justify-content: flex-end; flex-wrap: wrap; padding-left: 14px; font-size: 14px; line-height: 1.7; }
+  .names-grid .ct .kid-n { flex-basis: 100%; text-align: right; }
   /* 座位條 */
   .card .meter { display: flex; gap: 4px; margin-top: auto; padding-top: 12px; }
   .meter i { width: 6px; height: 6px; border-radius: 50%; border: 1px solid var(--accent); }
@@ -324,7 +328,7 @@
   .p-list .card .eyebrow, .p-list .card .mini-rule { display: none; }
   .p-list .card .n { grid-column: 1; line-height: 1.15; margin: 0; }
   /* 桌號與桌名同一行、同字級、同字體、基線對齊；字級依整行字寬放到最大（上限 5.6mm），不折行 */
-  .p-list .card .tname { grid-column: 2; margin: 0; letter-spacing: 0; line-height: 1.15; white-space: nowrap; overflow: hidden; color: var(--body); }
+  .p-list .card .tname { grid-column: 2; margin: 0; letter-spacing: 0; padding-left: 0; line-height: 1.15; white-space: nowrap; overflow: hidden; color: var(--body); }
   .p-list .card .n, .p-list .card .tname { font-family: var(--serif); font-size: min(calc(5.6mm * var(--k)), calc(33mm * var(--k) / var(--hw, 6))); }
   .p-list .card .n { font-weight: 700; font-variant-numeric: lining-nums; }
   .p-list .card .tname { font-weight: 500; }
@@ -770,7 +774,9 @@ const $ = (id) => document.getElementById(id);
 const seatsOf = (d) => d.guests.reduce((n, g) => n + (g.name ? g.count : 0), 0);
 // 顯示用：代表人姓名，多人時後面加「3 位」
 // 名單排成兩欄：姓名（靠左）｜人數（靠右），整塊置中，每一行就會對齊
-const partyCells = (g) => `<span class="nm">${esc(g.name)}</span><span class="ct">${g.count > 1 ? `${g.count} 位` : ""}${g.child && mode === "staff" ? `<em class="kid-n">童椅 ${g.child}</em>` : ""}</span>`;
+// 兩個中文字的姓名（伍氏、志昆）中間補一個全形空格，和三個字的名字一樣寬、看起來整齊；只影響顯示，不改存檔
+const showName = (n) => /^[\u3400-\u9fff\uf900-\ufaff]{2}$/.test(n) ? n[0] + "\u3000" + n[1] : n;
+const partyCells = (g, all) => `<span class="nm">${esc(showName(g.name))}</span><span class="ct">${g.count > 1 || all ? `${g.count} 位` : ""}${g.child && mode === "staff" ? `<em class="kid-n">童椅 ${g.child}</em>` : ""}</span>`;
 // 座位條：10 個小點代表 10 個座位，已入座的塗滿，超過的標紅（工作人員才看得到）
 const meterHTML = (d) => { const used = seatsOf(d), n = Math.max(d.cap, used);
   return `<span class="meter" title="${used} / ${d.cap} 位" aria-label="${used} / ${d.cap} 位">` +
@@ -834,14 +840,15 @@ function renderDetail() {
   $("detail").hidden = mode === "staff" || !selected;
   if (!selected) return;
   const d = state.tables[selected];
-  // 和席次一覽的座位卡同一套：TABLE、大號桌號、細線菱形、桌名，名單兩欄
+  // 和席次一覽的座位卡同一套：TABLE、大號桌號、桌名，細線菱形隔開名單
   $("detail-body").innerHTML = `<div class="place">
       <span class="eyebrow">${d.num === "主桌" ? "HEAD TABLE" : "TABLE"}</span>
       <span class="n">${esc(d.num === "主桌" ? "主桌" : d.num)}</span>
-      <span class="mini-rule"><i></i></span>
       ${d.name ? `<div class="tname">${esc(d.name)}</div>` : ""}
+      <span class="mini-rule"><i></i></span>
     </div>
-    ${d.guests.length ? `<div class="party-grid names-grid">${d.guests.map(partyCells).join("")}</div>` : `<p class="hint" style="text-align:center">這桌還沒有安排賓客。</p>`}`;
+    ${d.num === "主桌" ? `<p class="reserved">新人與主婚人席<em>Reserved</em></p>`   // 主桌不公布名單
+      : d.guests.length ? `<div class="party-grid names-grid">${d.guests.map(g => partyCells(g, true)).join("")}</div>` : `<p class="hint" style="text-align:center">這桌還沒有安排賓客。</p>`}`;
 }
 
 // 編輯區塊：工作人員點了桌子才出現；桌號依平面圖固定，不能手動改
@@ -882,9 +889,9 @@ function renderRoster() {
     const hw = [...d.num].length * 0.62 + (d.name ? 0.5 + nameWidth(d.name) : 0);
     return `<button class="card${d.guests.length > 7 ? " many" : ""}" style="--hw:${hw.toFixed(2)}" data-id="${id}" aria-label="${esc(label(d))}${d.name ? "・" + esc(d.name) : ""}">
       <span class="eyebrow">TABLE</span><span class="n">${esc(d.num)}</span>
-      <span class="mini-rule"><i></i></span>
       ${d.name ? `<div class="tname">${esc(d.name)}</div>` : ""}
-      ${d.guests.length ? `<div class="who party-grid">${d.guests.map(partyCells).join("")}</div>` : `<div class="who none">尚未安排</div>`}
+      <span class="mini-rule"><i></i></span>
+      ${d.guests.length ? `<div class="who party-grid">${d.guests.map(g => partyCells(g)).join("")}</div>` : `<div class="who none">尚未安排</div>`}
       ${meterHTML(d)}</button>`;
   }).join("");
 }
@@ -902,7 +909,7 @@ function renderSearch() {
   $("search-hint").textContent = hits.length ? `找到 ${hits.length} 筆，金色的桌子就是座位。` : "找不到，試試只輸入名字的一部分。";
   const where = (id) => { const d = state.tables[id]; return label(d) + (d.name ? `・${d.name}` : ""); };
   list.innerHTML = hits.slice(0, 30).map(([n, id, isTable]) =>
-    `<li><button data-id="${id}"><span>${esc(n)}${isTable ? ` <small class="muted">（桌名）</small>` : ""}</span><b>${esc(isTable ? label(state.tables[id]) : where(id))}</b></button></li>`).join("");
+    `<li><button data-id="${id}"><span>${esc(isTable ? n : showName(n))}${isTable ? ` <small class="muted">（桌名）</small>` : ""}</span><b>${esc(isTable ? label(state.tables[id]) : where(id))}</b></button></li>`).join("");
 }
 
 // 已入座的人（依代表人姓名比對）
