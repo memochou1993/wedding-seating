@@ -25,7 +25,7 @@
     --muted: #8c7a68;
     --accent: #a8875a;      /* 香檳金：框線、花飾 */
     --accent-soft: #efe5d3;
-    --card: #fcf8f1;        /* 桌卡底色：介於紙色與香檳金之間的淡香檳 */
+    --card: #fdfaf5;        /* 桌卡底色：非常淡的香檳色 */
     --line: #dccdb4;
     --parents: #e7edf1;     /* 主婚人親友桌底色 */
     --parents-ink: #4d6576;
@@ -447,7 +447,7 @@
   .p-list .card .meter { display: none; }
   /* 最後一格：「查找座位」在上、QR code 在下，整組在卡片裡上下置中 */
   /* 卡片框線用 mm：印在 A2 上約 0.4mm，遠看也清楚（1px 只有 0.26mm） */
-  .p-list .card, .p-list .note { border-width: calc(.4mm * var(--k)); }
+  .p-list .card, .p-list .note { border-width: calc(.4mm * var(--k)); border-radius: calc(1.5mm * var(--k)); }   /* 小圓角 */
   .p-list .note { border: calc(.4mm * var(--k)) solid var(--line); background: var(--card); padding: calc(2.6mm * var(--k)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(1.5mm * var(--k)); font-size: calc(3mm * var(--k)); color: var(--muted); text-align: center; }
   .p-list .note .qr { flex: 0 1 auto; height: 72%; min-height: 0; max-width: 100%; aspect-ratio: 1; color: var(--body); }   /* QR 只佔自己的正方形，和標題一組上下置中 */
   .p-list .note b { color: var(--body); font-weight: 400; font-size: var(--name-fs, 1.05em); letter-spacing: .1em; text-indent: .1em; line-height: 1.3; }
