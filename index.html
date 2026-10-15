@@ -121,13 +121,12 @@
   .tbl .chair.over { fill: var(--warn); stroke: var(--warn); }
   .tbl .chair.kid { fill: var(--kid); stroke: none; }
   body[data-mode="staff"] .tbl .chair.kid { cursor: grab; }
-  .tbl .num { font-size: 26px; font-weight: 700; text-anchor: middle; dominant-baseline: central; fill: var(--body); }
-  .tbl .num.long { font-size: 16px; }
+  .tbl .num { font-size: 21px; font-weight: 700; text-anchor: middle; dominant-baseline: central; fill: var(--body); }
+  .tbl .num.long { font-size: 15px; }   /* 有沒有桌名，桌號都同樣大 */
   .tbl .num.empty { fill: #c9b99f; font-weight: 500; }
   .tbl .num.with-name { font-size: 21px; }
   .tbl .num.with-name.long { font-size: 15px; }
   .tbl .tn { font-size: 9px; font-weight: 500; letter-spacing: 0; text-anchor: middle; dominant-baseline: central; fill: var(--body); pointer-events: none; }
-  .tbl.match .tn { fill: #fff; }
   /* 選取／聚焦：桌子後方一圈淡淡的香檳金光暈 */
   .tbl circle.hit { fill: transparent; }   /* 放大觸控範圍，手機上比較好點 */
   .tbl circle.glow { fill: var(--accent); opacity: 0; transition: opacity .2s; }
@@ -135,8 +134,8 @@
   .tbl:focus-visible circle.glow, .tbl.selected circle.glow { opacity: .2; }
   .tbl.selected circle.disc { stroke-width: 2; }
   .tbl:focus { outline: none; }
-  .tbl.match circle.disc { fill: var(--accent); stroke: var(--accent); }
-  .tbl.match .num { fill: #fff; }
+  /* 找到的桌子：淡香檳底、加粗金框，字維持深色（不用整片實心金色，太重） */
+  .tbl.match circle.disc { fill: #f1e1c2; stroke: var(--accent); stroke-width: 3.2; }
   .tbl.match circle.halo { opacity: 1; animation: ping 1.6s ease-out infinite; transform-box: fill-box; transform-origin: center; }
   .tbl.dup .num { fill: var(--warn); }
   /* 拖曳交換整桌（工作人員） */
@@ -912,7 +911,7 @@ function renderPlan() {
     const up = lines.length ? (lines.length > 1 ? 10 : 8) * R / 30 : 0;
     num.setAttribute("y", t.y - 3 * k - up);
     num.classList.toggle("with-name", lines.length > 0);
-    num.style.fontSize = bare ? ((d.num.length > 2 ? (lines.length ? 15 : 16) : (lines.length ? 21 : 26)) * k).toFixed(1) + "px" : "";
+    num.style.fontSize = bare ? ((d.num.length > 2 ? 15 : 21) * k).toFixed(1) + "px" : "";
     // 字級依這一行的字寬自動調整：短桌名字大一點，6 個字時剛好塞進桌面
     tn.innerHTML = lines.map((l, i) => `<tspan x="${t.x}" y="${(t.y + (lines.length > 1 ? 4 + i * 10 : 8.5) * R / 30).toFixed(1)}" font-size="${(Math.min(10, 49 / nameWidth(l)) * k).toFixed(2)}">${esc(l)}</tspan>`).join("");
     const used = seatsOf(d);
