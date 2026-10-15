@@ -280,6 +280,7 @@
   .card .tname { font-size: 15px; font-weight: 600; letter-spacing: .25em; padding-left: .25em; color: var(--body); margin: 8px 0 0; }
   .card .who { font-size: 15px; color: var(--body); line-height: 1.9; }
   .card .who.none { color: #c2b39c; font-size: 14px; }
+  .card .who.none.rsv { font-family: var(--latin); font-style: italic; font-size: 16px; letter-spacing: .06em; color: var(--accent); }   /* 賓客版、輸出版的空桌 */
   /* 姓名｜人數 兩欄對齊 */
   .party-grid { display: grid; grid-template-columns: auto auto; justify-content: center; align-items: baseline; column-gap: 12px; text-align: left; }
   .party-grid .ct { text-align: right; color: var(--muted); font-size: .85em; white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; }
@@ -355,6 +356,7 @@
   .p-list .p-names.solo { grid-template-columns: 1fr; justify-content: stretch; }
   .p-list .p-names .grp small { margin-left: .5em; font-size: .8em; color: var(--muted); white-space: nowrap; }
   .p-list .card .who.none { font-size: calc(2.8mm * var(--k)); text-align: center; }
+  .p-list .card .who.none.rsv { font-size: calc(4mm * var(--k)); }
   .p-list .card .meter { display: none; }
   /* 最後一格：上方「手機找座位」，下方 QR code 填滿剩下的高度 */
   .p-list .note { border: 1px solid var(--line); background: var(--card); padding: calc(2.6mm * var(--k)); display: flex; flex-direction: column; align-items: center; gap: calc(1mm * var(--k)); font-size: calc(3mm * var(--k)); color: var(--muted); text-align: center; }
@@ -865,7 +867,7 @@ function renderDetail() {
       <span class="mini-rule"><i></i></span>
     </div>
     ${d.num === "主桌" ? `<p class="reserved">新人與主婚人席<em>Reserved</em></p>`   // 主桌不公布名單
-      : d.guests.length ? `<div class="party-grid names-grid">${d.guests.map(g => partyCells(g, true)).join("")}</div>` : `<p class="hint" style="text-align:center">這桌還沒有安排賓客。</p>`}`;
+      : d.guests.length ? `<div class="party-grid names-grid">${d.guests.map(g => partyCells(g, true)).join("")}</div>` : `<p class="reserved"><em>Reserved</em></p>`}`;   // 賓客看到空桌：寫 Reserved，不寫「還沒安排」
 }
 
 // 編輯區塊：工作人員點了桌子才出現；桌號依平面圖固定，不能手動改
@@ -908,7 +910,7 @@ function renderRoster() {
       <span class="eyebrow">TABLE</span><span class="n">${esc(d.num)}</span>
       ${d.name ? `<div class="tname">${esc(d.name)}</div>` : ""}
       <span class="mini-rule"><i></i></span>
-      ${d.guests.length ? `<div class="who party-grid">${d.guests.map(g => partyCells(g)).join("")}</div>` : `<div class="who none">尚未安排</div>`}
+      ${d.guests.length ? `<div class="who party-grid">${d.guests.map(g => partyCells(g)).join("")}</div>` : (mode === "staff" ? `<div class="who none">尚未安排</div>` : `<div class="who none rsv">Reserved</div>`)}
       ${meterHTML(d)}</button>`;
   }).join("");
 }
