@@ -131,7 +131,9 @@
   .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; margin-top: 22px; font-size: 13px; color: var(--muted); }
 
   /* 找座位列：捲動時固定在畫面頂端 */
-  .bar { position: sticky; top: 0; z-index: 10; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 8px 24px rgba(78,58,42,.08); padding: 12px 16px; display: grid; gap: 6px; }
+  /* 找座位列：外面包一層和頁面同色的底（上下各留一點空），固定在頂端時後面的內容不會從縫隙透出來 */
+  .bar-dock { position: sticky; top: 0; z-index: 10; background: var(--ground); padding: 10px 0; margin: -10px 0; }
+  .bar { position: relative; background: var(--paper); border: 1px solid var(--line); padding: 12px 16px; display: grid; gap: 6px; }
   .bar-row { display: flex; align-items: center; gap: 12px; }
   .bar-label { font-size: 13px; font-weight: 500; letter-spacing: .3em; color: var(--accent); white-space: nowrap; }
   .bar input { flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); background: #fff; font-size: 16px; }
@@ -361,6 +363,7 @@
     <div class="rule"><span></span></div>
   </header>
 
+  <div class="bar-dock">
   <section class="bar" aria-label="找座位">
     <div class="bar-row">
       <label class="bar-label" for="q">找座位</label>
@@ -370,6 +373,7 @@
     <p class="hint" id="search-hint"></p>
     <p class="status staff-only"><span id="s-stats"></span><span class="saved" id="saved">連線中…</span><a id="guest-link" target="_blank">賓客畫面 ↗</a></p>
   </section>
+  </div>
 
   <section class="plan-card framed">
     <svg class="plan" id="plan" viewBox="80 78 752 1232" role="group" aria-label="宴會廳平面圖"></svg>
