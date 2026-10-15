@@ -328,7 +328,8 @@
   body.board-mode .bar { position: fixed; top: 0; left: 0; right: 0; z-index: 15; display: flex; align-items: center; gap: 8px 20px; padding: 8px 20px; }
   body.board-mode .bar-row { flex: 0 0 380px; }
   body.board-mode .bar .hint { display: none; }
-  body.board-mode .status { flex: 1; font-size: 13px; }
+  body.board-mode .status { flex: 1; font-size: 13px; margin: 0; }
+  .plan-card .status { margin: 0 0 14px; }
   /* 編輯面板靠右，平面圖保持看得到 */
   body.board-mode dialog.sheet { inset: auto 24px 24px auto; transform: none; height: calc(100vh - 110px); max-height: none; width: 480px; }
   body.board-mode dialog.sheet::backdrop { background: rgba(43,37,34,.12); }
@@ -419,11 +420,12 @@
     </div>
     <ul class="results" id="results"></ul>
     <p class="hint" id="search-hint"></p>
-    <p class="status staff-only"><span id="s-stats"></span><span class="saved" id="saved">連線中…</span><a id="guest-link" target="_blank">賓客畫面 ↗</a><a id="poster-link" target="_blank">A1 輸出版 ↗</a></p>
   </section>
   </div>
 
   <div class="plan-card">
+    <!-- 工作人員：排桌統計與同步狀態放在平面圖上方 -->
+    <p class="status staff-only" id="status"><span id="s-stats"></span><span class="saved" id="saved">連線中…</span><a id="guest-link" target="_blank">賓客畫面 ↗</a><a id="poster-link" target="_blank">A1 輸出版 ↗</a></p>
     <svg class="plan" id="plan" viewBox="87 103.8 748 1202.2" role="group" aria-label="宴會廳平面圖"></svg>
     <div class="legend">
       <span class="side-tag" data-side="主婚人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>主婚人親友</span>
@@ -1231,6 +1233,7 @@ function setupPoster() {
   const bar = document.querySelector(".bar");
   if (BOARD) {
     document.body.prepend(bar);                                  // 找座位與同步狀態留在最上方
+    bar.append($("status"));                                     // 統計與同步狀態原本在平面圖上方，桌機編輯畫面改放進頂端列
     document.body.append($("editor"), $("toast"), $("detail"));  // 對話框也移出被藏起來的 .wrap
   }
   // 列印：取消螢幕預覽的縮放，舞台高度也要還原，否則只印得出縮小後那一截
