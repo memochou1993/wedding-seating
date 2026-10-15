@@ -276,9 +276,16 @@
   .seg button[aria-pressed="true"][data-v="主婚人親友"] { background: var(--parents-ink); }
   .seg button[aria-pressed="true"][data-v="新人親友"] { background: var(--couple-ink); }
   .guest-list { list-style: none; margin: 0; padding: 0; counter-reset: g; border-top: 1px solid var(--line); }
-  .guest-list li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); counter-increment: g; }   /* 每列上下留一點呼吸空間 */
-  .guest-list li::before { content: counter(g); width: 1.6em; text-align: right; font-family: var(--serif); font-variant-numeric: lining-nums tabular-nums; color: var(--muted); font-size: 15px; }   /* 英文襯線字的數字是舊式（小寫高度），太小；改用中文字型的等高數字 */
-  .guest-list li.over::before { color: var(--warn); }
+  .guest-list li { display: flex; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid var(--line); counter-increment: g; }   /* 每列上下留一點呼吸空間 */
+  /* 編號兼拖曳把手：按住 ⠿ 或編號上下拖，可以調整順序。編號用 CSS 計數，拖的時候即時跟著變 */
+  .guest-list .grip { flex: none; width: 28px; display: flex; align-items: center; justify-content: flex-end; gap: 3px; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+    font-family: var(--serif); font-size: 15px; font-variant-numeric: lining-nums tabular-nums; color: var(--muted); align-self: stretch; }
+  .guest-list .grip::before { content: "⠿"; font-size: 11px; color: var(--line); }
+  .guest-list .grip::after { content: counter(g); }
+  .guest-list .grip:hover::before { color: var(--accent); }
+  .guest-list li.over .grip::after { color: var(--warn); }
+  .guest-list li.dragging { background: var(--accent-soft); box-shadow: 0 4px 14px rgba(78,58,42,.15); position: relative; z-index: 1; }
+  body.reordering, body.reordering * { cursor: grabbing !important; user-select: none; }
   .guest-list input { flex: 1; min-width: 0; border: 0; background: transparent; padding: 10px 4px; font-size: 16px; color: var(--body); }
   .guest-list input:focus { outline: none; background: var(--accent-soft); }
   /* 姓名可以直接修改：和新增列一樣用有框的輸入框，看得出可編輯 */
@@ -294,11 +301,11 @@
   .g-count.kid.on input { border-color: var(--kid); color: var(--kid-ink); font-weight: 600; }
   .kid-n { margin-left: 6px; font-size: .8em; color: var(--kid-ink); }
   .party-n { margin-left: 6px; font-size: .8em; color: var(--muted); font-variant-numeric: lining-nums; }
-  .guest-list .del { width: 44px; height: 44px; border: 0; background: transparent; color: var(--muted); font-size: 20px; cursor: pointer; flex: none; }
+  .guest-list .del { width: 32px; height: 44px; border: 0; background: transparent; color: var(--muted); font-size: 20px; cursor: pointer; flex: none; }
   .guest-list:empty { display: none; }
   /* 新增列和名單對齊：左邊讓出編號欄（1.6em × 15px＋間距），人數、兒童椅在同一欄，加入鈕和 × 同寬 */
-  .add { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-left: calc(24px + 8px); }
-  .add .btn.solid { flex: none; width: 44px; padding: 0; font-size: 14px; min-height: 44px; }
+  .add { display: flex; align-items: center; gap: 6px; margin-top: 10px; padding-left: calc(28px + 6px); }
+  .add .btn.solid { flex: none; width: 40px; padding: 0; font-size: 14px; min-height: 44px; }
   .add input { flex: 1; min-width: 0; padding: 10px 8px; border: 1px solid var(--line); background: #fff; font-size: 16px; }
   .add input:focus { border-color: var(--accent); outline: none; }
   .nav { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; }
@@ -998,6 +1005,7 @@ function renderEditor() {
     const before = []; d.guests.reduce((n, g, i) => (before[i] = n, n + g.count), 0);   // 這組之前已坐了幾位
     $("f-list").innerHTML = d.guests.map((p, i) =>
       `<li class="${before[i] + p.count > d.cap ? "over" : ""}">` +
+      `<span class="grip" data-i="${i}" title="拖曳調整順序" aria-hidden="true"></span>` +
       `<input class="g-name" value="${esc(p.name)}" data-i="${i}" aria-label="第 ${i + 1} 組代表人">` +
       `<label class="g-count"><input type="number" inputmode="numeric" min="1" max="20" value="${p.count}" data-i="${i}" data-f="count" aria-label="${esc(p.name)} 這組共幾位">位</label>` +
       `<label class="g-count kid${p.child ? " on" : ""}" title="兒童座椅"><input type="number" inputmode="numeric" min="0" max="10" value="${p.child || 0}" data-i="${i}" data-f="child" aria-label="${esc(p.name)} 兒童座椅幾張">兒童椅</label>` +
@@ -1104,7 +1112,7 @@ function swipeToClose(sheet, close) {
   const setY = (y) => sheet.style.transform = y ? `translateX(-50%) translateY(${y}px)` : "";
   // 用 touch 事件：第一下移動就要決定是不是在拖面板，並立刻擋下捲動（等瀏覽器開始捲動就來不及了）
   sheet.addEventListener("touchstart", (e) => {
-    if (e.touches.length > 1 || innerWidth >= 600 || e.target.closest("input, textarea, select, .combo-pop")) { start = null; return; }
+    if (e.touches.length > 1 || innerWidth >= 600 || e.target.closest("input, textarea, select, .combo-pop, .grip")) { start = null; return; }
     const p = e.touches[0];
     start = { y: p.clientY, x: p.clientX, t: e.timeStamp, dy: 0, v: 0, on: null };
   }, { passive: true });
@@ -1197,6 +1205,33 @@ $("f-list").addEventListener("pointerdown", (e) => {
   removeGuest(+b.dataset.i);
 });
 $("f-list").addEventListener("click", (e) => { const b = e.target.closest(".del"); if (b && e.detail === 0) removeGuest(+b.dataset.i); });   // 鍵盤按 Enter／空白鍵
+// 拖曳調整賓客順序：按住把手上下拖，放開時寫回名單
+let reorder = null;
+$("f-list").addEventListener("pointerdown", (e) => {
+  const g = e.target.closest(".grip"); if (!g || e.button > 0) return;
+  e.preventDefault();
+  const i = +g.dataset.i;
+  if ($("f-list").contains(document.activeElement)) document.activeElement.blur();   // 先結束正在編輯的欄位（可能會重畫名單）
+  const li = $("f-list").children[i]; if (!li) return;
+  li.classList.add("dragging"); document.body.classList.add("reordering");
+  reorder = { from: i, li };
+});
+addEventListener("pointermove", (e) => {
+  if (!reorder) return;
+  const list = $("f-list"), others = [...list.children].filter(x => x !== reorder.li);
+  const next = others.find(x => { const r = x.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; });
+  if (next !== reorder.li.nextElementSibling) list.insertBefore(reorder.li, next || null);
+});
+const endReorder = (commit) => {
+  if (!reorder) return;
+  const { from, li } = reorder; reorder = null;
+  li.classList.remove("dragging"); document.body.classList.remove("reordering");
+  const to = [...$("f-list").children].indexOf(li);
+  if (commit && to >= 0 && to !== from) edit(d => { const [g] = d.guests.splice(from, 1); d.guests.splice(to, 0, g); });
+  renderEditor();
+};
+addEventListener("pointerup", () => endReorder(true));
+addEventListener("pointercancel", () => endReorder(false));
 function removeGuest(i) { edit(d => d.guests.splice(i, 1)); renderEditor(); }
 function refreshCount() { const d = state.tables[selected], n = seatsOf(d); $("f-count").textContent = `${n} / ${d.cap} 人`; $("f-count").classList.toggle("over", n > d.cap); }
 function addNames(text) {
