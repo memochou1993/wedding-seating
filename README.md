@@ -1,6 +1,6 @@
 # wedding-seating
 
-115.10.25 林府文定午宴（聖雅典｜威尼斯 40+2 桌）的席次表網頁。
+115.10.25 林府文定午宴（聖雅典・威尼斯 40+2 桌）的席次表網頁。
 風格與花框沿用 `../wedding-signs` 的告示牌。
 
 - 賓客版：https://memochou1993.github.io/wedding-seating/
