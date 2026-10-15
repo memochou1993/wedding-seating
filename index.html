@@ -301,11 +301,11 @@
   .poster {
     --k: calc(var(--ph) / 420mm);   /* 相對 A2 的倍率 */
     width: var(--pw); height: var(--ph); box-sizing: border-box; background: var(--paper);
-    padding: calc(30mm * var(--k)) calc(28mm * var(--k)) calc(26mm * var(--k)); display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;
+    padding: calc(34mm * var(--k)) calc(30mm * var(--k)) calc(28mm * var(--k)) calc(36mm * var(--k)); display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;
     column-gap: calc(14mm * var(--k)); row-gap: calc(5mm * var(--k)); box-shadow: none;
   }
   .poster > .frame-art { inset: calc(8mm * var(--k)); width: calc(100% - 16mm * var(--k)); height: calc(100% - 16mm * var(--k)); }
-  .p-plan { grid-row: 1 / 3; height: calc(var(--ph) - 56mm * var(--k)); aspect-ratio: 752 / 1232; }
+  .p-plan { grid-row: 1 / 3; height: calc(var(--ph) - 62mm * var(--k)); aspect-ratio: 752 / 1232; }
   .p-plan svg.plan { width: 100%; height: 100%; }
   .p-head { text-align: center; padding-top: calc(2mm * var(--k)); }
   .p-kicker { font-size: calc(5mm * var(--k)); letter-spacing: .6em; color: var(--accent); }
@@ -442,7 +442,7 @@
   </section>
 
   <!-- 輸出版（?poster，預設 A2 橫式）：左邊平面圖、右邊 7×6 席次表；用瀏覽器列印或 tools/poster.sh 存成 PDF -->
-  <section class="poster framed" id="poster" data-frame-scale="2.4" hidden>
+  <section class="poster framed" id="poster" data-frame-scale="1.8" hidden>
     <div class="p-plan" id="p-plan"></div>
     <header class="p-head">
       <div class="p-kicker">席 次 表<span>SEATING CHART</span></div>
