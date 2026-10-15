@@ -407,11 +407,11 @@
   .p-list .card .who.none { font-size: calc(2.8mm * var(--k)); text-align: center; }
   .p-list .card .who.none.rsv { font-size: calc(4mm * var(--k)); }
   .p-list .card .meter { display: none; }
-  /* 最後一格：上方「手機找座位」，下方 QR code 填滿剩下的高度 */
+  /* 最後一格：「手機找座位」在上、QR code 在下，整組在卡片裡上下置中 */
   /* 卡片框線用 mm：印在 A2 上約 0.4mm，遠看也清楚（1px 只有 0.26mm） */
   .p-list .card, .p-list .note { border-width: calc(.4mm * var(--k)); }
-  .p-list .note { border: calc(.4mm * var(--k)) solid var(--line); background: var(--card); padding: calc(2.6mm * var(--k)); display: flex; flex-direction: column; align-items: center; gap: calc(1mm * var(--k)); font-size: calc(3mm * var(--k)); color: var(--muted); text-align: center; }
-  .p-list .note .qr { flex: 1 1 0; min-height: 0; width: 100%; color: var(--body); }
+  .p-list .note { border: calc(.4mm * var(--k)) solid var(--line); background: var(--card); padding: calc(2.6mm * var(--k)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(1.5mm * var(--k)); font-size: calc(3mm * var(--k)); color: var(--muted); text-align: center; }
+  .p-list .note .qr { flex: 0 1 auto; height: 72%; min-height: 0; max-width: 100%; aspect-ratio: 1; color: var(--body); }   /* QR 只佔自己的正方形，和標題一組上下置中 */
   .p-list .note b { color: var(--body); font-weight: 500; font-size: 1.05em; letter-spacing: .1em; }
 
   @media print {
