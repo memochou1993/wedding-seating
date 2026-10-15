@@ -91,7 +91,7 @@
   .tbl .num.empty { fill: #c9b99f; font-weight: 500; }
   .tbl .num.with-name { font-size: 21px; }
   .tbl .num.with-name.long { font-size: 15px; }
-  .tbl .tn { font-size: 9px; font-weight: 500; letter-spacing: 0; text-anchor: middle; dominant-baseline: central; fill: var(--accent); pointer-events: none; }
+  .tbl .tn { font-size: 9px; font-weight: 500; letter-spacing: 0; text-anchor: middle; dominant-baseline: central; fill: var(--body); pointer-events: none; }
   .tbl.match .tn { fill: #fff; }
   /* 選取／聚焦：桌子後方一圈淡淡的香檳金光暈 */
   .tbl circle.hit { fill: transparent; }   /* 放大觸控範圍，手機上比較好點 */
@@ -126,6 +126,7 @@
   .side-tag svg { flex: none; width: 14px; height: 14px; }
   .side-tag circle { fill: var(--paper); stroke: var(--accent); stroke-width: 1.1; }
   .side-tag .kid-icon { fill: var(--kid); }
+  body[data-mode="guest"] .kid-tag, body.poster-mode:not(.board-mode) .kid-tag { display: none; }   /* 賓客版、輸出版不畫椅子，也就沒有兒童座椅圖例 */
   .side-tag[data-side="主婚人親友"] circle { fill: var(--parents); }
   .side-tag[data-side="新人親友"] circle { fill: var(--couple); }
   .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; margin-top: 22px; font-size: 13px; color: var(--muted); }
@@ -384,7 +385,7 @@
       <span class="side-tag" data-side="主婚人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>主婚人親友</span>
       <span class="side-tag" data-side="新人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>新人親友</span>
       <span class="side-tag staff-only" data-side=""><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>未設定</span>
-      <span class="side-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><rect class="kid-icon" x="2.5" y="2.5" width="9" height="9" rx="1.2"/></svg>兒童座椅</span>
+      <span class="side-tag kid-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><rect class="kid-icon" x="2.5" y="2.5" width="9" height="9" rx="1.2"/></svg>兒童座椅</span>
     </div>
   </section>
 
@@ -790,23 +791,27 @@ function renderPlan() {
     const d = state.tables[g.dataset.id];
     const num = g.querySelector(".num"), tn = g.querySelector(".tn");
     const t = TABLES.find(x => x.id === g.dataset.id);
+    // 賓客版、輸出版不畫椅子，桌面放大到原本連椅子的範圍；字跟著桌面等比放大
+    const bare = mode !== "staff" || !!POSTER, R = bare ? t.seat - 2 : t.r, k = R / t.r;
+    g.querySelector(".disc").setAttribute("r", R);
     num.textContent = d.num || (mode === "staff" ? "＋" : "");
     num.classList.toggle("empty", !d.num);
     num.classList.toggle("long", d.num.length > 2);
     // 桌名寫在桌號下方；太長就分兩行（先在空白處斷，否則每行最多 5 字），第二行再長就用「…」
     const lines = tableNameLines(d.name);
-    const up = lines.length ? (lines.length > 1 ? 10 : 8) * t.r / 30 : 0;
-    num.setAttribute("y", t.y - 3 - up);
+    const up = lines.length ? (lines.length > 1 ? 10 : 8) * R / 30 : 0;
+    num.setAttribute("y", t.y - 3 * k - up);
     num.classList.toggle("with-name", lines.length > 0);
+    num.style.fontSize = bare ? ((d.num.length > 2 ? (lines.length ? 15 : 16) : (lines.length ? 21 : 26)) * k).toFixed(1) + "px" : "";
     // 字級依這一行的字寬自動調整：短桌名字大一點，6 個字時剛好塞進桌面
-    tn.innerHTML = lines.map((l, i) => `<tspan x="${t.x}" y="${(t.y + (lines.length > 1 ? 4 + i * 10 : 8.5) * t.r / 30).toFixed(1)}" font-size="${Math.min(10, 49 / nameWidth(l)).toFixed(2)}">${esc(l)}</tspan>`).join("");
+    tn.innerHTML = lines.map((l, i) => `<tspan x="${t.x}" y="${(t.y + (lines.length > 1 ? 4 + i * 10 : 8.5) * R / 30).toFixed(1)}" font-size="${(Math.min(10, 49 / nameWidth(l)) * k).toFixed(2)}">${esc(l)}</tspan>`).join("");
     const used = seatsOf(d);
     // 椅子：依人數上限擺一圈，已排入的賓客塗滿；兒童座椅畫成方塊，放在離走道最遠的那一側
     const n = Math.max(d.cap, used), cr = t.r + 3.2;   // 椅子緊貼桌緣一圈
     const angle = (k) => slotAngle(k, n);
     const kidSeats = kidSlots(t, d);
     let filled = kidSeats.size;   // 兒童也算入座人數
-    g.querySelector(".chairs").innerHTML = Array.from({ length: n }, (_, k) => {
+    g.querySelector(".chairs").innerHTML = bare ? "" : Array.from({ length: n }, (_, k) => {
       const a = angle(k), cx = (t.x + cr * Math.cos(a)).toFixed(1), cy = (t.y + cr * Math.sin(a)).toFixed(1);
       if (kidSeats.has(k)) {
         // 方塊的一條邊貼著桌緣（邊朝桌心），跟著座位角度轉
@@ -1200,7 +1205,7 @@ function renderPosterList() {
   $("p-list").innerHTML = $("roster").innerHTML + `<div class="note">
     <span class="side-tag" data-side="主婚人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>主婚人親友</span>
     <span class="side-tag" data-side="新人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>新人親友</span>
-    <span class="side-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><rect class="kid-icon" x="2.5" y="2.5" width="9" height="9" rx="1.2"/></svg>兒童座椅</span>
+    <span class="side-tag kid-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><rect class="kid-icon" x="2.5" y="2.5" width="9" height="9" rx="1.2"/></svg>兒童座椅</span>
     <span><b>手機找座位</b><br><span class="url">memochou1993.github.io/wedding-seating</span></span></div>`;
 }
 if (POSTER) { mode = "guest"; setupPoster(); }
