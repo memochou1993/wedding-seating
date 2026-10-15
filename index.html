@@ -379,7 +379,7 @@
   </div>
 
   <section class="plan-card framed">
-    <svg class="plan" id="plan" viewBox="80 78 752 1232" role="group" aria-label="宴會廳平面圖"></svg>
+    <svg class="plan" id="plan" viewBox="85 78 752 1232" role="group" aria-label="宴會廳平面圖"></svg>
     <div class="legend">
       <span class="side-tag" data-side="主婚人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>主婚人親友</span>
       <span class="side-tag" data-side="新人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>新人親友</span>
@@ -481,7 +481,8 @@ const COLS = [
 const SPOTS = COLS.flatMap(([x, ys]) => ys.map(y => [x, y]));
 // 依「由前往後、由左往右」排序，作為預設桌號順序
 const row = ([, y]) => Math.round((y - ROW_A) / (PITCH / 2));
-const TABLES = [{ id: "main", x: 455, y: 290, r: 35, seat: 45, main: true }].concat(
+// 主桌放在兩座舞台、兩條伸展台的正中線（x≈461），不是外牆的中線（外牆左右本來就不對稱）
+const TABLES = [{ id: "main", x: 461, y: 290, r: 35, seat: 45, main: true }].concat(
   SPOTS.slice().sort((a, b) => row(a) - row(b) || a[0] - b[0]).map(([x, y], i) => ({ id: "t" + (i + 1), x, y, r: TABLE_R, seat: SEAT }))
 );
 // 桌號：由舞台往入口、由中間往兩側。最靠近主桌的兩區先編，每區都沿交錯的兩欄由上往下：
@@ -730,7 +731,7 @@ function staticPlan() {
     swing(420, 456) + swing(492, 456),
     triple(566, 602, 675, 711),
     pillar(369), pillar(543),
-    txt(455, 1298, "入　口", "entrance"),
+    txt(461, 1298, "入　口", "entrance"),
   ].join("");
 }
 function buildPlan() {
