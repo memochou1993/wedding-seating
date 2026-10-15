@@ -1397,6 +1397,12 @@ if (!POSTER && !BOARD) {
   };
   plan.addEventListener("pointerup", lift);
   plan.addEventListener("pointercancel", lift);
+  // 全圖時平面圖的 touch-action 是 pan-y（單指捲頁）；這在手指按下時就決定了，捏合途中改成 none 也來不及，
+  // 瀏覽器會把後續移動當成捲動搶走（pointercancel），縮放卡在第一下。兩指以上就自己擋下預設行為，整段捏合都由這裡處理
+  const multi = (e) => { if (e.touches.length > 1) e.preventDefault(); };
+  plan.addEventListener("touchstart", multi, { passive: false });
+  plan.addEventListener("touchmove", multi, { passive: false });
+  plan.addEventListener("gesturestart", (e) => e.preventDefault());   // iOS Safari：不要把捏合當成整頁縮放
   applyZoom();
 }
 
