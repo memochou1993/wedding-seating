@@ -695,11 +695,10 @@ async function pull() {
 function showSync(msg) {
   const el = document.getElementById("saved");
   if (!el || mode !== "staff") return;
-  const hhmm = (d) => d.toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" });
   el.classList.toggle("bad", !canSync || offline);
   el.textContent = msg || (!canSync ? "編輯金鑰不正確：修改只會存在這台電腦，不會同步。請確認網址是否完整。"
     : offline ? `無法連線，修改先存在這台電腦（${dirty.size} 桌待上傳），恢復連線後會自動補傳。`
-    : `已同步到雲端${syncedAt ? "・" + hhmm(syncedAt) : ""}。其他工作人員的修改每 15 秒更新一次。`);
+    : "");   // 同步正常時不顯示，只在同步中、斷線或金鑰錯誤時出現
 }
 
 /* ───────────── 花框（同告示牌：上方大花冠、下方小捲飾、四角內凹圓弧）───────────── */
@@ -938,7 +937,7 @@ function renderRoster() {
 
 function renderSearch() {
   const q = query.trim(), list = $("results");
-  if (!q) { list.innerHTML = ""; $("search-hint").textContent = mode === "staff" ? (matchMedia("(pointer: coarse)").matches ? "點桌子編輯名單；長按桌子再拖到另一桌，可整桌交換。" : "點桌子編輯名單；把桌子拖到另一桌上，可整桌交換。") : ""; return; }
+  if (!q) { list.innerHTML = ""; $("search-hint").textContent = ""; return; }
   const hits = [];
   // 比對賓客姓名，也比對桌名（例如輸入「大學同學」找到那一桌）
   for (const id of ORDER) {
