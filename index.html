@@ -711,10 +711,12 @@ function frameSVG(W, H) {
   const diag = (g) => `<g>${g}</g><g transform="matrix(0,1,1,0,0,0)">${g}</g>`;
   const scaleAt = (k, x, y, g) => `<g transform="translate(${x},${y}) scale(${k}) translate(${-x},${-y})">${g}</g>`;
   const I = 3.2, R = 19;
-  const notch = `<path d="M${I + R},${I} H${W - I - R} A${R},${R} 0 0 0 ${W - I},${I + R} V${H - I - R} A${R},${R} 0 0 0 ${W - I - R},${H - I} H${I + R} A${R},${R} 0 0 0 ${I},${H - I - R} V${I + R} A${R},${R} 0 0 0 ${I + R},${I} Z" ${ln(1.2)}/>`;
+  // 內線只畫上下兩段（連同四角的內凹弧），左右只留外框一條線
+  const notch = `<path d="M${I},${I + R} A${R},${R} 0 0 0 ${I + R},${I} H${W - I - R} A${R},${R} 0 0 0 ${W - I},${I + R} M${W - I},${H - I - R} A${R},${R} 0 0 0 ${W - I - R},${H - I} H${I + R} A${R},${R} 0 0 0 ${I},${H - I - R}" ${ln(1.2)}/>`;
   const i = I / 1.25, r = 15, a = r * 0.62;
+  // 捲鬚的起點接在內線圓弧的端點 (I, I+R)；整組放大 1.25 倍，所以這裡寫成 i + R / 1.25
   const corner = scaleAt(1.25, 0, 0,
-    diag(`<path d="M${i},${i + r + 1} c4,0 6.5,2.5 6.5,6.5 c0,2.6 -2.6,3.4 -3.8,1.7 c-0.8,-1.2 0.2,-2.5 1.4,-2" ${ln(0.9)}/>`) +
+    diag(`<path d="M${i},${i + R / 1.25} c4,0 6.5,2.5 6.5,6.5 c0,2.6 -2.6,3.4 -3.8,1.7 c-0.8,-1.2 0.2,-2.5 1.4,-2" ${ln(0.9)}/>`) +
     `<path d="M${i},${i + a} A${a},${a} 0 0 0 ${i + a},${i}" ${ln(0.6)}/>` + diamond(i + a * 0.42, i + a * 0.42, 1.3));
   const arm = (s) =>
     `<path d="M${CX},10 C${CX + s * 6},10 ${CX + s * 8},4.5 ${CX + s * 14},4.8 C${CX + s * 22},5.2 ${CX + s * 23},12.5 ${CX + s * 30},11.5 C${CX + s * 35},10.8 ${CX + s * 35.5},5.6 ${CX + s * 31.5},6 C${CX + s * 29},6.3 ${CX + s * 29.5},9 ${CX + s * 31.5},8.8" ${ln(1.1)}/>` +
