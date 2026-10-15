@@ -264,6 +264,9 @@
   .place .tname { font-size: 17px; font-weight: 600; letter-spacing: .3em; padding-left: .3em; color: var(--body); margin: 10px 0 0; }   /* 桌名是標題的一部分：字距拉開、稍粗，和下方名單區分 */
 
   /* 編輯面板 */
+  .check { display: flex; align-items: flex-start; gap: 10px; margin: 16px 0 0; cursor: pointer; font-size: 15px; }
+  .check input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+  .check small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
   .field-label { font-size: 13px; color: var(--muted); letter-spacing: .1em; margin: 16px 0 6px; }
   .seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line); background: #fff; }
   .seg button { border: 0; border-left: 1px solid var(--line); background: transparent; min-height: 44px; padding: 6px 4px; cursor: pointer; font-size: 15px; color: var(--body); }
@@ -272,11 +275,14 @@
   .seg button[aria-pressed="true"][data-v="主婚人親友"] { background: var(--parents-ink); }
   .seg button[aria-pressed="true"][data-v="新人親友"] { background: var(--couple-ink); }
   .guest-list { list-style: none; margin: 0; padding: 0; counter-reset: g; border-top: 1px solid var(--line); }
-  .guest-list li { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); counter-increment: g; }
-  .guest-list li::before { content: counter(g); width: 1.6em; text-align: right; font-family: var(--latin); color: var(--muted); font-size: 14px; }
+  .guest-list li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); counter-increment: g; }   /* 每列上下留一點呼吸空間 */
+  .guest-list li::before { content: counter(g); width: 1.6em; text-align: right; font-family: var(--serif); font-variant-numeric: lining-nums tabular-nums; color: var(--muted); font-size: 15px; }   /* 英文襯線字的數字是舊式（小寫高度），太小；改用中文字型的等高數字 */
   .guest-list li.over::before { color: var(--warn); }
   .guest-list input { flex: 1; min-width: 0; border: 0; background: transparent; padding: 10px 4px; font-size: 16px; color: var(--body); }
   .guest-list input:focus { outline: none; background: var(--accent-soft); }
+  /* 姓名可以直接修改：和新增列一樣用有框的輸入框，看得出可編輯 */
+  .guest-list .g-name { padding: 10px 8px; border: 1px solid var(--line); background: #fff; }
+  .guest-list .g-name:focus { border-color: var(--accent); background: #fff; }
   .g-count { flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: 14px; color: var(--muted); }
   .g-count input { width: 3.2em; padding: 8px 4px; border: 1px solid var(--line); background: #fff; text-align: center; font-size: 16px; color: var(--body); font-variant-numeric: lining-nums tabular-nums; }
   .g-count input:focus { border-color: var(--accent); outline: none; background: #fff; }
@@ -289,8 +295,10 @@
   .party-n { margin-left: 6px; font-size: .8em; color: var(--muted); font-variant-numeric: lining-nums; }
   .guest-list .del { width: 44px; height: 44px; border: 0; background: transparent; color: var(--muted); font-size: 20px; cursor: pointer; flex: none; }
   .guest-list:empty { display: none; }
-  .add { display: flex; gap: 8px; margin-top: 10px; }
-  .add input { flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); background: #fff; font-size: 16px; }
+  /* 新增列和名單對齊：左邊讓出編號欄（1.6em × 15px＋間距），人數、兒童椅在同一欄，加入鈕和 × 同寬 */
+  .add { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-left: calc(24px + 8px); }
+  .add .btn.solid { flex: none; width: 44px; padding: 0; font-size: 14px; min-height: 44px; }
+  .add input { flex: 1; min-width: 0; padding: 10px 8px; border: 1px solid var(--line); background: #fff; font-size: 16px; }
   .add input:focus { border-color: var(--accent); outline: none; }
   .nav { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; }
   .muted { color: var(--muted); font-size: 12px; }
@@ -519,11 +527,13 @@
       <button type="button" data-v="新人親友">新人親友</button>
       <button type="button" data-v="">未設定</button>
     </div>
+    <label class="check"><input type="checkbox" id="f-reserved"><span>保留席<small>賓客版與輸出版不列名單，只寫 Reserved</small></span></label>
     <div class="field-label">賓客</div>
     <ol class="guest-list" id="f-list"></ol>
     <form class="add" id="f-add">
-      <input id="f-new" placeholder="代表人姓名，可一次貼上多行" autocomplete="off" enterkeyhint="done" aria-label="新增一組賓客：代表人姓名">
+      <input id="f-new" placeholder="姓名" title="代表人姓名；可一次貼上多行，每人各 1 位" autocomplete="off" enterkeyhint="done" aria-label="新增一組賓客：代表人姓名，可一次貼上多行">
       <label class="g-count boxed"><input id="f-new-count" type="number" inputmode="numeric" min="1" max="20" value="1" aria-label="這組共幾位">位</label>
+      <label class="g-count kid boxed"><input id="f-new-child" type="number" inputmode="numeric" min="0" max="10" value="0" aria-label="兒童椅幾張">兒童椅</label>
       <button class="btn solid" type="submit">加入</button>
     </form>
     <div class="pool" id="pool" hidden>
@@ -672,6 +682,7 @@ function merge(s) {
     Object.assign(d.tables[id], s.tables[id] || {});
     const t = d.tables[id];   // 本機或雲端資料若有異常值，一律校正成安全的型別
     t.name = typeof t.name === "string" ? t.name.slice(0, 20) : "";
+    t.reserved = t.reserved === true;
     t.guests = Array.isArray(t.guests) ? t.guests.map(toParty).filter(Boolean) : [];
     t.kidAngles = Array.isArray(t.kidAngles) ? t.kidAngles.filter(a => Number.isFinite(a) && Math.abs(a) <= 360).slice(0, 10) : [];
     if (!SIDES.includes(d.tables[id].side)) d.tables[id].side = "";
@@ -707,7 +718,7 @@ async function rpc(fn, args) {
   if (!r.ok) throw new Error(`${fn} ${r.status}`);
   return r.json();
 }
-const pick = (d) => ({ num: d.num, name: d.name, side: d.side, cap: d.cap, guests: d.guests.filter(g => g.name), kidAngles: d.kidAngles || [] });
+const pick = (d) => ({ num: d.num, name: d.name, side: d.side, cap: d.cap, guests: d.guests.filter(g => g.name), kidAngles: d.kidAngles || [], reserved: !!d.reserved });
 
 // 存檔：先寫本機（離線也不會遺失），再排程送上雲端；ids 省略 = 目前選取的桌
 function save(ids) {
@@ -875,12 +886,13 @@ function buildPlan() {
 const STAFF = !!EDIT_KEY;
 let mode = STAFF ? "staff" : "guest", selected = null, query = "";
 const $ = (id) => document.getElementById(id);
+const shownGuests = (d) => d.reserved && mode !== "staff" ? [] : d.guests;   // 保留席在賓客版、輸出版不公開名單
 const seatsOf = (d) => d.guests.reduce((n, g) => n + (g.name ? g.count : 0), 0);
 // 顯示用：代表人姓名，多人時後面加「3 位」
 // 名單排成兩欄：姓名（靠左）｜人數（靠右），整塊置中，每一行就會對齊
 // 兩個中文字的姓名（伍氏、志昆）中間補一個全形空格，和三個字的名字一樣寬、看起來整齊；只影響顯示，不改存檔
 const showName = (n) => /^[\u3400-\u9fff\uf900-\ufaff]{2}$/.test(n) ? n[0] + "\u3000" + n[1] : n;
-const partyCells = (g, all) => `<span class="nm">${esc(showName(g.name))}</span><span class="ct">${g.count > 1 || all ? `${g.count} 位` : ""}${g.child && mode === "staff" ? `<em class="kid-n">童椅 ${g.child}</em>` : ""}</span>`;
+const partyCells = (g, all) => `<span class="nm">${esc(showName(g.name))}</span><span class="ct">${g.count > 1 || all ? `${g.count} 位` : ""}${g.child && mode === "staff" ? `<em class="kid-n">兒童椅 ${g.child}</em>` : ""}</span>`;
 // 座位條：10 個小點代表 10 個座位，已入座的塗滿，超過的標紅（工作人員才看得到）
 const meterHTML = (d) => { const used = seatsOf(d), n = Math.max(d.cap, used);
   return `<span class="meter" title="${used} / ${d.cap} 位" aria-label="${used} / ${d.cap} 位">` +
@@ -935,7 +947,7 @@ function renderPlan() {
     g.dataset.side = d.side;
     g.classList.toggle("selected", g.dataset.id === selected);
     g.classList.toggle("dup", mode === "staff" && dups.has(d.num));
-    g.classList.toggle("match", !!q && (d.guests.some(p => p.name.includes(q)) || d.name.includes(q)));
+    g.classList.toggle("match", !!q && (shownGuests(d).some(p => p.name.includes(q)) || d.name.includes(q)));
     // SVG 後畫的蓋在上面：找到或選取中的桌子移到最後畫，擴散的波紋才不會被旁邊的桌子擋住
     if (g.classList.contains("match") || g.classList.contains("selected")) plan.append(g);
     g.setAttribute("aria-label", `${label(d)}${d.name ? "・" + d.name : ""}，${d.side || "未設定"}，${used} 位賓客`);
@@ -954,7 +966,7 @@ function renderDetail() {
       <span class="mini-rule"><i></i></span>
     </div>
     ${d.num === "主桌" ? `<p class="reserved">新人與主婚人席<em>Reserved</em></p>`   // 主桌不公布名單
-      : d.guests.length ? `<div class="party-grid names-grid">${d.guests.map(g => partyCells(g, true)).join("")}</div>` : `<p class="reserved"><em>Reserved</em></p>`}`;   // 賓客看到空桌：寫 Reserved，不寫「還沒安排」
+      : shownGuests(d).length ? `<div class="party-grid names-grid">${d.guests.map(g => partyCells(g, true)).join("")}</div>` : `<p class="reserved"><em>Reserved</em></p>`}`;   // 賓客看到空桌：寫 Reserved，不寫「還沒安排」
 }
 
 // 編輯區塊：工作人員點了桌子才出現；桌號依平面圖固定，不能手動改
@@ -967,6 +979,7 @@ function renderEditor() {
   refreshCount();
   if (document.activeElement !== $("f-name")) $("f-name").value = d.name;
   for (const b of $("f-side").children) b.setAttribute("aria-pressed", b.dataset.v === d.side);
+  $("f-reserved").checked = !!d.reserved;
   // 名單：正在其中一格打字時不重畫，避免游標跳掉
   if (!$("f-list").contains(document.activeElement)) {
     const before = []; d.guests.reduce((n, g, i) => (before[i] = n, n + g.count), 0);   // 這組之前已坐了幾位
@@ -974,7 +987,7 @@ function renderEditor() {
       `<li class="${before[i] + p.count > d.cap ? "over" : ""}">` +
       `<input class="g-name" value="${esc(p.name)}" data-i="${i}" aria-label="第 ${i + 1} 組代表人">` +
       `<label class="g-count"><input type="number" inputmode="numeric" min="1" max="20" value="${p.count}" data-i="${i}" data-f="count" aria-label="${esc(p.name)} 這組共幾位">位</label>` +
-      `<label class="g-count kid${p.child ? " on" : ""}" title="兒童座椅"><input type="number" inputmode="numeric" min="0" max="10" value="${p.child || 0}" data-i="${i}" data-f="child" aria-label="${esc(p.name)} 兒童座椅幾張">童椅</label>` +
+      `<label class="g-count kid${p.child ? " on" : ""}" title="兒童座椅"><input type="number" inputmode="numeric" min="0" max="10" value="${p.child || 0}" data-i="${i}" data-f="child" aria-label="${esc(p.name)} 兒童座椅幾張">兒童椅</label>` +
       `<button type="button" class="del" data-i="${i}" aria-label="移除 ${esc(p.name)}">×</button></li>`).join("");
   }
 }
@@ -997,7 +1010,7 @@ function renderRoster() {
       <span class="eyebrow">TABLE</span><span class="n">${esc(d.num)}</span>
       ${d.name ? `<div class="tname">${esc(d.name)}</div>` : ""}
       <span class="mini-rule"><i></i></span>
-      ${d.guests.length ? `<div class="who party-grid">${d.guests.map(g => partyCells(g)).join("")}</div>` : (mode === "staff" ? `<div class="who none">尚未安排</div>` : `<div class="who none rsv">Reserved</div>`)}
+      ${shownGuests(d).length ? `<div class="who party-grid">${d.guests.map(g => partyCells(g)).join("")}</div>` : (mode === "staff" ? `<div class="who none">${d.reserved ? "保留席（尚未填人數）" : "尚未安排"}</div>` : `<div class="who none rsv">Reserved</div>`)}
       ${meterHTML(d)}</button>`;
   }).join("");
 }
@@ -1010,7 +1023,7 @@ function renderSearch() {
   for (const id of ORDER) {
     const d = state.tables[id];
     if (d.name && d.name.includes(q)) hits.push([d.name, id, true]);
-    for (const p of d.guests) if (p.name.includes(q)) hits.push([p.name, id]);
+    for (const p of shownGuests(d)) if (p.name.includes(q)) hits.push([p.name, id]);
   }
   $("search-hint").textContent = hits.length ? `找到 ${hits.length} 筆，金色的桌子就是座位。` : "找不到，試試只輸入名字的一部分。";
   const where = (id) => { const d = state.tables[id]; return label(d) + (d.name ? `・${d.name}` : ""); };
@@ -1117,7 +1130,7 @@ const onSearch = (e) => {
   clearTimeout(searchFocusTimer);
   const q = query.trim(); if (!q) return;
   searchFocusTimer = setTimeout(() => {
-    const ids = ORDER.filter(id => { const d = state.tables[id]; return d.name.includes(q) || d.guests.some(p => p.name.includes(q)); });
+    const ids = ORDER.filter(id => { const d = state.tables[id]; return d.name.includes(q) || shownGuests(d).some(p => p.name.includes(q)); });
     if (ids.length) focusTables(ids);
   }, 300);
 };
@@ -1133,13 +1146,17 @@ $("results").addEventListener("click", (e) => {
 });
 $("roster").addEventListener("click", (e) => { const b = e.target.closest("button[data-id]"); if (b) select(b.dataset.id, false); });
 
-const edit = (fn) => { if (!selected) return; fn(state.tables[selected]); save(); renderPlan(); renderStats(); renderRoster(); renderSearch(); renderPool(); renderPosterList(); };
+// 海報版名單要逐張卡片量字級，很花時間：延後到停手 0.25 秒再重畫，編輯面板與平面圖先即時更新
+let posterTimer = null;
+const renderPosterListSoon = () => { clearTimeout(posterTimer); posterTimer = setTimeout(renderPosterList, 250); };
+const edit = (fn) => { if (!selected) return; fn(state.tables[selected]); save(); renderPlan(); renderStats(); renderRoster(); renderSearch(); renderPool(); renderPosterListSoon(); };
 $("f-side").addEventListener("click", (e) => {
   const b = e.target.closest("button[data-v]"); if (!b) return;
   edit(d => d.side = b.dataset.v);
   for (const x of $("f-side").children) x.setAttribute("aria-pressed", x === b);
 });
 $("f-name").addEventListener("input", (e) => edit(d => d.name = e.target.value.trim()));
+$("f-reserved").addEventListener("change", (e) => edit(d => d.reserved = e.target.checked));
 // 中文輸入法選字時按的 Enter 也會觸發 keydown（isComposing），這時不能離開欄位，否則選好的字會再被送一次
 const composing = (e) => e.isComposing || e.keyCode === 229;
 $("f-name").addEventListener("keydown", (e) => { if (e.key === "Enter" && !composing(e)) e.target.blur(); });
@@ -1158,15 +1175,22 @@ $("f-list").addEventListener("focusout", (e) => {
   if (e.target.matches(".g-name") && !e.target.value.trim()) removeGuest(+e.target.dataset.i);
   else if (e.target.matches('[type="number"]')) { renderEditor(); }
 });
-$("f-list").addEventListener("click", (e) => { const b = e.target.closest(".del"); if (b) removeGuest(+b.dataset.i); });
+// × 在按下的瞬間就移除：若游標還在人數或姓名欄，放開時那一欄失焦會重畫整份名單，× 被換掉，click 就丟了
+$("f-list").addEventListener("pointerdown", (e) => {
+  const b = e.target.closest(".del"); if (!b || e.button > 0) return;
+  e.preventDefault();   // 不搶焦點，先移除再說
+  removeGuest(+b.dataset.i);
+});
+$("f-list").addEventListener("click", (e) => { const b = e.target.closest(".del"); if (b && e.detail === 0) removeGuest(+b.dataset.i); });   // 鍵盤按 Enter／空白鍵
 function removeGuest(i) { edit(d => d.guests.splice(i, 1)); renderEditor(); }
 function refreshCount() { const d = state.tables[selected], n = seatsOf(d); $("f-count").textContent = `${n} / ${d.cap} 人`; $("f-count").classList.toggle("over", n > d.cap); }
 function addNames(text) {
   const names = text.split(/[\n,，、]+/).map(x => x.trim()).filter(Boolean);
   if (!names.length) return;
-  const count = names.length === 1 ? clampCount($("f-new-count").value) : 1;   // 一次貼多人時每人各 1 位
-  edit(d => d.guests.push(...names.map(name => ({ name: name.slice(0, 20), count }))));
-  $("f-new").value = ""; $("f-new-count").value = 1;
+  const count = names.length === 1 ? clampCount($("f-new-count").value) : 1;   // 一次貼多人時每人各 1 位、不帶兒童椅
+  const child = names.length === 1 ? Math.min(count, Math.max(0, parseInt($("f-new-child").value, 10) || 0)) : 0;
+  edit(d => d.guests.push(...names.map(name => child ? { name: name.slice(0, 20), count, child } : { name: name.slice(0, 20), count })));
+  $("f-new").value = ""; $("f-new-count").value = 1; $("f-new-child").value = 0;
   renderEditor();
   $("f-list").lastElementChild?.scrollIntoView({ block: "nearest" });
 }

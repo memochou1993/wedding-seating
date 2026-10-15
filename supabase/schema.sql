@@ -57,10 +57,13 @@ alter table seating.tables add constraint guests_are_parties
   check (not jsonb_path_exists(guests,
     '$[*] ? (@.type() != "object" || !exists(@.name) || !exists(@.count) || @.name.type() != "string" || @.count.type() != "number" || @.count < 1 || @.count > 20 || (exists(@.child) && (@.child.type() != "number" || @.child < 0 || @.child > 10)))'));
 
+-- 保留席：整桌先留給某個群體（例如「男方家人 10 位」），賓客版與輸出版不公開名單，只寫 Reserved
+alter table seating.tables add column if not exists reserved boolean not null default false;
+
 alter table seating.events enable row level security;
 alter table seating.tables enable row level security;
 
--- 讀：{ "tables": { "<table_id>": { num, name, side, cap, guests, updated_at } }, "updated_at": 最新修改時間 }
+-- 讀：{ "tables": { "<table_id>": { num, name, side, cap, guests, kidAngles, reserved, updated_at } }, "updated_at": 最新修改時間 }
 create or replace function public.seating_get(p_event text)
 returns jsonb
 language sql
@@ -70,7 +73,7 @@ set search_path = ''
 as $$
   select jsonb_build_object(
     'tables', coalesce(jsonb_object_agg(t.table_id, jsonb_build_object(
-      'num', t.num, 'name', t.name, 'side', t.side, 'cap', t.cap, 'guests', t.guests, 'kidAngles', t.kid_seats, 'updated_at', t.updated_at)), '{}'::jsonb),
+      'num', t.num, 'name', t.name, 'side', t.side, 'cap', t.cap, 'guests', t.guests, 'kidAngles', t.kid_seats, 'reserved', t.reserved, 'updated_at', t.updated_at)), '{}'::jsonb),
     'updated_at', max(t.updated_at)
   )
   from seating.tables t
@@ -91,7 +94,8 @@ as $$
   );
 $$;
 
--- 寫：p_tables = { "<table_id>": { num, name, side, cap, guests, kidAngles } }，只覆蓋有傳的桌；回傳寫入時間
+-- 寫：p_tables = { "<table_id>": { num, name, side, cap, guests, kidAngles, reserved } }，只覆蓋有傳的桌；回傳寫入時間
+-- reserved 沒傳就保留原值（舊版網頁送來的資料不會把保留席清掉）
 create or replace function public.seating_save(p_event text, p_key text, p_tables jsonb)
 returns timestamptz
 language plpgsql
@@ -108,7 +112,7 @@ begin
     raise exception 'invalid payload' using errcode = '22023';
   end if;
 
-  insert into seating.tables as t (event_id, table_id, num, name, side, cap, guests, kid_seats, updated_at)
+  insert into seating.tables as t (event_id, table_id, num, name, side, cap, guests, kid_seats, reserved, updated_at)
   select p_event, k,
          coalesce(v ->> 'num', ''),
          coalesce(v ->> 'name', ''),
@@ -116,11 +120,13 @@ begin
          coalesce((v ->> 'cap')::int, 10),
          coalesce(v -> 'guests', '[]'::jsonb),
          coalesce(v -> 'kidAngles', '[]'::jsonb),
+         coalesce((v ->> 'reserved')::boolean, false),
          v_now
   from jsonb_each(p_tables) as x(k, v)
   on conflict (event_id, table_id) do update
     set num = excluded.num, name = excluded.name, side = excluded.side, cap = excluded.cap,
-        guests = excluded.guests, kid_seats = excluded.kid_seats, updated_at = excluded.updated_at;
+        guests = excluded.guests, kid_seats = excluded.kid_seats, updated_at = excluded.updated_at,
+        reserved = case when p_tables -> excluded.table_id ? 'reserved' then excluded.reserved else t.reserved end;
 
   return v_now;
 end;
