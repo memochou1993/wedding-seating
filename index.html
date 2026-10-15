@@ -193,12 +193,15 @@
   dialog.sheet { max-width: none; inset: auto auto 0 50%; }
   /* 電腦上編輯面板放在畫面正中央 */
   @media (min-width: 600px) { dialog.sheet { inset: 50% auto auto 50%; transform: translate(-50%, -50%); } }
+  /* 手機：編輯面板固定佔畫面 85% 高，名單再多也有足夠的編輯空間 */
+  @media (max-width: 599px) { dialog.sheet[open] { height: 85vh; height: 85dvh; } }
   dialog.sheet:focus { outline: none; }
   /* 面板分成 頂部（標題、×）｜可捲動的內容｜底部（上一桌／下一桌），× 與按鈕永遠看得到 */
   #detail:not([hidden]), dialog.sheet[open] { display: flex; flex-direction: column; overflow: hidden; padding: 0; }
   .sheet::before { margin: 10px auto 2px; flex: none; }
   .sheet-head { position: relative; flex: none; padding: 6px 20px 12px; border-bottom: 1px solid var(--line); }
-  .sheet-body { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 4px 20px 18px; }
+  /* 內容區以實際內容高度起算（flex-basis auto）；Safari 在面板沒有固定高度時會把 flex: 1 的 0% 起始高度算成 0，面板會被壓扁 */
+  .sheet-body { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 4px 20px 18px; }
   #detail .sheet-body { padding: 8px 20px calc(18px + env(safe-area-inset-bottom, 0px)); }
   .sheet-foot { flex: none; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); background: var(--paper); }
   .sheet-foot.nav { margin-top: 0; }
