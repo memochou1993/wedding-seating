@@ -378,7 +378,7 @@
   .poster {
     --k: calc(var(--ph) / 420mm);   /* 相對 A2 的倍率 */
     width: var(--pw); height: var(--ph); box-sizing: border-box; background: var(--paper);
-    padding: calc(36mm * var(--k)) calc(26mm * var(--k)) calc(24mm * var(--k)) calc(26mm * var(--k)); display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;
+    padding: calc(40mm * var(--k)) calc(26mm * var(--k)) calc(24mm * var(--k)) calc(26mm * var(--k)); display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;
     column-gap: calc(14mm * var(--k)); row-gap: calc(5mm * var(--k)); box-shadow: none;
   }
   .poster > .frame-art { inset: calc(8mm * var(--k)); width: calc(100% - 16mm * var(--k)); height: calc(100% - 16mm * var(--k)); }
@@ -386,7 +386,14 @@
   /* 標題放在平面圖正上方（左欄第 1 列）；右邊席次表從頂端排到底（跨兩列），名單高度更多 */
   .p-head { grid-column: 1; grid-row: 1; height: calc(44mm * var(--k)); box-sizing: border-box; }
   .p-list { grid-column: 2; grid-row: 1 / span 2; }
-  .p-plan { grid-row: 2; height: calc(var(--ph) - (60mm + 44mm + 5mm) * var(--k)); aspect-ratio: 744.4 / 1202.2; }   /* 和平面圖 viewBox 同比例；上、左、右都切齊外牆線的外緣（牆線 x=90／832、y=105，線寬 2.4） */
+  /* 實驗：平面圖佔滿左欄（跨標題列），外牆往上延伸，標題寫在牆內、舞台上方；viewBox 與比例由 extendPlanForPoster() 依標題高度算出 */
+  .p-plan { grid-column: 1; grid-row: 1 / span 2; height: calc(var(--ph) - 64mm * var(--k)); aspect-ratio: 744.4 / 1202.2; }
+  .p-head { position: relative; z-index: 1; }
+  /* 實驗：輸出版不畫外牆、門和柱子，入口改用一條長條標示 */
+  body.poster-mode .plan .wall, body.poster-mode .plan .door, body.poster-mode .plan .pillar, body.poster-mode .plan > .entrance { display: none; }
+  .plan .entrance-mark { display: none; }
+  body.poster-mode .plan .entrance-mark { display: inline; }
+  .plan .entrance-mark rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.4; }   /* 和平面圖 viewBox 同比例；上、左、右都切齊外牆線的外緣（牆線 x=90／832、y=105，線寬 2.4） */
   .p-plan svg.plan { width: 100%; height: 100%; }
   /* 標題區左右兩欄：左「席次表／SEATING CHART」靠右對齊，右「林府文定／新人／日期」靠左對齊，中間一條淡金直線；左右等寬，直線落在花冠的中線上 */
   .p-head { display: grid; grid-template-columns: 1fr 1fr; align-content: center; padding-bottom: calc(4mm * var(--k)); }
@@ -797,6 +804,7 @@ document.querySelectorAll(".framed").forEach(decorate);
 /* ───────────── 平面圖 ───────────── */
 const NS = "http://www.w3.org/2000/svg";
 const plan = document.getElementById("plan");
+let PLAN_TOP = 105;   // 外牆上緣；輸出版把牆往上延伸，讓標題寫在牆內
 function staticPlan() {
   const rect = (x, y, w, h, cls, rx = 0) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" class="${cls}"/>`;
   const txt = (x, y, s, cls, extra = "") => `<text x="${x}" y="${y}" class="${cls}" text-anchor="middle" ${extra}>${s}</text>`;
@@ -823,20 +831,22 @@ function staticPlan() {
   const v = L.vest, vr = v.map(M).reverse();
   return [
     // 外牆一筆畫完：從右門廊起筆，經右牆、上緣（一條連續線）、左牆，再接左、中門廊的側牆；轉角都在同一筆裡才接得密合
-    `<path class="wall" d="M${vr[3]},${SILL} V${WALL_Y} H${M(L.wall)} V105 H${L.wall} V${WALL_Y} H${v[0]} V${SILL} M${v[3]},${SILL} V${WALL_Y} H${L.midVest} V${SILL} M${M(L.midVest)},${SILL} V${WALL_Y} H${vr[0]} V${SILL}"/>`,
+    `<path class="wall" d="M${vr[3]},${SILL} V${WALL_Y} H${M(L.wall)} V${PLAN_TOP} H${L.wall} V${WALL_Y} H${v[0]} V${SILL} M${v[3]},${SILL} V${WALL_Y} H${L.midVest} V${SILL} M${M(L.midVest)},${SILL} V${WALL_Y} H${vr[0]} V${SILL}"/>`,
     // 舞台、階梯、伸展台
     stage(L.stage), stage(M(L.stage + L.stageW)),
     // 舞台框內三行：中文廳名、英文廳名（小字）、舞台
     txt(L.stage + L.stageW / 2, 147, "聖雅典", "label-lg"), txt(L.stage + L.stageW / 2, 171, "SAINT ATHENS", "hall-name"), txt(L.stage + L.stageW / 2, 202, "舞　台", "label", `style="font-size:21px"`),
     txt(M(L.stage + L.stageW / 2), 147, "威尼斯", "label-lg"), txt(M(L.stage + L.stageW / 2), 171, "VENICE", "hall-name"), txt(M(L.stage + L.stageW / 2), 202, "舞　台", "label", `style="font-size:21px"`),
     stairs(L.stairsOut, 178), stairs(L.stairsIn, 178), stairs(M(L.stairsIn + 30), 178), stairs(M(L.stairsOut + 30), 178),
-    rect(L.runway, 218, L.runwayW, 707, "runway"), rect(M(L.runway + L.runwayW), 218, L.runwayW, 707, "runway"),
+    rect(L.runway, 218, L.runwayW, 760, "runway"), rect(M(L.runway + L.runwayW), 218, L.runwayW, 760, "runway"),   // 伸展台延伸到最後一排桌子旁
     txt(L.runway + L.runwayW / 2, 560, "伸展台", "label", `writing-mode="vertical-rl" style="letter-spacing:.6em"`),
     txt(M(L.runway + L.runwayW / 2), 560, "伸展台", "label", `writing-mode="vertical-rl" style="letter-spacing:.6em"`),
     // 入口門：左右門廊互為鏡像，中央門廊置中
     triple(...v), swing(L.midVest, AX) + swing(M(L.midVest), AX), triple(...vr),
     pillar(L.pillar), pillar(M(L.pillar)),
     txt(AX, 1298, "入　口", "entrance"),
+    // 輸出版（不畫牆）用的入口標示：一條跨過三個門廊的淡金色長條，中間寫「入口」
+    `<g class="entrance-mark"><rect x="${v[0]}" y="1246" width="${vr[3] - v[0]}" height="40" rx="3"/>` + txt(AX, 1273, "入　口", "entrance") + `</g>`,
     // 圖例：輸出版放在 10、20 桌下方的空地（網頁版圖例在平面圖卡片下方，這裡隱藏）
     `<g class="plan-legend">` +
       `<circle cx="345" cy="1160" r="8" data-side="主婚人親友"/>` + txt(405, 1166, "主婚人親友", "label", `style="font-size:17px"`) +
@@ -892,7 +902,7 @@ function renderPlan() {
     const num = g.querySelector(".num"), tn = g.querySelector(".tn");
     const t = TABLES.find(x => x.id === g.dataset.id);
     // 賓客版、輸出版不畫椅子，桌面放大到原本連椅子的範圍；字跟著桌面等比放大
-    const bare = mode !== "staff" || !!POSTER, R = bare ? t.seat - 2 : t.r, k = R / t.r;
+    const bare = mode !== "staff" || !!POSTER, R = bare ? t.seat + 2 : t.r, k = R / t.r;
     g.querySelector(".disc").setAttribute("r", R);
     num.textContent = d.num || (mode === "staff" ? "＋" : "");
     num.classList.toggle("empty", !d.num);
@@ -1329,6 +1339,20 @@ const POSTER = new URLSearchParams(location.search).get("poster");
 const PAPER = { a1: [841, 594], a2: [594, 420], a3: [420, 297] };
 // 桌機的工作人員版也用這個版面當編輯畫面（BOARD）：上方找座位列，下方整張海報縮放到剛好塞滿視窗
 const BOARD = STAFF && !POSTER && matchMedia("(min-width: 1100px)").matches;
+// 輸出版：平面圖往上多畫一段（高度 = 標題列＋列間距），比例尺不變；外牆上緣跟著上移，標題就落在牆內
+function extendPlanForPoster() {
+  const box = $("p-plan"), head = document.querySelector(".p-head");
+  const gap = parseFloat(getComputedStyle($("poster")).rowGap) || 0;
+  const H = box.clientHeight, top = head.offsetHeight + gap;
+  if (!H || H <= top) return;
+  // 不畫牆之後，可視範圍改成切齊內容（桌子、舞台、入口條）的外緣再留 1.5 單位，左右下都更貼
+  const X0 = 106.5, W = 709, Y0 = 103.8, VH = 1183.5;   // 桌子放大後，左右各多留 4 單位
+  const u = (H - top) / VH;                  // 每單位幾 px
+  const E = top / u;                         // 往上多畫的單位數
+  plan.setAttribute("viewBox", `${X0} ${(Y0 - E).toFixed(2)} ${W} ${(VH + E).toFixed(2)}`);
+  box.style.aspectRatio = `${W} / ${(VH + E).toFixed(2)}`;
+  PLAN_TOP = 105 - E;
+}
 function setupPoster() {
   const [pw, ph] = PAPER[(POSTER || "a2").toLowerCase()] || PAPER.a2;
   document.body.classList.add("poster-mode");
@@ -1339,6 +1363,7 @@ function setupPoster() {
   $("p-plan").append(plan);                 // 同一張平面圖搬進海報
   const stage = document.createElement("div"); stage.className = "poster-stage";
   document.body.prepend(stage); stage.append(poster);   // 移出 .wrap（海報模式會把 .wrap 藏起來）
+  extendPlanForPoster();                    // 要在海報顯示出來之後量，否則高度是 0
   const bar = document.querySelector(".bar");
   if (BOARD) {
     document.body.prepend(bar);                                  // 找座位與同步狀態留在最上方
