@@ -282,6 +282,43 @@
 
   [hidden] { display: none !important; }
 
+  /* ───── 輸出版海報：尺寸由 --pw/--ph 決定（預設 A2 橫式 594×420mm），字級跟著紙張等比放大 ───── */
+  body.poster-mode { padding: 0; background: #d9d4cc; overflow: auto; }
+  body.poster-mode .wrap { display: none; }
+  body.poster-mode .sheet, body.poster-mode .toast { display: none !important; }
+  .poster-stage { transform-origin: 0 0; }
+  .poster {
+    --k: calc(var(--ph) / 420mm);   /* 相對 A2 的倍率 */
+    width: var(--pw); height: var(--ph); box-sizing: border-box; background: var(--paper);
+    padding: calc(30mm * var(--k)) calc(28mm * var(--k)) calc(26mm * var(--k)); display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;
+    column-gap: calc(14mm * var(--k)); row-gap: calc(6mm * var(--k)); box-shadow: none;
+  }
+  .poster > .frame-art { inset: calc(8mm * var(--k)); width: calc(100% - 16mm * var(--k)); height: calc(100% - 16mm * var(--k)); }
+  .p-plan { grid-row: 1 / 3; height: calc(var(--ph) - 56mm * var(--k)); aspect-ratio: 752 / 1232; }
+  .p-plan svg.plan { width: 100%; height: 100%; }
+  .p-head { text-align: center; padding-top: calc(10mm * var(--k)); }
+  .p-kicker { font-size: calc(5mm * var(--k)); letter-spacing: .6em; color: var(--accent); }
+  .p-kicker span { display: block; font-family: var(--latin); font-size: .7em; letter-spacing: .4em; margin-top: .3em; }
+  .p-head h1 { margin: calc(3mm * var(--k)) 0 calc(1.5mm * var(--k)); font-size: calc(15mm * var(--k)); letter-spacing: .14em; color: var(--body); line-height: 1.15; }
+  .p-date { font-size: calc(5mm * var(--k)); letter-spacing: .1em; }
+  .p-date em { font-family: var(--latin); font-style: italic; color: var(--accent); margin-left: 1em; }
+  .p-list { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: repeat(6, minmax(0, 1fr)); gap: calc(3mm * var(--k)); min-height: 0; }
+  /* 海報的桌卡：桌號與桌名同一行，下方細線，名單往下排，省下高度給名單 */
+  .p-list .card { cursor: default; padding: calc(2.6mm * var(--k)) calc(2.6mm * var(--k)); overflow: hidden; min-height: 0;
+    display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr; align-content: start; align-items: center; column-gap: calc(2.2mm * var(--k)); text-align: left; }
+  .p-list .card .eyebrow, .p-list .card .mini-rule { display: none; }
+  .p-list .card .n { grid-column: 1; font-size: calc(8mm * var(--k)); line-height: 1; margin: 0; }
+  .p-list .card .tname { grid-column: 2; font-size: calc(3.3mm * var(--k)); margin: 0; letter-spacing: .06em; line-height: 1.25; }
+  .p-list .card .who { grid-column: 1 / -1; align-self: start; font-size: calc(3.1mm * var(--k)); line-height: 1.5;
+    border-top: 1px solid var(--accent-soft); margin-top: calc(1.8mm * var(--k)); padding-top: calc(1.6mm * var(--k)); }
+  .p-list .card .who.none { font-size: calc(2.8mm * var(--k)); text-align: center; }
+  .p-list .card .meter { display: none; }
+  .p-list .note { border: 1px solid var(--line); background: #fff; padding: calc(3mm * var(--k)); display: flex; flex-direction: column; justify-content: center; gap: calc(2mm * var(--k)); font-size: calc(3mm * var(--k)); color: var(--muted); }
+  .p-list .note .side-tag { gap: calc(2mm * var(--k)); }
+  .p-list .note .side-tag svg { width: calc(3.6mm * var(--k)); height: calc(3.6mm * var(--k)); }
+  .p-list .note b { color: var(--body); font-weight: 500; font-size: 1.05em; }
+  .p-list .note .url { font-family: var(--latin); font-size: .95em; color: var(--accent); word-break: break-all; }
+
   @media print {
     @page { size: A4 portrait; margin: 10mm; }
     body { background: #fff; padding: 0; }
@@ -380,6 +417,17 @@
   <section class="roster framed" id="roster-wrap">
     <div class="roster-head"><h2>席次一覽</h2><p>TABLE LIST</p></div>
     <div class="roster-grid" id="roster"></div>
+  </section>
+
+  <!-- 輸出版（?poster，預設 A2 橫式）：左邊平面圖、右邊 7×6 席次表；用瀏覽器列印或 tools/poster.sh 存成 PDF -->
+  <section class="poster framed" id="poster" data-frame-scale="2.4" hidden>
+    <div class="p-plan" id="p-plan"></div>
+    <header class="p-head">
+      <div class="p-kicker">席 次 表<span>SEATING CHART</span></div>
+      <h1>聖雅典｜威尼斯</h1>
+      <div class="p-date">115.10.25 午宴 · 林府文定<em>October 25, 2026</em></div>
+    </header>
+    <div class="p-list" id="p-list"></div>
   </section>
 
 </div>
@@ -602,7 +650,7 @@ function decorate(el) {
   el.prepend(svg);
   const draw = () => {
     const w = el.clientWidth - 28, h = el.clientHeight - 28;
-    const u = Math.min(2.6, w / 130);      // 1 單位 = u 像素；窄螢幕時縮小花飾
+    const u = Math.min(2.6, w / 130) * (+el.dataset.frameScale || 1);      // 1 單位 = u 像素；窄螢幕時縮小花飾（海報放大）
     const W = w / u, H = h / u;
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
     svg.innerHTML = frameSVG(W, H);
@@ -838,7 +886,7 @@ function markActive() {
   opts.forEach((b, i) => b.classList.toggle("active", i === poolActive));
   opts[poolActive]?.scrollIntoView({ block: "nearest" });
 }
-function renderAll() { renderPlan(); renderDetail(); renderEditor(); renderStats(); renderRoster(); renderSearch(); renderPool(); }
+function renderAll() { renderPlan(); renderDetail(); renderEditor(); renderStats(); renderRoster(); renderSearch(); renderPool(); renderPosterList(); }
 
 function select(id, fromPlan) {
   if (id && id !== selected) { poolSide = state.tables[id].side; poolQ = ""; $("pool-q").value = ""; }
@@ -1067,6 +1115,34 @@ addEventListener("contextmenu", (e) => { if (drag) e.preventDefault(); });      
 addEventListener("pointerup", () => endDrag(true));
 addEventListener("pointercancel", () => endDrag(false));
 addEventListener("keydown", (e) => { if (e.key === "Escape" && drag) endDrag(false); });
+
+/* ───────────── 輸出版（?poster=a2｜a1｜a3，預設 A2 橫式）───────────── */
+const POSTER = new URLSearchParams(location.search).get("poster");
+const PAPER = { a1: [841, 594], a2: [594, 420], a3: [420, 297] };
+function setupPoster() {
+  const [pw, ph] = PAPER[(POSTER || "a2").toLowerCase()] || PAPER.a2;
+  document.body.classList.add("poster-mode");
+  const poster = $("poster");
+  poster.style.setProperty("--pw", pw + "mm"); poster.style.setProperty("--ph", ph + "mm");
+  poster.hidden = false;
+  $("p-plan").append(plan);                 // 同一張平面圖搬進海報
+  const stage = document.createElement("div"); stage.className = "poster-stage";
+  document.body.prepend(stage); stage.append(poster);   // 移出 .wrap（海報模式會把 .wrap 藏起來）
+  document.head.insertAdjacentHTML("beforeend", `<style>@media print { @page { size: ${pw}mm ${ph}mm; margin: 0; } body.poster-mode { background: none; } .poster-stage { transform: none !important; } }</style>`);
+  const fit = () => { const k = Math.min((innerWidth - 32) / poster.offsetWidth, (innerHeight - 32) / poster.offsetHeight, 1);
+    stage.style.transform = `translate(16px, 16px) scale(${k})`; };
+  addEventListener("resize", fit); requestAnimationFrame(fit);
+}
+// 海報右邊的 7×6 格：41 桌＋最後一格放圖例與網址
+function renderPosterList() {
+  if (!POSTER) return;
+  $("p-list").innerHTML = $("roster").innerHTML + `<div class="note">
+    <span class="side-tag" data-side="主婚人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>主婚人親友</span>
+    <span class="side-tag" data-side="新人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>新人親友</span>
+    <span class="side-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><rect class="kid-icon" x="2.5" y="2.5" width="9" height="9" rx="1.2"/></svg>兒童座椅</span>
+    <span><b>手機找座位</b><br><span class="url">memochou1993.github.io/wedding-seating</span></span></div>`;
+}
+if (POSTER) { mode = "guest"; setupPoster(); }
 
 buildPlan();
 setMode(mode);
