@@ -133,7 +133,7 @@
   /* 找座位列：捲動時固定在畫面頂端 */
   /* 找座位列：外面包一層和頁面同色的底（上下各留一點空），固定在頂端時後面的內容不會從縫隙透出來 */
   .bar-dock { position: sticky; top: 0; z-index: 10; background: var(--ground); padding: 10px 0; margin: -10px 0; }
-  .bar { position: relative; background: var(--paper); border: 1px solid var(--line); padding: 12px 16px; display: grid; gap: 6px; }
+  .bar { position: relative; background: var(--paper); box-shadow: 0 1px 2px rgba(78,58,42,.06), 0 10px 30px rgba(78,58,42,.07); padding: 12px 16px; display: grid; gap: 6px; }   /* 和其他卡片一樣用陰影 */
   .bar-row { display: flex; align-items: center; gap: 12px; }
   .bar-label { font-size: 13px; font-weight: 500; letter-spacing: .3em; color: var(--accent); white-space: nowrap; }
   .bar input { flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); background: #fff; font-size: 16px; }
@@ -289,7 +289,7 @@
   body.poster-mode:not(.board-mode) .sheet, body.poster-mode:not(.board-mode) .toast { display: none !important; }
   .poster-stage { transform-origin: 0 0; }
   .poster-stage { position: relative; width: 0; }
-  body.board-mode .bar { position: fixed; top: 0; left: 0; right: 0; z-index: 15; display: flex; align-items: center; gap: 8px 20px; padding: 8px 20px; border-width: 0 0 1px; }
+  body.board-mode .bar { position: fixed; top: 0; left: 0; right: 0; z-index: 15; display: flex; align-items: center; gap: 8px 20px; padding: 8px 20px; }
   body.board-mode .bar-row { flex: 0 0 380px; }
   body.board-mode .bar .hint { display: none; }
   body.board-mode .status { flex: 1; font-size: 13px; }
