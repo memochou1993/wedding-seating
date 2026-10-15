@@ -419,7 +419,7 @@
     </div>
     <ul class="results" id="results"></ul>
     <p class="hint" id="search-hint"></p>
-    <p class="status staff-only"><span id="s-stats"></span><span class="saved" id="saved">連線中…</span><a id="guest-link" target="_blank">賓客畫面 ↗</a><a id="poster-link" target="_blank">A2 輸出版 ↗</a></p>
+    <p class="status staff-only"><span id="s-stats"></span><span class="saved" id="saved">連線中…</span><a id="guest-link" target="_blank">賓客畫面 ↗</a><a id="poster-link" target="_blank">A1 輸出版 ↗</a></p>
   </section>
   </div>
 
@@ -998,7 +998,7 @@ function setMode(m) {
 
 /* ───────────── 事件 ───────────── */
 $("guest-link").href = location.pathname;
-$("poster-link").href = location.pathname + "?poster=a2";   // 即時讀雲端最新資料；要存 PDF 就在那個分頁用瀏覽器列印
+$("poster-link").href = location.pathname + "?poster=a1";   // 即時讀雲端最新資料；要存 PDF 就在那個分頁用瀏覽器列印
 // 找座位列一捲到頂端就加上 .stuck（鋪底色擋住後面的內容）
 new IntersectionObserver(([e]) => document.querySelector(".bar-dock").classList.toggle("stuck", !e.isIntersecting), { rootMargin: "-1px 0px 0px 0px" })
   .observe(document.querySelector(".bar-sentinel"));
