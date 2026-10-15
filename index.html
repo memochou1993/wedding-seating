@@ -321,7 +321,9 @@
     display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr; align-content: start; align-items: center; column-gap: calc(2.2mm * var(--k)); text-align: left; }
   .p-list .card .eyebrow, .p-list .card .mini-rule { display: none; }
   .p-list .card .n { grid-column: 1; font-size: calc(8mm * var(--k)); line-height: 1; margin: 0; }
-  .p-list .card .tname { grid-column: 2; font-size: calc(3.3mm * var(--k)); margin: 0; letter-spacing: .06em; line-height: 1.25; }
+  /* 桌名一行放到最大：依字寬（--nw，中文 1、英數 0.55）把可用寬度平均分給每個字，最大 5.4mm，不折行 */
+  .p-list .card .tname { grid-column: 2; margin: 0; letter-spacing: 0; line-height: 1.15; white-space: nowrap; overflow: hidden;
+    font-size: min(calc(5.4mm * var(--k)), calc(25.5mm * var(--k) / var(--nw, 6))); }
   .p-list .card .who { grid-column: 1 / -1; align-self: start; font-size: calc(3.1mm * var(--k)); line-height: 1.5;
     border-top: 1px solid var(--accent-soft); margin-top: calc(1.8mm * var(--k)); padding-top: calc(1.6mm * var(--k)); }
   .p-list .card .who.none { font-size: calc(2.8mm * var(--k)); text-align: center; }
@@ -849,7 +851,7 @@ function renderRoster() {
     return `<button class="card" data-id="${id}" aria-label="${esc(label(d))}${d.name ? "・" + esc(d.name) : ""}">
       <span class="eyebrow">TABLE</span><span class="n">${esc(d.num)}</span>
       <span class="mini-rule"><i></i></span>
-      ${d.name ? `<div class="tname">${esc(d.name)}</div>` : ""}
+      ${d.name ? `<div class="tname" style="--nw:${nameWidth(d.name).toFixed(2)}">${esc(d.name)}</div>` : ""}
       ${d.guests.length ? `<div class="who party-grid">${d.guests.map(partyCells).join("")}</div>` : `<div class="who none">尚未安排</div>`}
       ${meterHTML(d)}</button>`;
   }).join("");
