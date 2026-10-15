@@ -708,16 +708,11 @@ function frameSVG(W, H) {
   const diamond = (x, y, r) => `<path d="M${x},${y - r} L${x + r},${y} L${x},${y + r} L${x - r},${y} Z" ${dot}/>`;
   const leaf = (x, y, ang, len, wid) => `<path d="M0,0 Q${len / 2},${-wid} ${len},0 Q${len / 2},${wid} 0,0 Z" transform="translate(${x},${y}) rotate(${ang})" ${dot}/>`;
   const four = (g) => ["", `translate(${W},0) scale(-1,1)`, `translate(0,${H}) scale(1,-1)`, `translate(${W},${H}) scale(-1,-1)`].map(t => `<g transform="${t}">${g}</g>`).join("");
-  const diag = (g) => `<g>${g}</g><g transform="matrix(0,1,1,0,0,0)">${g}</g>`;
   const scaleAt = (k, x, y, g) => `<g transform="translate(${x},${y}) scale(${k}) translate(${-x},${-y})">${g}</g>`;
-  const I = 3.2, R = 19;
-  // 內線只畫上下兩段（連同四角的內凹弧），左右只留外框一條線
-  const notch = `<path d="M${I},${I + R} A${R},${R} 0 0 0 ${I + R},${I} H${W - I - R} A${R},${R} 0 0 0 ${W - I},${I + R} M${W - I},${H - I - R} A${R},${R} 0 0 0 ${W - I - R},${H - I} H${I + R} A${R},${R} 0 0 0 ${I},${H - I - R}" ${ln(1.2)}/>`;
-  const i = I / 1.25, r = 15, a = r * 0.62;
-  // 捲鬚的起點接在內線圓弧的端點 (I, I+R)；整組放大 1.25 倍，所以這裡寫成 i + R / 1.25
+  // 外框只有一條線；四角留一道和外框同粗的弧線和小菱形
+  const i = 2.56, a = 15 * 0.62;
   const corner = scaleAt(1.25, 0, 0,
-    diag(`<path d="M${i},${i + R / 1.25} c4,0 6.5,2.5 6.5,6.5 c0,2.6 -2.6,3.4 -3.8,1.7 c-0.8,-1.2 0.2,-2.5 1.4,-2" ${ln(0.9)}/>`) +
-    `<path d="M${i},${i + a} A${a},${a} 0 0 0 ${i + a},${i}" ${ln(0.6)}/>` + diamond(i + a * 0.42, i + a * 0.42, 1.3));
+    `<path d="M${i},${i + a} A${a},${a} 0 0 0 ${i + a},${i}" ${ln(1)}/>` + diamond(i + a * 0.42, i + a * 0.42, 1.3));
   const arm = (s) =>
     `<path d="M${CX},10 C${CX + s * 6},10 ${CX + s * 8},4.5 ${CX + s * 14},4.8 C${CX + s * 22},5.2 ${CX + s * 23},12.5 ${CX + s * 30},11.5 C${CX + s * 35},10.8 ${CX + s * 35.5},5.6 ${CX + s * 31.5},6 C${CX + s * 29},6.3 ${CX + s * 29.5},9 ${CX + s * 31.5},8.8" ${ln(1.1)}/>` +
     `<path d="M${CX + s * 3},13.5 C${CX + s * 9},14.5 ${CX + s * 12},17.5 ${CX + s * 17},16 c${s * 2.6},-0.8 ${s * 2.2},-3.6 0,-3.4" ${ln(0.8)}/>` +
@@ -725,7 +720,7 @@ function frameSVG(W, H) {
   const crest = scaleAt(1.25, CX, 0, arm(1) + arm(-1) + diamond(CX, 7, 2.8) + `<circle cx="${CX}" cy="13" r="1.2" ${dot}/>`);
   const curl = (s) => `<path d="M${CX + s * 4},4 C${CX + s * 10},4 ${CX + s * 12},8 ${CX + s * 17},7 C${CX + s * 20.5},6.2 ${CX + s * 20},2.8 ${CX + s * 17.5},3.4" ${ln(0.9)}/>`;
   const foot = `<g transform="translate(0,${H}) scale(1,-1)">${diamond(CX, 4, 2.4) + curl(1) + curl(-1)}</g>`;
-  return `<rect x="0" y="0" width="${W}" height="${H}" ${ln(1)}/>` + notch + four(corner) + crest + foot;
+  return `<rect x="0" y="0" width="${W}" height="${H}" ${ln(1)}/>` + four(corner) + crest + foot;
 }
 function decorate(el) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
