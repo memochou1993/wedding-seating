@@ -55,6 +55,7 @@
   .hero .zh-kicker { font-size: 15px; letter-spacing: 1.2em; padding-left: 1.2em; color: var(--accent); font-weight: 500; }
   .hero .en-kicker { font-family: var(--latin); font-size: 13px; letter-spacing: .4em; padding-left: .4em; color: var(--accent); margin-top: 2px; }
   .hero h1 { margin: 22px 0 6px; font-size: clamp(32px, 6vw, 56px); font-weight: 700; letter-spacing: .14em; padding-left: .14em; color: var(--body); line-height: 1.25; text-wrap: balance; }
+  .hero .couple { font-size: 21px; font-weight: 500; letter-spacing: .3em; padding-left: .3em; color: var(--body); margin-bottom: 6px; }   /* 新人名字，夾在標題與日期之間 */
   .hero .date { font-size: 17px; letter-spacing: .12em; color: var(--body); }
   .rule { display: flex; align-items: center; gap: 12px; width: 220px; max-width: 70%; margin: 20px auto 0; color: var(--accent); }
   .rule::before, .rule::after { content: ""; flex: 1; height: 1px; background: currentColor; }
@@ -367,20 +368,26 @@
   .poster {
     --k: calc(var(--ph) / 420mm);   /* 相對 A2 的倍率 */
     width: var(--pw); height: var(--ph); box-sizing: border-box; background: var(--paper);
-    padding: calc(30mm * var(--k)) calc(26mm * var(--k)) calc(24mm * var(--k)) calc(26mm * var(--k)); display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;
+    padding: calc(36mm * var(--k)) calc(26mm * var(--k)) calc(24mm * var(--k)) calc(26mm * var(--k)); display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;
     column-gap: calc(14mm * var(--k)); row-gap: calc(5mm * var(--k)); box-shadow: none;
   }
   .poster > .frame-art { inset: calc(8mm * var(--k)); width: calc(100% - 16mm * var(--k)); height: calc(100% - 16mm * var(--k)); }
   /* 標題橫跨整張、置中在花冠下方；平面圖與席次表都從標題下方開始，左右等高，重心不偏 */
-  .p-head { grid-column: 1 / -1; height: calc(46mm * var(--k)); box-sizing: border-box; }
-  .p-plan { grid-row: 2; height: calc(var(--ph) - (54mm + 46mm + 5mm) * var(--k)); aspect-ratio: 748 / 1202.2; }   /* 和平面圖 viewBox 同比例；上緣從外牆線（y=105，半個線寬）開始 */
+  /* 標題放在平面圖正上方（左欄第 1 列）；右邊席次表從頂端排到底（跨兩列），名單高度更多 */
+  .p-head { grid-column: 1; grid-row: 1; height: calc(44mm * var(--k)); box-sizing: border-box; }
+  .p-list { grid-column: 2; grid-row: 1 / span 2; }
+  .p-plan { grid-row: 2; height: calc(var(--ph) - (60mm + 44mm + 5mm) * var(--k)); aspect-ratio: 748 / 1202.2; }   /* 和平面圖 viewBox 同比例；上緣從外牆線（y=105，半個線寬）開始 */
   .p-plan svg.plan { width: 100%; height: 100%; }
-  .p-head { text-align: center; padding-top: calc(2mm * var(--k)); }
-  .p-kicker { font-size: calc(5mm * var(--k)); color: var(--accent); }
+  /* 標題區左右兩欄：左「席次表／SEATING CHART」靠右對齊，右「林府文定／新人／日期」靠左對齊，中間一條淡金直線；左右等寬，直線落在花冠的中線上 */
+  .p-head { display: grid; grid-template-columns: 1fr 1fr; align-content: center; padding-bottom: calc(4mm * var(--k)); }
+  .p-head > * { grid-column: 2; text-align: left; padding-left: calc(8mm * var(--k)); border-left: calc(.66mm * var(--k)) solid var(--line); }   /* 和花框線同粗（1px × 2.5 ≈ 0.66mm），印出來才不會太細 */
+  .p-head > .p-kicker { grid-column: 1; grid-row: 1 / span 3; align-self: center; text-align: right; padding: 0 calc(8mm * var(--k)) 0 0; border: 0; }
+  .p-kicker { font-size: calc(11.5mm * var(--k)); color: var(--accent); }   /* 比「林府文定」（13mm）小一點 */
   /* 字距會加在每個字後面（含最後一個），左邊補一樣寬的 padding，整行才會真正置中 */
-  .p-kicker b { display: block; font-weight: inherit; letter-spacing: 1.2em; padding-left: 1.2em; }
-  .p-kicker span { display: block; font-family: var(--latin); font-size: .7em; letter-spacing: .4em; padding-left: .4em; margin-top: .3em; }
-  .p-head h1 { margin: calc(2mm * var(--k)) 0 calc(1mm * var(--k)); font-size: calc(13mm * var(--k)); letter-spacing: .14em; color: var(--body); line-height: 1.15; }
+  .p-kicker b { display: block; font-weight: 500; line-height: 1.15; letter-spacing: .35em; margin-right: -.35em; }   /* 字距加在每個字後面，靠右對齊時把最後一段收回來 */
+  .p-kicker span { display: block; font-family: var(--latin); font-size: calc(3.8mm * var(--k)); letter-spacing: .4em; margin-right: -.4em; margin-top: calc(1.5mm * var(--k)); }
+  .p-head h1 { margin: 0; padding-bottom: calc(1mm * var(--k)); font-size: calc(13mm * var(--k)); letter-spacing: .14em; color: var(--body); line-height: 1.15; }
+  .p-head .couple { font-size: calc(6.5mm * var(--k)); font-weight: 500; letter-spacing: .3em; color: var(--body); padding-bottom: calc(1.5mm * var(--k)); }
   .p-date { font-size: calc(5mm * var(--k)); letter-spacing: .1em; }
   .p-list { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: repeat(6, minmax(0, 1fr)); gap: calc(3mm * var(--k)); min-height: 0; }
   /* 海報的桌卡：桌號與桌名同一行，下方細線，名單往下排，省下高度給名單 */
@@ -433,6 +440,7 @@
     <div class="zh-kicker">席次表</div>
     <div class="en-kicker">SEATING CHART</div>
     <h1>林府文定</h1>
+    <div class="couple">文瑜・杰鋐</div>
     <div class="date">115.10.25</div>
     <div class="rule"><span></span></div>
   </header>
@@ -534,6 +542,7 @@
     <header class="p-head">
       <div class="p-kicker"><b>席次表</b><span>SEATING CHART</span></div>
       <h1>林府文定</h1>
+      <div class="couple">文瑜・杰鋐</div>
       <div class="p-date">115.10.25</div>
     </header>
     <div class="p-plan" id="p-plan"></div>
