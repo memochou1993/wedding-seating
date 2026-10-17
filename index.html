@@ -1194,13 +1194,17 @@ const onSearch = (e) => {
 };
 $("q").addEventListener("input", onSearch);
 $("q").addEventListener("compositionend", onSearch);
+// 點選項時先擋掉 mousedown，搜尋框才不會失焦：失焦會讓下拉清單收起、輸入法結束組字而重畫清單，點下去的選項就沒反應
+$("results").addEventListener("mousedown", (e) => { if (e.target.closest("button")) e.preventDefault(); });
 $("results").addEventListener("click", (e) => {
   const b = e.target.closest("button[data-id]"); if (!b) return;
-  // 搜尋框換成點下去的那個名字（或桌名），只留那一桌是金色
+  const { id, name } = b.dataset;
+  // 先收起鍵盤：輸入法若還在組字（例如打完「林」又按了下一個注音），會在這時把字送出並重新搜尋，之後再填入選到的名字才不會被蓋掉
+  document.activeElement.blur();
   clearTimeout(searchFocusTimer);
-  $("q").value = query = b.dataset.name; renderPlan(); renderSearch();
-  document.activeElement.blur();   // 收起下拉清單（手機也會收起鍵盤），留下金色桌子
-  select(b.dataset.id, false);
+  // 搜尋框換成點下去的那個名字（或桌名），只留那一桌是金色
+  $("q").value = query = name; renderPlan(); renderSearch();
+  select(id, false);
 });
 $("roster").addEventListener("click", (e) => { const b = e.target.closest("button[data-id]"); if (b) select(b.dataset.id, false); });
 
@@ -1342,6 +1346,7 @@ $("editor").addEventListener("click", (e) => { if (downOutside && e.target === $
 // 賓客的同桌名單：點頁面其他地方就收起（點別桌則直接換成那一桌）
 document.addEventListener("click", (e) => {
   if (mode !== "guest" || !selected || $("detail").hidden) return;
+  if (!e.target.isConnected) return;   // 點的元素在處理點擊時被重畫掉了（例如搜尋選項），不算點到外面
   if (e.target.closest("#detail, .tbl, #results, .card, .bar")) return;
   select(null, true);
 });
