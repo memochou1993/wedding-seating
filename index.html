@@ -113,6 +113,7 @@
   @media (max-width: 560px) { body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); } .intro .bar-dock { padding: 0 28px; } .plan-card { padding: 0 28px 56px; } .roster { display: none; } }
   .plan-card svg.plan { display: block; width: 100%; height: auto; }
   body[data-mode="guest"] .plan-zoom .edge { inset: 0; }   /* 賓客版平面圖滿版，邊緣陰影貼齊螢幕邊 */
+  body.immersive .plan-zoom .edge { --l: 1; --t: 1; --r: 1; --b: 1; }   /* 沉浸式：四邊一律有內陰影，不管倍率（含全圖）、也不管那一邊有沒有拖到底 */
   /* 平面圖畫布：雙指縮放、放大後單指拖曳（桌機用滑鼠拖）；沒放大時單指上下滑照常捲動整頁 */
   .plan-zoom { position: relative; padding: 4px; }   /* 窗口細框和平面圖內容之間留 4px */
   .plan-zoom svg.plan { touch-action: pan-y; }
@@ -123,6 +124,10 @@
      沒有內容的那一側把這層推出窗口外（被 overflow 裁掉），那邊就沒有陰影；各邊用 --l/--t/--r/--b（0 或 1）開關 */
   .plan-zoom .edge { position: absolute; inset: 4px; overflow: hidden; pointer-events: none; --l: 0; --t: 0; --r: 0; --b: 0; }
   .plan-zoom .edge::before { content: ""; position: absolute; box-shadow: inset 0 0 var(--edge-blur, 22px) rgba(43,30,20,var(--edge-alpha, .4));   /* 深咖啡，比原本的咖啡色更深 */
+  /* 沉浸式：單層模糊內陰影在邊緣最深只有設定值的一半，再疊一層窄而實的陰影（往內擴 --edge-spread），邊緣才真的變深；寬的那層負責往內淡出。
+     寬度與深淺由 applyZoom 寫在 --edge-blur／--edge-alpha（行內樣式），在開發者工具改樣式表不會生效 */
+  body.immersive .plan-zoom .edge::before { box-shadow: inset 0 0 var(--edge-blur, 22px) rgba(43,30,20,var(--edge-alpha, .4)),
+    inset 0 0 10px var(--edge-spread, 4px) rgba(43,30,20,calc(var(--edge-alpha, .4) * .55)); }
     top: calc((1 - var(--t)) * -48px); right: calc((1 - var(--r)) * -48px); bottom: calc((1 - var(--b)) * -48px); left: calc((1 - var(--l)) * -48px);
     transition: top .25s, right .25s, bottom .25s, left .25s; }
   .plan-zoom.more-l .edge { --l: 1; }
@@ -133,6 +138,8 @@
   .zoom-ctl button { width: 26px; height: 26px; padding: 0; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); color: var(--accent);
     font-size: 14px; line-height: 1; cursor: pointer; box-shadow: 0 1px 4px rgba(78,58,42,.1); }
   .zoom-ctl button:disabled { color: var(--line); cursor: default; }
+  /* －／＋ 用線條圖示（字型的全形符號太細太長，和數字不搭）：線寬固定、跟著按鈕文字顏色 */
+  .zoom-ctl button svg { display: block; width: 11px; height: 11px; margin: auto; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; }
 
   /* 平面圖 */
   .plan text { font-family: var(--serif); fill: var(--body); }
@@ -280,7 +287,7 @@
   .sheet-head .close { top: 0; right: 8px; }
   /* 手機：面板往下滑就能關閉，不需要 × */
   @media (max-width: 599px) { #close-detail, #close-editor { display: none; } }
-  .sheet.swiping { transition: none !important; }
+  .sheet.swiping { transition: none !important; user-select: none; -webkit-user-select: none; }   /* 滑鼠拖抽屜時不反白名單文字 */
   .sheet.settling { transition: transform .2s ease; }
   @media (min-width: 600px) { .sheet::before { display: none; } .sheet-head { padding-top: 16px; } .sheet-foot { padding-bottom: 14px; } #detail .sheet-body { padding-top: 18px; } }
   dialog.sheet::backdrop { background: rgba(43,37,34,.35); }
@@ -443,9 +450,19 @@
   body.immersive .plan-zoom { height: 100%; padding: 0; }
   body.immersive .plan-card svg.plan { height: 100%; touch-action: none; }   /* 頁面不捲動：單指一律拖平面圖 */
   body.immersive .legend { position: absolute; left: calc(12px + env(safe-area-inset-left)); bottom: calc(12px + env(safe-area-inset-bottom)); margin: 0;
-    padding: 6px 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 1px 4px rgba(78,58,42,.1); gap: 4px 12px; }
-  body.immersive .zoom-ctl { right: calc(12px + env(safe-area-inset-right)); bottom: calc(12px + env(safe-area-inset-bottom)); gap: 6px; }
-  body.immersive .zoom-ctl button { width: 34px; height: 34px; font-size: 17px; }
+    box-sizing: border-box; height: 32px; align-items: center; flex-wrap: nowrap;   /* 和右下縮放鈕膠囊同高（按鈕 30px＋上下框線） */
+    padding: 0 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 1px 4px rgba(78,58,42,.1); gap: 4px 12px; }
+  /* 縮放鈕：和左下圖例同款的膠囊，－＋ 兩顆合在一起、中間一條細線隔開 */
+  body.immersive .zoom-ctl { right: calc(12px + env(safe-area-inset-right)); bottom: calc(12px + env(safe-area-inset-bottom)); gap: 1px;
+    background: var(--line); border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 1px 4px rgba(78,58,42,.1); overflow: hidden; }
+  body.immersive .zoom-ctl button { width: 30px; height: 30px; border: 0; border-radius: 0; background: var(--paper); box-shadow: none; color: var(--muted); }   /* 和圖例文字同色 */   /* 兩顆都是 30×30 正方形（加上下框線共 32px，和圖例同高）；間隙透出底色當分隔線 */
+  body.immersive .zoom-ctl button:disabled { color: var(--line); }   /* 縮到全圖／放到最大時，那一顆變淡 */
+  /* 膠囊兩端是半圓，按鈕的幾何中心看起來偏外側：圖示各往內移 2px，視覺上才置中 */
+  body.immersive #zoom-out svg { transform: translateX(2px); }
+  body.immersive #zoom-in svg { transform: translateX(-2px); }
+  .zoom-pct { display: none; }
+  body.immersive .zoom-pct { display: flex; align-items: center; justify-content: center; width: 46px; height: 30px; background: var(--paper);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 13px; font-weight: 300; font-variant-numeric: tabular-nums; letter-spacing: .02em; color: var(--muted); }   /* 目前倍率：全圖＝100%；和 －／＋、圖例文字同色；數字用系統內建字型，不用思源宋體 */
 
   /* ───── 輸出版海報：尺寸由 --pw/--ph 決定（預設 A2 橫式 594×420mm），字級跟著紙張等比放大 ───── */
   body.poster-mode { padding: 0; background: #d9d4cc; overflow: auto; }
@@ -575,8 +592,9 @@
       <svg class="plan" id="plan" viewBox="88.8 103.8 744.4 1202.2" role="group" aria-label="宴會廳平面圖"></svg>
       <span class="edge" aria-hidden="true"></span>
       <div class="zoom-ctl" aria-label="平面圖縮放">
-        <button type="button" id="zoom-out" aria-label="縮小">－</button>
-        <button type="button" id="zoom-in" aria-label="放大">＋</button>
+        <button type="button" id="zoom-out" aria-label="縮小"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h9"/></svg></button>
+        <output class="zoom-pct" id="zoom-pct" aria-live="polite">100%</output>
+        <button type="button" id="zoom-in" aria-label="放大"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h9M6 1.5v9"/></svg></button>
       </div>
     </div>
     <div class="legend">
@@ -1181,26 +1199,36 @@ function swipeToClose(sheet, close) {
   let start = null;
   const body = () => sheet.querySelector(".sheet-body");
   const setY = (y) => sheet.style.transform = y ? `translateX(-50%) translateY(${y}px)` : "";
-  // 用 touch 事件：第一下移動就要決定是不是在拖面板，並立刻擋下捲動（等瀏覽器開始捲動就來不及了）
-  sheet.addEventListener("touchstart", (e) => {
-    if (e.touches.length > 1 || innerWidth >= 600 || e.target.closest("input, textarea, select, .combo-pop, .grip")) { start = null; return; }
-    const p = e.touches[0];
-    start = { y: p.clientY, x: p.clientX, t: e.timeStamp, dy: 0, v: 0, on: null };
-  }, { passive: true });
-  sheet.addEventListener("touchmove", (e) => {
-    if (!start) return;
-    const p = e.touches[0], dy = p.clientY - start.y, dx = p.clientX - start.x;
+  const begin = (x, y, t, target) => {
+    if (innerWidth >= 600 || target.closest("input, textarea, select, button, .combo-pop, .grip")) { start = null; return; }
+    start = { y, x, t, dy: 0, v: 0, on: null };
+  };
+  // 回傳 true＝正在拖面板（呼叫端要擋下捲動／反白）
+  const move = (x, y, t, min = 0) => {
+    if (!start) return false;
+    const dy = y - start.y, dx = x - start.x;
     if (start.on === null) {
+      if (Math.hypot(dx, dy) < min) return false;   // 滑鼠：先動一點再判斷方向（觸控第一下就判斷）
       // 往下、以垂直為主、內容已在最頂端 → 拖面板；否則交給內容捲動
       start.on = dy > 0 && dy >= Math.abs(dx) && (body()?.scrollTop || 0) <= 0;
       if (start.on) sheet.classList.add("swiping");
     }
-    if (!start.on) return;
-    e.preventDefault();
-    start.v = (dy - start.dy) / Math.max(1, e.timeStamp - start.t); start.t = e.timeStamp;
+    if (!start.on) return false;
+    start.v = (dy - start.dy) / Math.max(1, t - start.t); start.t = t;
     start.dy = Math.max(0, dy);
     setY(start.dy);
-  }, { passive: false });
+    return true;
+  };
+  // 用 touch 事件：第一下移動就要決定是不是在拖面板，並立刻擋下捲動（等瀏覽器開始捲動就來不及了）
+  sheet.addEventListener("touchstart", (e) => {
+    if (e.touches.length > 1) { start = null; return; }
+    begin(e.touches[0].clientX, e.touches[0].clientY, e.timeStamp, e.target);
+  }, { passive: true });
+  sheet.addEventListener("touchmove", (e) => { if (move(e.touches[0].clientX, e.touches[0].clientY, e.timeStamp)) e.preventDefault(); }, { passive: false });
+  // 桌機（視窗窄到出現抽屜時）：用滑鼠按住往下拖也能關
+  sheet.addEventListener("pointerdown", (e) => { if (e.pointerType === "mouse" && e.button === 0) begin(e.clientX, e.clientY, e.timeStamp, e.target); });
+  addEventListener("pointermove", (e) => { if (e.pointerType === "mouse" && move(e.clientX, e.clientY, e.timeStamp, 4)) e.preventDefault(); });
+  addEventListener("pointerup", (e) => { if (e.pointerType === "mouse") end(); });
   const end = () => {
     if (!start) return;
     const { on, dy, v } = start; start = null;
@@ -1230,6 +1258,17 @@ const onSearch = (e) => {
 };
 $("q").addEventListener("input", onSearch);
 $("q").addEventListener("compositionend", onSearch);
+$("q").addEventListener("change", onSearch);
+// iPhone 點鍵盤上方的建議字（QuickType／自動填入的姓名）時，Safari 有時直接換掉欄位內容、不送 input 事件，下拉清單就不會出現。
+// 搜尋框有焦點時每 0.25 秒對一次：內容和上次搜尋的不一樣（且不在組字中）就補搜一次
+let qComposing = false, qPoll = null;
+$("q").addEventListener("compositionstart", () => { qComposing = true; });
+$("q").addEventListener("compositionend", () => { qComposing = false; });
+$("q").addEventListener("focus", () => {
+  clearInterval(qPoll);
+  qPoll = setInterval(() => { const q = $("q"); if (!qComposing && q.value !== query) onSearch({ target: q }); }, 250);
+});
+$("q").addEventListener("blur", () => clearInterval(qPoll));
 // 點選項時先擋掉 mousedown，搜尋框才不會失焦：失焦會讓下拉清單收起、輸入法結束組字而重畫清單，點下去的選項就沒反應
 $("results").addEventListener("mousedown", (e) => { if (e.target.closest("button")) e.preventDefault(); });
 $("results").addEventListener("click", (e) => {
@@ -1662,10 +1701,13 @@ function applyZoom() {
     box.classList.toggle("more-b", zy + h < VB0.y + VB0.h - e);
     // 放得越大，邊緣陰影越寬越深：提示畫面外還有更多內容
     const t = (zs - 1) / (ZMAX - 1);
+    // 沉浸式滿版：放得越大陰影越深——濃度 .45（全圖）→ 1（最大），邊緣那層實陰影往內擴 3 → 9px
     box.style.setProperty("--edge-blur", (16 + 22 * t).toFixed(1) + "px");
-    box.style.setProperty("--edge-alpha", (.36 + .26 * t).toFixed(3));
+    box.style.setProperty("--edge-alpha", (IMMERSIVE ? .45 + .55 * t : .36 + .26 * t).toFixed(3));
+    box.style.setProperty("--edge-spread", (3 + 6 * t).toFixed(1) + "px");
   }
   $("zoom-in").disabled = zs >= ZMAX - 0.01; $("zoom-out").disabled = zs <= 1.01;
+  $("zoom-pct").textContent = Math.round(zs * 100) + "%";
 }
 // 讓 SVG 座標 (px, py) 落在畫面上 (fx, fy) 的位置（fx、fy 是在平面圖框內的比例 0–1）
 function placeAt(px, py, fx, fy) { zx = px - fx * VB0.w / zs; zy = py - fy * VB0.h / zs; applyZoom(); }
