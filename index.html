@@ -407,7 +407,10 @@
   .party-grid { display: grid; grid-template-columns: auto auto; justify-content: center; align-items: baseline; column-gap: 12px; text-align: left; }
   .party-grid .ct { text-align: right; color: var(--muted); font-size: .85em; white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; }
   .party-grid .kid-n { font-style: normal; display: block; font-size: .9em; line-height: 1.2; }
-  .names-grid { justify-content: stretch; grid-template-columns: 1fr auto; column-gap: 0; align-items: stretch; margin-top: 4px; }   /* 一列一組，長名字也不會擠 */
+  /* 一列兩組（姓名、人數｜姓名、人數），面板不會太高。中間空一欄 32px：左右兩組等寬，點線在中間斷開，兩組分得清楚 */
+  .names-grid { justify-content: stretch; grid-template-columns: 1fr auto 32px 1fr auto; column-gap: 0; align-items: stretch; margin-top: 4px; }
+  .names-grid > :nth-child(4n+3) { grid-column: 4; }
+  .names-grid > :nth-child(4n+4) { grid-column: 5; }
   /* 底線整列接續不斷開：兩格等高、文字貼底，人數格用左內距代替欄距 */
   .names-grid .nm, .names-grid .ct { display: flex; align-items: flex-end; padding: 7px 0; border-bottom: 1px dotted var(--line); font-size: 16px; line-height: 1.5; }
   .names-grid .ct { justify-content: flex-end; flex-wrap: wrap; padding-left: 14px; font-size: 14px; line-height: 1.7; }
@@ -1176,8 +1179,10 @@ function renderAll() { renderPlan(); renderDetail(); renderEditor(); renderStats
 function select(id, fromPlan) {
   if (id && id !== selected) { poolSide = state.tables[id].side; poolQ = ""; $("pool-q").value = ""; }
   selected = id;
-  if (id && !fromPlan) { focusTable(id); if (!IMMERSIVE) document.querySelector(`.tbl[data-id="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" }); }
+  if (id && !fromPlan && !IMMERSIVE) { focusTable(id); document.querySelector(`.tbl[data-id="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" }); }
   renderPlan(); renderDetail(); renderEditor(); renderPool();
+  // 沉浸式：同桌名單先開好，量得到抽屜多高，再把桌子移到「搜尋框下緣～抽屜上緣」的正中間；關掉抽屜時重新套用拖曳範圍
+  if (IMMERSIVE) { if (id && !fromPlan) focusTable(id); else if (id) liftTable(id); else applyZoom(); }
 }
 
 // 工作人員：可編輯、看得到人數與重複桌號；賓客：唯讀，只能找座位、看同桌名單
@@ -1195,7 +1200,7 @@ new IntersectionObserver(([e]) => document.querySelector(".bar-dock").classList.
   .observe(document.querySelector(".bar-sentinel"));
 $("close-detail").onclick = () => select(null, true);
 // 手機：從下方滑出的面板往下滑就關閉。內容捲到頂端時才開始拖；拖超過 80px 或快速往下一撥就關，不夠就彈回
-function swipeToClose(sheet, close) {
+function swipeToClose(sheet, close, onMove) {   // onMove(y, animate)：抽屜往下移了 y px（拖曳中 animate=false；放手後彈回／關閉為 true）
   let start = null;
   const body = () => sheet.querySelector(".sheet-body");
   const setY = (y) => sheet.style.transform = y ? `translateX(-50%) translateY(${y}px)` : "";
@@ -1216,7 +1221,7 @@ function swipeToClose(sheet, close) {
     if (!start.on) return false;
     start.v = (dy - start.dy) / Math.max(1, t - start.t); start.t = t;
     start.dy = Math.max(0, dy);
-    setY(start.dy);
+    setY(start.dy); onMove?.(start.dy, false);
     return true;
   };
   // 用 touch 事件：第一下移動就要決定是不是在拖面板，並立刻擋下捲動（等瀏覽器開始捲動就來不及了）
@@ -1235,13 +1240,41 @@ function swipeToClose(sheet, close) {
     sheet.classList.remove("swiping");
     if (!on) return;
     sheet.classList.add("settling");
-    if (dy > 80 || v > 0.6) { setY(sheet.offsetHeight); setTimeout(() => { sheet.classList.remove("settling"); setY(0); close(); }, 200); }
-    else { setY(0); setTimeout(() => sheet.classList.remove("settling"), 200); }
+    if (dy > 80 || v > 0.6) { setY(sheet.offsetHeight); onMove?.(sheet.offsetHeight, true); setTimeout(() => { sheet.classList.remove("settling"); setY(0); close(); }, 200); }
+    else { setY(0); onMove?.(0, true); setTimeout(() => sheet.classList.remove("settling"), 200); }
   };
   sheet.addEventListener("touchend", end);
   sheet.addEventListener("touchcancel", end);
 }
-swipeToClose($("detail"), () => select(null, true));
+// 沉浸式：平面圖跟著抽屜走——抽屜往下 y px，畫面往下 y/2（桌子一直停在搜尋框與抽屜上緣的中間）；放手後的彈回／關閉用 0.2 秒跟上抽屜的動畫
+let sheetBase = null, sheetTween = 0;
+// 畫面上下移到 target（SVG 座標的 zy），0.2 秒、和抽屜一樣先快後慢
+const tweenZy = (target, done) => {
+  cancelAnimationFrame(sheetTween);
+  const from = zy, t0 = performance.now();
+  const step = (now) => {
+    const k = Math.min(1, (now - t0) / 200), e = 1 - (1 - k) ** 3;
+    zy = from + (target - from) * e; applyZoom();
+    if (k < 1) sheetTween = requestAnimationFrame(step); else done?.();
+  };
+  sheetTween = requestAnimationFrame(step);
+};
+const followSheet = (dy, animate) => {
+  if (!IMMERSIVE || !FIT) return;
+  if (sheetBase === null) sheetBase = zy;   // 這次拖曳開始時的位置
+  const target = sheetBase - dy / 2 / (FIT.s * zs);
+  if (!animate) { cancelAnimationFrame(sheetTween); zy = target; applyZoom(); return; }
+  tweenZy(target, () => { sheetBase = null; });
+};
+// 在平面圖上點桌子打開名單：桌子若在可見範圍（搜尋框～抽屜上緣）的中線以下，就跟著抽屜滑上來，停在正中間（和關抽屜時往下相反）
+function liftTable(id) {
+  if (!FIT) return;
+  const t = TABLES.find(x => x.id === id); if (!t) return;
+  const r = plan.parentElement.getBoundingClientRect(), u = FIT.s * zs;
+  const py = (t.y - zy) * u, mid = (FIT.T + (r.height - sheetCover())) / 2;
+  if (py > mid) tweenZy(zy + (py - mid) / u); else applyZoom();
+}
+swipeToClose($("detail"), () => select(null, true), followSheet);
 addEventListener("keydown", (e) => { if (e.key === "Escape" && mode === "guest" && selected) select(null, true); });
 // 留著的搜尋清單（keep-open）：點搜尋列以外的地方或按 Esc 就收起
 addEventListener("click", (e) => { if (!e.target.closest?.(".bar")) document.querySelector(".bar").classList.remove("keep-open"); });
@@ -1670,6 +1703,18 @@ const ZMAX = 4;
 const CONTENT = { x: 94, y: 95, w: 734, h: 1110 };
 let FOCUS_FY = .5;   // 把桌子移進畫面時放在窗口高度的哪裡（避開上方搜尋列與下方的同桌名單）
 let FIT = null;      // 全圖時：每單位幾 px（s）、上方搜尋列與下方圖例佔掉的高度（T、B，px）
+// 同桌名單（抽屜）蓋住窗口下方多少 px；沒開時 0。抽屜貼底，用版面高度算（不受滑入動畫影響）
+function sheetCover() {
+  const d = $("detail"); if (d.hidden) return 0;
+  const r = plan.parentElement.getBoundingClientRect();
+  return r.bottom - (innerHeight - (parseFloat(getComputedStyle(d).bottom) || 0) - d.offsetHeight) + 12;
+}
+// 移桌子進畫面時放在窗口高度的哪裡：抽屜開著就放在搜尋框下緣與抽屜上緣的正中間，否則照 FOCUS_FY
+function focusFY() {
+  const cover = sheetCover(); if (!cover || !FIT) return FOCUS_FY;
+  const h = plan.parentElement.getBoundingClientRect().height;
+  return (FIT.T + (h - cover)) / 2 / h;
+}
 function fitImmersive() {
   const r = plan.parentElement.getBoundingClientRect(); if (!r.width || !r.height) return false;
   const T = document.querySelector(".bar-dock").getBoundingClientRect().bottom - r.top + 12;
@@ -1690,7 +1735,7 @@ function applyZoom() {
     const u = FIT.s * zs;   // 現在每單位幾 px
     const clamp = (z, size, lo, hi) => hi - lo <= size ? (lo + hi - size) / 2 : Math.min(hi - size, Math.max(lo, z));
     zx = clamp(zx, w, CONTENT.x, CONTENT.x + CONTENT.w);
-    zy = clamp(zy, h, CONTENT.y - FIT.T / u, CONTENT.y + CONTENT.h + FIT.B / u);
+    zy = clamp(zy, h, CONTENT.y - FIT.T / u, CONTENT.y + CONTENT.h + Math.max(FIT.B, sheetCover()) / u);   // 抽屜開著：下緣可以拉到抽屜上方
   } else {
     zx = Math.min(VB0.x + VB0.w - w, Math.max(VB0.x, zx));
     zy = Math.min(VB0.y + VB0.h - h, Math.max(VB0.y, zy));
@@ -1726,7 +1771,7 @@ function focusTables(ids) {
   // 沉浸式以畫面上的大小為準（約每單位 1.2px，手機上和原本放大 2.2 倍差不多），桌機、手機看起來一樣大
   const k = IMMERSIVE ? 1.2 / (plan.getBoundingClientRect().width / VB0.w) : 2.2;
   zs = Math.min(k, VB0.w / (x1 - x0), VB0.h / (y1 - y0));
-  placeAt((x0 + x1) / 2, (y0 + y1) / 2, .5, IMMERSIVE ? FOCUS_FY : .5);
+  placeAt((x0 + x1) / 2, (y0 + y1) / 2, .5, IMMERSIVE ? focusFY() : .5);
 }
 const focusTable = (id) => focusTables([id]);   // 從搜尋結果或名單選到某桌
 if (!POSTER && !BOARD) {
