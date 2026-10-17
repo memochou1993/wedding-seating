@@ -11,7 +11,7 @@
 <!-- 分享預覽（LINE、FB 只讀 HTML 原始碼裡的 Open Graph，不執行 JS）：預覽圖用 tools/gen-og.py 產生 -->
 <!-- 名單上都是賓客的真實姓名：不讓搜尋引擎收錄，分享預覽不受影響 -->
 <meta name="robots" content="noindex">
-<meta name="description" content="115.10.25 林府文定・輸入姓名，找到你的座位">
+<meta name="description" content="2026.10.25 林府文定・輸入姓名，找到你的座位">
 <meta name="theme-color" content="#f3efe8">
 <link rel="canonical" href="https://memochou1993.github.io/wedding-seating/">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -19,8 +19,8 @@
 <meta property="og:url" content="https://memochou1993.github.io/wedding-seating/">
 <meta property="og:site_name" content="林府文定">
 <meta property="og:locale" content="zh_TW">
-<meta property="og:title" content="座位表｜林府文定 文瑜・杰鋐">
-<meta property="og:description" content="115.10.25・輸入姓名，找到你的座位">
+<meta property="og:title" content="座位表｜林府文定">
+<meta property="og:description" content="2026.10.25・輸入姓名，找到你的座位">
 <meta property="og:image" content="https://memochou1993.github.io/wedding-seating/og.jpg">
 <meta property="og:image:secure_url" content="https://memochou1993.github.io/wedding-seating/og.jpg">
 <meta property="og:image:type" content="image/jpeg">
@@ -28,8 +28,8 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="林文瑜與周杰鋐・婚紗合照，座位表">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="座位表｜林府文定 文瑜・杰鋐">
-<meta name="twitter:description" content="115.10.25・輸入姓名，找到你的座位">
+<meta name="twitter:title" content="座位表｜林府文定">
+<meta name="twitter:description" content="2026.10.25・輸入姓名，找到你的座位">
 <meta name="twitter:image" content="https://memochou1993.github.io/wedding-seating/og.jpg">
 <!-- favicon：花框的香檳金愛心 -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23a8875a' d='M16 28.5C14.9 27.6 2.5 19.6 2.5 10.9 2.5 6.9 5.5 4 9.2 4c2.8 0 5.2 1.6 6.8 4 1.6-2.4 4-4 6.8-4 3.7 0 6.7 2.9 6.7 6.9 0 8.7-12.4 16.7-13.5 17.6z'/%3E%3C/svg%3E">
@@ -574,7 +574,7 @@
     <div class="kicker"><div class="zh-kicker">座位表</div><div class="en-kicker">SEATING CHART</div></div>
     <h1>林府文定</h1>
     <div class="couple">文瑜・杰鋐</div>
-    <div class="date">115.10.25</div>
+    <div class="date">2026.10.25</div>
     <div class="rule"><span></span></div>
   </header>
 
@@ -678,7 +678,7 @@
       <div class="p-kicker"><b>座位表</b><span>SEATING CHART</span></div>
       <h1>林府文定</h1>
       <div class="couple">文瑜・杰鋐</div>
-      <div class="p-date">115.10.25</div>
+      <div class="p-date">2026.10.25</div>
     </header>
     <div class="p-plan" id="p-plan"></div>
     <div class="p-list" id="p-list"></div>
@@ -1112,7 +1112,8 @@ function renderStats() {
   const ts = ORDER.map(id => state.tables[id]);
   const seated = ts.reduce((s, d) => s + seatsOf(d), 0);
   const left = roster ? unassigned().reduce((s, p) => s + p.count, 0) : null;
-  $("s-stats").textContent = `已安排 ${ts.filter(d => d.guests.length).length} / ${ts.length} 桌・${seated} 位入座` + (left === null ? "" : `・待安排 ${left} 位`);
+  // 有賓客、或勾了「保留」的桌都算已安排
+  $("s-stats").textContent = `已安排 ${ts.filter(d => d.guests.length || d.reserved).length} / ${ts.length} 桌・${seated} 位入座` + (left === null ? "" : `・待安排 ${left} 位`);
 }
 
 function renderRoster() {
