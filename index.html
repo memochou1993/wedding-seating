@@ -437,7 +437,7 @@
   body.immersive .roster, body.immersive .hero, body.immersive .bar-sentinel, body.immersive .intro > .frame-art { display: none; }
   body.immersive .intro { height: 100%; box-shadow: none; overflow: hidden; }
   body.immersive .intro .bar-dock, body.immersive .intro .bar-dock.stuck { position: absolute; top: 0; left: 0; right: 0; z-index: 10; margin: 0;
-    padding: calc(10px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left));
+    padding: calc(18px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left));
     background: none; box-shadow: none; pointer-events: none; }   /* 不鋪底色：只有輸入框本身浮在平面圖上，其他地方照樣能拖平面圖 */
   body.immersive .bar-row, body.immersive .results { pointer-events: auto; }
   body.immersive .bar { background: none; }
@@ -1765,7 +1765,7 @@ function applyZoom() {
 }
 // 讓 SVG 座標 (px, py) 落在畫面上 (fx, fy) 的位置（fx、fy 是在平面圖框內的比例 0–1）
 function placeAt(px, py, fx, fy) { zx = px - fx * VB0.w / zs; zy = py - fy * VB0.h / zs; applyZoom(); }
-function zoomBy(k) { const cx = zx + VB0.w / zs / 2, cy = zy + VB0.h / zs / 2; zs *= k; placeAt(cx, cy, .5, .5); }
+function zoomBy(k) { const cx = zx + VB0.w / zs / 2, cy = zy + VB0.h / zs / 2; zs = Math.min(ZMAX, Math.max(1, zs * k)); placeAt(cx, cy, .5, .5); }
 // 把指定的桌子框進畫面：只有一桌就放大到約 2.2 倍置中；多桌就縮放到剛好全部看得到（最多 2.2 倍）
 function focusTables(ids) {
   if (POSTER || BOARD) return;
@@ -1826,7 +1826,8 @@ if (!POSTER && !BOARD) {
     const c = centroid(), r = plan.getBoundingClientRect();
     if (Math.hypot(c.x - anchor.x, c.y - anchor.y) > 8 || fingers.size > 1) anchor.moved = true;
     if (anchor.moved && e.pointerType === "mouse") document.body.classList.add("panning");
-    if (fingers.size > 1 && anchor.d) zs = anchor.s * spread() / anchor.d;
+    // 先把倍率夾在 1–4 倍再定位：已到 400% 還繼續撐開時，用超出上限的倍率算位置、之後才被夾回，畫面會被推著滑走
+    if (fingers.size > 1 && anchor.d) zs = Math.min(ZMAX, Math.max(1, anchor.s * spread() / anchor.d));
     placeAt(anchor.px, anchor.py, (c.x - r.left) / r.width, (c.y - r.top) / r.height);
   });
   const lift = (e) => {
