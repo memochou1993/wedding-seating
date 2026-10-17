@@ -424,6 +424,7 @@
      一行小標題＋搜尋框浮在上方，圖例與縮放鈕浮在下方。高度用 100dvh：跟著手機瀏覽器網址列伸縮，永遠是看得到的高度 ───── */
   .mini-title { display: none; }
   body.immersive { padding: 0; height: 100vh; height: 100dvh; overflow: hidden; background: var(--paper); }
+  html.immersive, body.immersive { overscroll-behavior: none; }   /* 拖平面圖拖到底時，不要整頁回彈或觸發「下拉重新整理」 */
   body.immersive .wrap { max-width: 720px; display: block; height: 100%; }   /* 大螢幕：中間一欄（約會場寬），兩側露出底色 */
   @media (min-width: 721px) { body.immersive { background: var(--ground); } body.immersive .intro { box-shadow: 0 0 40px rgba(78,58,42,.12); } }
   body.immersive .roster, body.immersive .hero, body.immersive .bar-sentinel, body.immersive .intro > .frame-art { display: none; }
@@ -1559,7 +1560,7 @@ const PAPER = { a1: [841, 594], a2: [594, 420], a3: [420, 297] };
 // 桌機的工作人員版也用這個版面當編輯畫面（BOARD）：上方找座位列，下方整張海報縮放到剛好塞滿視窗
 const BOARD = STAFF && !POSTER && matchMedia("(min-width: 1100px)").matches;
 const IMMERSIVE = !STAFF && !POSTER;   // 賓客版：平面圖滿版
-if (IMMERSIVE) document.body.classList.add("immersive");
+if (IMMERSIVE) { document.body.classList.add("immersive"); document.documentElement.classList.add("immersive"); }
 // 輸出版：平面圖往上多畫一段（高度 = 標題列＋列間距），比例尺不變；外牆上緣跟著上移，標題就落在牆內
 function extendPlanForPoster() {
   const box = $("p-plan"), head = document.querySelector(".p-head");
@@ -1819,7 +1820,11 @@ if (!POSTER && !BOARD) {
     // 沉浸式：整頁都不讓 Safari 放大畫面——手指落在標題、搜尋框、圖例、名單上，或一指在圖上一指在圖外時，捏合也不會變成整頁放大
     const noPageZoom = (e) => e.preventDefault();
     document.addEventListener("gesturestart", noPageZoom); document.addEventListener("gesturechange", noPageZoom);
-    document.addEventListener("touchmove", (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+    // 單指也擋：頁面本身不捲動，往下拖平面圖（或從標題、搜尋框旁開始拖）時，iPhone／LINE 不會把它當成下拉重新整理。
+    // 同桌名單與搜尋結果需要自己捲動，那裡的單指拖曳照常
+    document.addEventListener("touchmove", (e) => {
+      if (e.touches.length > 1 || !e.target.closest?.(".sheet, .results")) e.preventDefault();
+    }, { passive: false });
   }
   applyZoom();
 }
