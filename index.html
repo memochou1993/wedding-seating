@@ -87,21 +87,36 @@
   .hero h1 { margin: 22px 0 6px; font-size: clamp(32px, 6vw, 56px); font-weight: 700; letter-spacing: .14em; padding-left: .14em; color: var(--body); line-height: 1.25; text-wrap: balance; }
   .hero .couple { font-size: 21px; font-weight: 500; letter-spacing: .3em; padding-left: .3em; color: var(--body); margin-bottom: 6px; }   /* 新人名字，夾在標題與日期之間 */
   .hero .date { font-size: 17px; letter-spacing: .12em; color: var(--body); }
+  /* 手機：照輸出版的標題排成左右兩欄——左「席次表」靠右、右邊標題／新人／日期靠左，中間一條細直線；不畫下方菱形線。
+     兩欄等寬，直線落在正中、和上方花飾的中軸對齊；上方離花飾、下方離搜尋框的留白差不多，整組才不會往一邊偏 */
+  @media (max-width: 560px) {
+    .hero { display: grid; grid-template-columns: 1fr 1fr; align-items: center; padding: 96px 16px 8px; }
+    .hero .kicker { grid-row: 1 / span 3; text-align: right; padding-right: 18px; }
+    /* 左欄只有兩行、金色較淡：字放大到和「林府文定」差不多、加粗一級，左右的份量才平衡 */
+    .hero .zh-kicker { font-size: clamp(23px, 7vw, 30px); font-weight: 600; letter-spacing: .2em; padding-left: 0; margin-right: -.2em; line-height: 1.2; }   /* 字距加在每個字後面，靠右對齊時把最後一段收回來 */
+    .hero .en-kicker { font-size: 10px; letter-spacing: .26em; padding-left: 0; margin: 8px -.26em 0 0; }
+    .hero h1, .hero .couple, .hero .date { grid-column: 2; text-align: left; padding-left: 18px; border-left: 1px solid var(--line); }
+    .hero h1 { margin: 0; padding-bottom: 2px; font-size: clamp(24px, 7.2vw, 31px); line-height: 1.15; }
+    .hero .couple { margin: 0; padding-bottom: 2px; font-size: 15px; line-height: 1.4; }
+    .hero .date { font-size: 13px; line-height: 1.4; }
+    .hero .rule { display: none; }
+  }
   .rule { display: flex; align-items: center; gap: 12px; width: 220px; max-width: 70%; margin: 20px auto 0; color: var(--accent); }
   .rule::before, .rule::after { content: ""; flex: 1; height: 1px; background: currentColor; }
   .rule span { width: 7px; height: 7px; background: currentColor; transform: rotate(45deg); }
 
-  /* 版面：手機優先的單欄。標題 → 固定在頂端的找座位列 → 平面圖 → 席次一覽；電腦上置中最寬 880px */
+  /* 版面：手機優先的單欄。標題 → 固定在頂端的找座位列 → 平面圖 → 席次一覽（手機不顯示，點平面圖的桌子就看得到名單）；電腦上置中最寬 880px */
   /* 搜尋列夾在標題與平面圖之間，左右和平面圖對齊；下方拉長避開四角花飾 */
   .intro .bar-dock { padding: 0 36px; margin: 0; }   /* 左右和平面圖窗口對齊（同 .plan-card 的左右留白）；下方不留（預留的提示行就是間隔） */
   .intro .bar-sentinel { height: 0; }
-  .plan-card { padding: 0 36px 104px; }   /* 左右：花框內線往內再留 14px（同花框到卡片邊的距離） */
-  @media (max-width: 560px) { body { padding: 16px 8px 48px; } .hero { padding: 72px 20px 24px; } .intro .bar-dock { padding: 0 28px; } .plan-card { padding: 0 28px 92px; } .roster { padding: 56px 16px 156px; } }
+  .plan-card { padding: 0 36px 104px; }   /* 左右：花框內線往內再留 14px（同花框到卡片邊的距離）；手機版下方只留到避開底部花飾；頁面不留邊，卡片貼滿螢幕、四周不露底色 */
+  @media (max-width: 560px) { body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); } .intro .bar-dock { padding: 0 28px; } .plan-card { padding: 0 28px 56px; } .roster { display: none; } }
   .plan-card svg.plan { display: block; width: 100%; height: auto; }
-  /* 平面圖畫布：雙指縮放、放大後單指拖曳；沒放大時單指上下滑照常捲動整頁 */
+  /* 平面圖畫布：雙指縮放、放大後單指拖曳（桌機用滑鼠拖）；沒放大時單指上下滑照常捲動整頁 */
   .plan-zoom { position: relative; padding: 4px; }   /* 窗口細框和平面圖內容之間留 4px */
   .plan-zoom svg.plan { touch-action: pan-y; }
-  .plan-zoom svg.plan.zoomed { touch-action: none; }
+  .plan-zoom svg.plan.zoomed { touch-action: none; cursor: grab; }
+  body.panning, body.panning * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
   /* 邊緣陰影：那一側還有沒看到的內容時，沿窗口內緣出現一道淡咖啡內陰影，提示可以往那邊滑。
      一層直角、四邊同一道模糊的 inset 陰影：外圍貼齊窗口是直角，往內淡出時轉角自然成圓弧。
      沒有內容的那一側把這層推出窗口外（被 overflow 裁掉），那邊就沒有陰影；各邊用 --l/--t/--r/--b（0 或 1）開關 */
@@ -196,20 +211,20 @@
   /* 第一張卡裡的搜尋列：平常和卡片融在一起；固定在頂端時變成一條有陰影的浮動列 */
   /* 黏在頂端時整條（含上方與左右的留白）鋪卡片底色，後面捲動的平面圖不會透出來；陰影加在整條下方 */
   .intro .bar-dock.stuck { background: var(--paper); box-shadow: 0 6px 16px rgba(78,58,42,.12); padding-bottom: 14px; }
-  .intro .bar-dock.stuck .bar { padding-bottom: 0; }   /* 輸入框上方平常和黏住時都是 24px，黏住瞬間不會跳；左右的 4px 內縮維持 */   /* 黏住時輸入框上下留白一致（14px 也夠「搜尋」標籤浮起來） */
+  .intro .bar-dock.stuck .bar { padding-bottom: 0; }   /* 輸入框上方平常和黏住時都是 24px，黏住瞬間不會跳；左右的 4px 內縮維持 */   /* 黏住時輸入框上下留白一致（14px 也夠「請輸入您的姓名」標籤浮起來） */
   .intro .bar { box-shadow: none; padding: 24px 4px 0; gap: 0; }   /* 左右比平面圖窗口再內縮 4px（和平面圖窗口內側的 4px 一致）；輸入框下方不留白，緊接著預留的一行提示 */
   .bar-sentinel { height: 0; margin: 0; }
   .bar { position: relative; grid-template-columns: minmax(0, 1fr); background: var(--paper); box-shadow: 0 1px 2px rgba(78,58,42,.06), 0 10px 30px rgba(78,58,42,.07); padding: 12px 16px; display: grid; gap: 6px; }   /* 和其他卡片一樣用陰影 */
   /* 搜尋框：空著時「搜尋」在框裡；點進去或有輸入時，縮小浮到外框上緣（外框在標籤處斷開），外框與標籤轉成香檳金。
      placeholder 是一個空白，只用來偵測欄位是不是空的（:placeholder-shown） */
   .bar-row { position: relative; display: flex; }
-  .bar input { font-family: "Bopomofo", var(--serif); flex: 1; min-width: 0; padding: 12px 14px 11px 44px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); font-size: 18px; line-height: 1.4; }   /* 18px 字在框裡比較飽滿 */
+  .bar input { font-family: "Bopomofo", var(--serif); flex: 1; min-width: 0; padding: 12px 14px 11px 44px; border: 1px solid var(--body); border-radius: 4px; background: var(--paper); font-size: 18px; line-height: 1.4; }   /* 18px 字在框裡比較飽滿；外框、圖示、提示字都和「林府文定」同色，一眼就看得到 */
   .bar input:focus { border-color: var(--accent); outline: none; box-shadow: inset 0 0 0 1px var(--accent); }
-  .notch-label { position: absolute; top: 0; left: 10px; transform: translateY(-50%); padding: 0 6px; background: var(--paper); font-size: 13px; line-height: 1; color: var(--muted); pointer-events: none;
+  .notch-label { position: absolute; top: 0; left: 10px; transform: translateY(-50%); padding: 0 6px; background: var(--paper); font-size: 13px; line-height: 1; color: var(--body); pointer-events: none;
     transition: top .18s ease, left .18s ease, font-size .18s ease, color .18s ease; }
-  .bar input:placeholder-shown:not(:focus) + .notch-label { top: 50%; left: 38px; font-size: 18px; color: var(--muted); }
+  .bar input:placeholder-shown:not(:focus) + .notch-label { top: 50%; left: 38px; font-size: 18px; }
   /* 放大鏡：放在框內左側，標籤躺在框裡時排在它右邊 */
-  .search-icon { position: absolute; left: 14px; top: 50%; width: 20px; height: 20px; transform: translateY(-50%); fill: none; stroke: var(--muted); stroke-width: 1.6; stroke-linecap: round; pointer-events: none; transition: stroke .18s; }
+  .search-icon { position: absolute; left: 14px; top: 50%; width: 20px; height: 20px; transform: translateY(-50%); fill: none; stroke: var(--body); stroke-width: 1.6; stroke-linecap: round; pointer-events: none; transition: stroke .18s; }
   .bar-row:focus-within .search-icon { stroke: var(--accent); }
   .bar-row:focus-within .notch-label { color: var(--accent); }
   /* 清除鈕（×）：換掉瀏覽器預設的藍色，改用和文字同色系的細線 */
@@ -498,8 +513,7 @@
   <!-- 第一張卡：標題、找座位、平面圖合在同一個花框裡 -->
   <section class="intro framed">
   <header class="hero">
-    <div class="zh-kicker">席次表</div>
-    <div class="en-kicker">SEATING CHART</div>
+    <div class="kicker"><div class="zh-kicker">席次表</div><div class="en-kicker">SEATING CHART</div></div>
     <h1>林府文定</h1>
     <div class="couple">文瑜・杰鋐</div>
     <div class="date">115.10.25</div>
@@ -512,7 +526,7 @@
     <div class="bar-row">
       <svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.75"/><path d="M12.8 12.8 17 17"/></svg>
       <input id="q" type="search" placeholder=" " autocomplete="off" enterkeyhint="search">
-      <label class="notch-label" for="q">搜尋</label>
+      <label class="notch-label" for="q">請輸入您的姓名</label>
     </div>
     <ul class="results" id="results"></ul>
     <p class="hint" id="search-hint"></p>
@@ -1613,27 +1627,34 @@ if (!POSTER && !BOARD) {
     anchor = { px: zx + (c.x - r.left) / r.width * VB0.w / zs, py: zy + (c.y - r.top) / r.height * VB0.h / zs, d: spread(), s: zs, x: c.x, y: c.y, moved: false };
   };
   plan.addEventListener("pointerdown", (e) => {
-    if (e.pointerType !== "touch") return;
+    if (e.pointerType === "mouse") {
+      // 滑鼠：放大後按住左鍵拖曳平移；工作人員按在桌子上是在拖桌，不平移
+      if (e.button > 0 || zs <= 1.01 || (mode === "staff" && e.target.closest(".tbl"))) return;
+      e.preventDefault();   // 拖曳時不要反白平面圖上的字
+    } else if (e.pointerType !== "touch") return;
     fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (fingers.size === 2 && drag && !drag.active) { clearTimeout(drag.timer); drag = null; }   // 兩指是在縮放，不是長按拖桌
     reanchor();
   });
-  plan.addEventListener("pointermove", (e) => {
+  // 移動、放開聽在整個視窗：滑鼠拖出平面圖外也能繼續平移、放開時收尾
+  addEventListener("pointermove", (e) => {
     if (!fingers.has(e.pointerId) || !anchor || drag?.active) return;
     fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (fingers.size === 1 && zs <= 1.01) return;   // 沒放大：交給瀏覽器捲動頁面
     const c = centroid(), r = plan.getBoundingClientRect();
     if (Math.hypot(c.x - anchor.x, c.y - anchor.y) > 8 || fingers.size > 1) anchor.moved = true;
+    if (anchor.moved && e.pointerType === "mouse") document.body.classList.add("panning");
     if (fingers.size > 1 && anchor.d) zs = anchor.s * spread() / anchor.d;
     placeAt(anchor.px, anchor.py, (c.x - r.left) / r.width, (c.y - r.top) / r.height);
   });
   const lift = (e) => {
     if (!fingers.delete(e.pointerId)) return;
+    document.body.classList.remove("panning");
     if (anchor?.moved) { justDragged = true; setTimeout(() => justDragged = false, 0); }   // 拖過畫布就不算點桌子
     reanchor();
   };
-  plan.addEventListener("pointerup", lift);
-  plan.addEventListener("pointercancel", lift);
+  addEventListener("pointerup", lift);
+  addEventListener("pointercancel", lift);
   // 全圖時平面圖的 touch-action 是 pan-y（單指捲頁）；這在手指按下時就決定了，捏合途中改成 none 也來不及，
   // 瀏覽器會把後續移動當成捲動搶走（pointercancel），縮放卡在第一下。兩指以上就自己擋下預設行為，整段捏合都由這裡處理
   const multi = (e) => { if (e.touches.length > 1) e.preventDefault(); };
