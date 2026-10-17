@@ -300,14 +300,14 @@
   /* 賓客點桌子浮出的資訊卡：置中的座位卡樣式 */
   .place { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 4px; }
   .place .eyebrow { font-family: var(--latin); font-size: 12px; letter-spacing: .4em; padding-left: .4em; color: var(--accent); }
-  .place .n { font-family: var(--latin); font-size: 52px; font-weight: 600; line-height: 1; color: var(--body); margin-top: 2px; }
+  .place .n { font-family: var(--latin); font-size: 52px; font-weight: 600; line-height: 1; color: var(--body); }
   .place .n:not(:empty) { font-variant-numeric: lining-nums; }
   .place .mini-rule { display: flex; align-items: center; gap: 6px; width: 72px; margin: 14px 0 6px; color: var(--accent); }
   .place .mini-rule::before, .place .mini-rule::after { content: ""; flex: 1; height: 1px; background: currentColor; opacity: .7; }
   .place .mini-rule i { width: 5px; height: 5px; background: currentColor; transform: rotate(45deg); }
   .reserved { margin: 6px 0 4px; text-align: center; font-size: 15px; letter-spacing: .3em; padding-left: .3em; color: var(--muted); }
   .reserved em { display: block; margin-top: 4px; font-family: var(--latin); font-size: 15px; letter-spacing: .08em; color: var(--body); }
-  .place .tname { font-size: 17px; font-weight: 600; letter-spacing: .3em; padding-left: .3em; color: var(--body); margin: 10px 0 0; }   /* 桌名是標題的一部分：字距拉開、稍粗，和下方名單區分 */
+  .place .tname { font-size: 20px; font-weight: 600; letter-spacing: .3em; padding-left: .3em; color: var(--body); margin: 0; }   /* 桌名是標題的一部分：字距拉開、稍粗，和下方名單區分 */
 
   /* 編輯面板 */
   .check { display: flex; align-items: flex-start; gap: 10px; margin: 16px 0 0; cursor: pointer; font-size: 15px; }
@@ -415,6 +415,10 @@
   .names-grid .nm, .names-grid .ct { display: flex; align-items: flex-end; padding: 7px 0; border-bottom: 1px dotted var(--line); font-size: 16px; line-height: 1.5; }
   .names-grid .ct { justify-content: flex-end; flex-wrap: wrap; padding-left: 14px; font-size: 14px; line-height: 1.7; }
   .names-grid .ct .kid-n { flex-basis: 100%; text-align: right; }
+  @media (max-width: 599px) {   /* 手機抽屜：姓名、人數、Reserved 都放大一號，比較好讀 */
+    .names-grid .nm { font-size: 18px; } .names-grid .ct { font-size: 16px; }
+    #detail .reserved { font-size: 17px; } #detail .reserved em { font-size: 20px; }
+  }
   /* 座位條 */
   .card .meter { display: flex; gap: 4px; margin-top: auto; padding-top: 12px; }
   .meter i { width: 6px; height: 6px; border-radius: 50%; border: 1px solid var(--accent); }
