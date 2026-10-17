@@ -40,6 +40,16 @@ tools/poster.sh        # → dist/席次表-a2.pdf（讀雲端最新資料）
 tools/poster.sh a1     # A1
 ```
 
+## 分享預覽（LINE／FB）
+
+`<head>` 的 Open Graph 標籤讓 LINE 分享時顯示標題、描述與預覽圖 `og.jpg`（1200×630，版型沿用 `../forever-vows` 文定喜帖）；頁面設 `noindex`，不讓搜尋引擎收錄賓客姓名。
+
+```bash
+python3 tools/gen-og.py   # → og.jpg、apple-touch-icon.png（需要 ../forever-vows、Pillow、fontTools）
+```
+
+LINE 會快取舊的預覽，換圖後分享時網址加 `?v=N`。
+
 ## 出席名單匯入
 
 出席調查試算表 → 席次表的「待安排」名單（工作人員編輯面板裡「從出席名單加入」）：
