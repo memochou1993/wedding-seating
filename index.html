@@ -162,8 +162,6 @@
   .side-tag { display: inline-flex; align-items: center; gap: 6px; letter-spacing: .06em; color: var(--muted); }
   .side-tag svg { flex: none; width: 14px; height: 14px; }
   .side-tag circle { fill: var(--paper); stroke: var(--accent); stroke-width: 1.1; }
-  .side-tag .kid-icon { fill: var(--kid); }
-  body[data-mode="guest"] .kid-tag, body.poster-mode:not(.board-mode) .kid-tag { display: none; }   /* 賓客版、輸出版不畫椅子，也就沒有兒童座椅圖例 */
   .side-tag[data-side="主婚人親友"] circle { fill: var(--parents); }
   .side-tag[data-side="新人親友"] circle { fill: var(--couple); }
   .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; margin-top: 22px; font-size: 13px; color: var(--muted); }
@@ -512,8 +510,6 @@
     <div class="legend">
       <span class="side-tag" data-side="主婚人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>主婚人親友</span>
       <span class="side-tag" data-side="新人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>新人親友</span>
-      <span class="side-tag staff-only" data-side=""><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>未設定</span>
-      <span class="side-tag kid-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><rect class="kid-icon" x="2.5" y="2.5" width="9" height="9" rx="1.2"/></svg>兒童座椅</span>
     </div>
   </div>
   </section>
