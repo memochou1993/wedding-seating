@@ -7,7 +7,7 @@
 <meta name="referrer" content="no-referrer">
 <!-- 只允許自己的程式、Google Fonts，以及連線到 wedding 的 Supabase -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://jkzybhpzihljrluxslmy.supabase.co; img-src 'self' data:; base-uri 'none'; form-action 'none'; object-src 'none'">
-<title>席次表｜林府文定</title>
+<title>座位表｜林府文定</title>
 <!-- 分享預覽（LINE、FB 只讀 HTML 原始碼裡的 Open Graph，不執行 JS）：預覽圖用 tools/gen-og.py 產生 -->
 <!-- 名單上都是賓客的真實姓名：不讓搜尋引擎收錄，分享預覽不受影響 -->
 <meta name="robots" content="noindex">
@@ -19,16 +19,16 @@
 <meta property="og:url" content="https://memochou1993.github.io/wedding-seating/">
 <meta property="og:site_name" content="林府文定">
 <meta property="og:locale" content="zh_TW">
-<meta property="og:title" content="席次表｜林府文定 文瑜・杰鋐">
+<meta property="og:title" content="座位表｜林府文定 文瑜・杰鋐">
 <meta property="og:description" content="115.10.25・輸入姓名，找到你的座位">
 <meta property="og:image" content="https://memochou1993.github.io/wedding-seating/og.jpg">
 <meta property="og:image:secure_url" content="https://memochou1993.github.io/wedding-seating/og.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="林文瑜與周杰鋐・婚紗合照，席次表">
+<meta property="og:image:alt" content="林文瑜與周杰鋐・婚紗合照，座位表">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="席次表｜林府文定 文瑜・杰鋐">
+<meta name="twitter:title" content="座位表｜林府文定 文瑜・杰鋐">
 <meta name="twitter:description" content="115.10.25・輸入姓名，找到你的座位">
 <meta name="twitter:image" content="https://memochou1993.github.io/wedding-seating/og.jpg">
 <!-- favicon：花框的香檳金愛心 -->
@@ -87,7 +87,7 @@
   .hero h1 { margin: 22px 0 6px; font-size: clamp(32px, 6vw, 56px); font-weight: 700; letter-spacing: .14em; padding-left: .14em; color: var(--body); line-height: 1.25; text-wrap: balance; }
   .hero .couple { font-size: 21px; font-weight: 500; letter-spacing: .3em; padding-left: .3em; color: var(--body); margin-bottom: 6px; }   /* 新人名字，夾在標題與日期之間 */
   .hero .date { font-size: 17px; letter-spacing: .12em; color: var(--body); }
-  /* 手機：照輸出版的標題排成左右兩欄——左「席次表」靠右、右邊標題／新人／日期靠左，中間一條細直線；不畫下方菱形線。
+  /* 手機：照輸出版的標題排成左右兩欄——左「座位表」靠右、右邊標題／新人／日期靠左，中間一條細直線；不畫下方菱形線。
      兩欄等寬，直線落在正中、和上方花飾的中軸對齊；上方離花飾、下方離搜尋框的留白差不多，整組才不會往一邊偏 */
   @media (max-width: 560px) {
     .hero { display: grid; grid-template-columns: 1fr 1fr; align-items: center; padding: 96px 16px 8px; }
@@ -497,8 +497,8 @@
     column-gap: calc(14mm * var(--k)); row-gap: calc(5mm * var(--k)); box-shadow: none;
   }
   .poster > .frame-art { inset: calc(8mm * var(--k)); width: calc(100% - 16mm * var(--k)); height: calc(100% - 16mm * var(--k)); }
-  /* 標題橫跨整張、置中在花冠下方；平面圖與席次表都從標題下方開始，左右等高，重心不偏 */
-  /* 標題放在平面圖正上方（左欄第 1 列）；右邊席次表從頂端排到底（跨兩列），名單高度更多 */
+  /* 標題橫跨整張、置中在花冠下方；平面圖與座位表都從標題下方開始，左右等高，重心不偏 */
+  /* 標題放在平面圖正上方（左欄第 1 列）；右邊座位表從頂端排到底（跨兩列），名單高度更多 */
   .p-head { grid-column: 1; grid-row: 1; height: calc(44mm * var(--k)); box-sizing: border-box; }
   .p-list { grid-column: 2; grid-row: 1 / span 2; }
   /* 實驗：平面圖佔滿左欄（跨標題列），外牆往上延伸，標題寫在牆內、舞台上方；viewBox 與比例由 extendPlanForPoster() 依標題高度算出 */
@@ -510,7 +510,7 @@
   body.poster-mode .plan .entrance-mark { display: inline; }
   .plan .entrance-mark line { stroke: var(--line); stroke-width: 4; stroke-linecap: round; }   /* 和卡片框線同色，比桌框淡，不搶眼 */
   .p-plan svg.plan { width: 100%; height: 100%; overflow: visible; }
-  /* 標題區左右兩欄：左「席次表／SEATING CHART」靠右對齊，右「林府文定／新人／日期」靠左對齊，中間一條淡金直線；左右等寬，直線落在花冠的中線上 */
+  /* 標題區左右兩欄：左「座位表／SEATING CHART」靠右對齊，右「林府文定／新人／日期」靠左對齊，中間一條淡金直線；左右等寬，直線落在花冠的中線上 */
   .p-head { display: grid; grid-template-columns: 1fr 1fr; align-content: center; padding-bottom: calc(4mm * var(--k)); }
   .p-head > * { grid-column: 2; text-align: left; padding-left: calc(8mm * var(--k)); border-left: calc(.66mm * var(--k)) solid var(--line); }   /* 和花框線同粗（1px × 2.5 ≈ 0.66mm），印出來才不會太細 */
   .p-head > .p-kicker { grid-column: 1; grid-row: 1 / span 3; align-self: center; text-align: right; padding: 0 calc(8mm * var(--k)) 0 0; border: 0; }
@@ -571,7 +571,7 @@
   <!-- 第一張卡：標題、找座位、平面圖合在同一個花框裡 -->
   <section class="intro framed">
   <header class="hero">
-    <div class="kicker"><div class="zh-kicker">席次表</div><div class="en-kicker">SEATING CHART</div></div>
+    <div class="kicker"><div class="zh-kicker">座位表</div><div class="en-kicker">SEATING CHART</div></div>
     <h1>林府文定</h1>
     <div class="couple">文瑜・杰鋐</div>
     <div class="date">115.10.25</div>
@@ -672,10 +672,10 @@
     <div class="roster-grid" id="roster"></div>
   </section>
 
-  <!-- 輸出版（?poster，預設 A2 橫式）：上方置中標題，下方左邊平面圖、右邊 7×6 席次表；用瀏覽器列印或 tools/poster.sh 存成 PDF -->
+  <!-- 輸出版（?poster，預設 A2 橫式）：上方置中標題，下方左邊平面圖、右邊 7×6 座位表；用瀏覽器列印或 tools/poster.sh 存成 PDF -->
   <section class="poster framed" id="poster" data-frame-scale="1.8" data-line-scale="2.5" hidden>
     <header class="p-head">
-      <div class="p-kicker"><b>席次表</b><span>SEATING CHART</span></div>
+      <div class="p-kicker"><b>座位表</b><span>SEATING CHART</span></div>
       <h1>林府文定</h1>
       <div class="couple">文瑜・杰鋐</div>
       <div class="p-date">115.10.25</div>

@@ -1,4 +1,4 @@
--- 席次表資料放在獨立的 `seating` schema，與 wedding 專案其他資料（例如 song）分開。
+-- 座位表資料放在獨立的 `seating` schema，與 wedding 專案其他資料（例如 song）分開。
 -- 這個 schema 不對外開放：anon 沒有任何表權限，只能透過 public 底下的三個函式存取。
 --
 --   public.seating_get(event)                       讀整份席次（公開，賓客也能讀）

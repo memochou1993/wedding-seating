@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""把出席調查試算表的「能出席」名單匯入席次表的出席名單（工作人員專用）。
+"""把出席調查試算表的「能出席」名單匯入座位表的出席名單（工作人員專用）。
 
     python3 tools/import_roster.py            # 匯入
     python3 tools/import_roster.py --dry-run  # 只看結果、不上傳
