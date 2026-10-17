@@ -112,6 +112,7 @@
   .plan-card { padding: 0 36px 104px; }   /* 左右：花框內線往內再留 14px（同花框到卡片邊的距離）；手機版下方只留到避開底部花飾；頁面不留邊，卡片貼滿螢幕、四周不露底色 */
   @media (max-width: 560px) { body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); } .intro .bar-dock { padding: 0 28px; } .plan-card { padding: 0 28px 56px; } .roster { display: none; } }
   .plan-card svg.plan { display: block; width: 100%; height: auto; }
+  body[data-mode="guest"] .plan-zoom .edge { inset: 0; }   /* 賓客版平面圖滿版，邊緣陰影貼齊螢幕邊 */
   /* 平面圖畫布：雙指縮放、放大後單指拖曳（桌機用滑鼠拖）；沒放大時單指上下滑照常捲動整頁 */
   .plan-zoom { position: relative; padding: 4px; }   /* 窗口細框和平面圖內容之間留 4px */
   .plan-zoom svg.plan { touch-action: pan-y; }
@@ -138,6 +139,8 @@
   .plan .wall { fill: none; stroke: #b9a891; stroke-width: 2.4; stroke-linejoin: miter; stroke-linecap: butt; }
   .plan .door { fill: none; stroke: #b9a891; stroke-width: 2.4; }   /* 門弧、門片和牆一樣粗 */
   .plan .pillar { fill: #b9a891; }
+  /* 賓客版不畫外牆、門、柱子和「入口」字，只留舞台、伸展台和桌子；工作人員版才看得到牆和門的細節 */
+  body[data-mode="guest"] .plan .wall, body[data-mode="guest"] .plan .door, body[data-mode="guest"] .plan .pillar, body[data-mode="guest"] .plan > .entrance { display: none; }
   .plan .entrance { font-size: 15px; letter-spacing: .5em; fill: var(--accent); }
   .plan .stage { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.4; }
   .plan .stair { fill: var(--paper); stroke: #c7b394; stroke-width: 1; }
@@ -218,7 +221,7 @@
   /* 搜尋框：空著時「搜尋」在框裡；點進去或有輸入時，縮小浮到外框上緣（外框在標籤處斷開），外框與標籤轉成香檳金。
      placeholder 是一個空白，只用來偵測欄位是不是空的（:placeholder-shown） */
   .bar-row { position: relative; display: flex; }
-  .bar input { font-family: "Bopomofo", var(--serif); flex: 1; min-width: 0; padding: 12px 14px 11px 44px; border: 1px solid var(--body); border-radius: 4px; background: var(--paper); font-size: 18px; line-height: 1.4; }   /* 18px 字在框裡比較飽滿；外框、圖示、提示字都和「林府文定」同色，一眼就看得到 */
+  .bar input { font-family: "Bopomofo", var(--serif); flex: 1; min-width: 0; padding: 12px 14px 11px 44px; border: 1px solid var(--accent); border-radius: 4px; background: var(--paper); font-size: 18px; line-height: 1.4; }   /* 18px 字在框裡比較飽滿；外框用和桌子圓框同一個香檳金，圖示、提示字和「林府文定」同色 */
   .bar input:focus { border-color: var(--accent); outline: none; box-shadow: inset 0 0 0 1px var(--accent); }
   .notch-label { position: absolute; top: 0; left: 10px; transform: translateY(-50%); padding: 0 6px; background: var(--paper); font-size: 13px; line-height: 1; color: var(--body); pointer-events: none;
     transition: top .18s ease, left .18s ease, font-size .18s ease, color .18s ease; }
@@ -235,6 +238,7 @@
   .results:empty, .bar:not(:focus-within) .results { display: none; }
   .results button { width: 100%; min-width: 0; text-align: left; border: 1px solid var(--line); background: #fff; padding: 10px 12px; cursor: pointer; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 12px; }
   .results button > span { min-width: 0; overflow-wrap: anywhere; }
+  .results .empty { padding: 10px 12px; font-size: 14px; color: var(--muted); }
   .results button:hover { border-color: var(--accent); }
   .results b { color: var(--accent); margin-left: auto; text-align: right; }   /* 放不下就整段換到下一行靠右，長桌名不會撐寬畫面 */
   .hint { color: var(--muted); font-size: 13px; margin: 0; }
@@ -413,6 +417,36 @@
 
   [hidden] { display: none !important; }
 
+  /* ───── 賓客版沉浸式（手機、桌機都一樣）：平面圖滿版一整個畫面，沒有花框與大標題；
+     一行小標題＋搜尋框浮在上方，圖例與縮放鈕浮在下方。高度用 100dvh：跟著手機瀏覽器網址列伸縮，永遠是看得到的高度 ───── */
+  .mini-title { display: none; }
+  body.immersive { padding: 0; height: 100vh; height: 100dvh; overflow: hidden; background: var(--paper); }
+  body.immersive .wrap { max-width: 720px; display: block; height: 100%; }   /* 大螢幕：中間一欄（約會場寬），兩側露出底色 */
+  @media (min-width: 721px) { body.immersive { background: var(--ground); } body.immersive .intro { box-shadow: 0 0 40px rgba(78,58,42,.12); } }
+  body.immersive .roster, body.immersive .hero, body.immersive .bar-sentinel, body.immersive .intro > .frame-art { display: none; }
+  body.immersive .intro { height: 100%; box-shadow: none; overflow: hidden; }
+  body.immersive .intro .bar-dock, body.immersive .intro .bar-dock.stuck { position: absolute; top: 0; left: 0; right: 0; z-index: 10; margin: 0;
+    padding: calc(10px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left));
+    background: none; box-shadow: none; pointer-events: none; }   /* 不鋪底色：只有輸入框本身浮在平面圖上，其他地方照樣能拖平面圖 */
+  body.immersive .bar-row, body.immersive .results { pointer-events: auto; }
+  body.immersive .bar { background: none; }
+  body.immersive .bar input { box-shadow: 0 2px 6px rgba(78,58,42,.12), 0 8px 24px rgba(78,58,42,.14); }
+  body.immersive .bar input:focus { box-shadow: inset 0 0 0 1px var(--accent), 0 2px 6px rgba(78,58,42,.12), 0 8px 24px rgba(78,58,42,.14); }
+  /* 標題與提示字直接疊在平面圖上：用紙色光暈襯底，壓在桌子上也讀得清楚 */
+  body.immersive #search-hint { display: none; }   /* 沉浸式不留提示行：平面圖從輸入框下緣算起 */
+  body.immersive .mini-title { text-shadow: 0 0 3px var(--paper), 0 0 6px var(--paper), 0 0 10px var(--paper); }
+  body.immersive .mini-title { display: block; text-align: center; padding: 0 0 10px; font-size: 20px; line-height: 1.35; letter-spacing: .16em; color: var(--accent); }   /* 整行香檳金、粗體；比搜尋框裡的提示字（18px）大一點 */
+  body.immersive .mini-title b { font-weight: 700; color: var(--body); }   /* 標題用深咖啡，和輸入的字同色；日期維持香檳金 */
+  body.immersive .mini-title small { display: block; margin-top: 2px; font-size: 14px; letter-spacing: .16em; }   /* 日期排在下一行 */
+  body.immersive .intro .bar { padding: 0; }
+  body.immersive .plan-card { position: absolute; inset: 0; padding: 0; }
+  body.immersive .plan-zoom { height: 100%; padding: 0; }
+  body.immersive .plan-card svg.plan { height: 100%; touch-action: none; }   /* 頁面不捲動：單指一律拖平面圖 */
+  body.immersive .legend { position: absolute; left: calc(12px + env(safe-area-inset-left)); bottom: calc(12px + env(safe-area-inset-bottom)); margin: 0;
+    padding: 6px 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 1px 4px rgba(78,58,42,.1); gap: 4px 12px; }
+  body.immersive .zoom-ctl { right: calc(12px + env(safe-area-inset-right)); bottom: calc(12px + env(safe-area-inset-bottom)); gap: 6px; }
+  body.immersive .zoom-ctl button { width: 34px; height: 34px; font-size: 17px; }
+
   /* ───── 輸出版海報：尺寸由 --pw/--ph 決定（預設 A2 橫式 594×420mm），字級跟著紙張等比放大 ───── */
   body.poster-mode { padding: 0; background: #d9d4cc; overflow: auto; }
   body.poster-mode .wrap { display: none; }
@@ -522,6 +556,7 @@
 
   <div class="bar-sentinel" aria-hidden="true"></div>
   <div class="bar-dock">
+  <div class="mini-title"><b>林府文定座位表</b><small>2026.10.25</small></div>
   <section class="bar" aria-label="尋找座位">
     <div class="bar-row">
       <svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.75"/><path d="M12.8 12.8 17 17"/></svg>
@@ -529,7 +564,7 @@
       <label class="notch-label" for="q">請輸入您的姓名</label>
     </div>
     <ul class="results" id="results"></ul>
-    <p class="hint" id="search-hint"></p>
+    <p class="hint" id="search-hint"></p>   <!-- 固定空著：工作人員版搜尋列和平面圖之間的間隔（沉浸式不顯示） -->
   </section>
   </div>
 
@@ -1073,7 +1108,7 @@ function renderRoster() {
 
 function renderSearch() {
   const q = query.trim(), list = $("results");
-  if (!q) { list.innerHTML = ""; $("search-hint").textContent = ""; return; }
+  if (!q) { list.innerHTML = ""; return; }
   const hits = [];
   // 比對賓客姓名，也比對桌名（例如輸入「大學同學」找到那一桌）
   for (const id of ORDER) {
@@ -1081,7 +1116,8 @@ function renderSearch() {
     if (d.name && d.name.includes(q)) hits.push([d.name, id, true]);
     for (const p of shownGuests(d)) if (p.name.includes(q)) hits.push([p.name, id]);
   }
-  $("search-hint").textContent = hits.length ? `找到 ${hits.length} 筆，金色的桌子就是座位。` : "找不到，試試只輸入名字的一部分。";
+  // 找不到也用下拉清單呈現（一列說明），不另外佔一行提示
+  if (!hits.length) { list.innerHTML = `<li class="empty">找不到「${esc(q)}」，試試只輸入一部分</li>`; return; }
   const where = (id) => { const d = state.tables[id]; return label(d) + (d.name ? `・${d.name}` : ""); };
   list.innerHTML = hits.slice(0, 30).map(([n, id, isTable]) =>
     `<li><button data-id="${id}" data-name="${esc(n)}"><span>${esc(isTable ? n : showName(n))}${isTable ? ` <small class="muted">（桌名）</small>` : ""}</span><b>${esc(isTable ? label(state.tables[id]) : where(id))}</b></button></li>`).join("");
@@ -1122,7 +1158,7 @@ function renderAll() { renderPlan(); renderDetail(); renderEditor(); renderStats
 function select(id, fromPlan) {
   if (id && id !== selected) { poolSide = state.tables[id].side; poolQ = ""; $("pool-q").value = ""; }
   selected = id;
-  if (id && !fromPlan) { focusTable(id); document.querySelector(`.tbl[data-id="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" }); }
+  if (id && !fromPlan) { focusTable(id); if (!IMMERSIVE) document.querySelector(`.tbl[data-id="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" }); }
   renderPlan(); renderDetail(); renderEditor(); renderPool();
 }
 
@@ -1478,6 +1514,8 @@ const POSTER = new URLSearchParams(location.search).get("poster");
 const PAPER = { a1: [841, 594], a2: [594, 420], a3: [420, 297] };
 // 桌機的工作人員版也用這個版面當編輯畫面（BOARD）：上方找座位列，下方整張海報縮放到剛好塞滿視窗
 const BOARD = STAFF && !POSTER && matchMedia("(min-width: 1100px)").matches;
+const IMMERSIVE = !STAFF && !POSTER;   // 賓客版：平面圖滿版
+if (IMMERSIVE) document.body.classList.add("immersive");
 // 輸出版：平面圖往上多畫一段（高度 = 標題列＋列間距），比例尺不變；外牆上緣跟著上移，標題就落在牆內
 function extendPlanForPoster() {
   const box = $("p-plan"), head = document.querySelector(".p-head");
@@ -1580,14 +1618,38 @@ if (POSTER) { mode = "guest"; setupPoster(); }
 else if (BOARD) setupPoster();
 
 /* ───────────── 平面圖畫布：縮放與平移（改 viewBox，放大後線條和字一樣清晰）───────────── */
-const VB0 = (() => { const b = plan.viewBox.baseVal; return { x: b.x, y: b.y, w: b.width, h: b.height }; })();
+let VB0 = (() => { const b = plan.viewBox.baseVal; return { x: b.x, y: b.y, w: b.width, h: b.height }; })();
 const ZMAX = 4;
+// 沉浸式：全圖（倍率 1）＝桌子與舞台（左右各留 16 單位）剛好塞進上方搜尋列與下方圖例之間；
+// 窗口比例隨螢幕而變，VB0 跟著窗口比例重算，縮放與拖曳的座標才對得上
+const CONTENT = { x: 94, y: 95, w: 734, h: 1110 };
+let FOCUS_FY = .5;   // 把桌子移進畫面時放在窗口高度的哪裡（避開上方搜尋列與下方的同桌名單）
+let FIT = null;      // 全圖時：每單位幾 px（s）、上方搜尋列與下方圖例佔掉的高度（T、B，px）
+function fitImmersive() {
+  const r = plan.parentElement.getBoundingClientRect(); if (!r.width || !r.height) return false;
+  const T = document.querySelector(".bar-dock").getBoundingClientRect().bottom - r.top + 12;
+  const B = r.bottom - document.querySelector(".legend").getBoundingClientRect().top + 12;
+  const s = Math.min(r.width / CONTENT.w, (r.height - T - B) / CONTENT.h);   // 每單位幾 px
+  VB0 = { x: CONTENT.x - (r.width / s - CONTENT.w) / 2, y: CONTENT.y - T / s - ((r.height - T - B) / s - CONTENT.h) / 2, w: r.width / s, h: r.height / s };
+  FOCUS_FY = (T + (r.height - T - B) * .4) / r.height;
+  FIT = { s, T, B };
+  return true;
+}
 let zs = 1, zx = VB0.x, zy = VB0.y;   // 放大倍率、目前看到的左上角（SVG 座標）
 function applyZoom() {
   zs = Math.min(ZMAX, Math.max(1, zs));
   const w = VB0.w / zs, h = VB0.h / zs;
-  zx = Math.min(VB0.x + VB0.w - w, Math.max(VB0.x, zx));
-  zy = Math.min(VB0.y + VB0.h - h, Math.max(VB0.y, zy));
+  if (IMMERSIVE && FIT) {
+    // 沉浸式：只能拖到會場邊緣——上緣停在搜尋框下方、下緣停在圖例上方、左右停在螢幕邊；看得到的範圍比會場大時置中。
+    // 不然全圖時為了配合螢幕比例在會場上下多出來的空白，放大後也拖得進去
+    const u = FIT.s * zs;   // 現在每單位幾 px
+    const clamp = (z, size, lo, hi) => hi - lo <= size ? (lo + hi - size) / 2 : Math.min(hi - size, Math.max(lo, z));
+    zx = clamp(zx, w, CONTENT.x, CONTENT.x + CONTENT.w);
+    zy = clamp(zy, h, CONTENT.y - FIT.T / u, CONTENT.y + CONTENT.h + FIT.B / u);
+  } else {
+    zx = Math.min(VB0.x + VB0.w - w, Math.max(VB0.x, zx));
+    zy = Math.min(VB0.y + VB0.h - h, Math.max(VB0.y, zy));
+  }
   plan.setAttribute("viewBox", `${zx} ${zy} ${w} ${h}`);
   plan.classList.toggle("zoomed", zs > 1.01);
   const box = plan.parentElement;
@@ -1614,14 +1676,31 @@ function focusTables(ids) {
   const ts = TABLES.filter(t => ids.includes(t.id)); if (!ts.length) return;
   const pad = 24, x0 = Math.min(...ts.map(t => t.x - t.seat)) - pad, x1 = Math.max(...ts.map(t => t.x + t.seat)) + pad;
   const y0 = Math.min(...ts.map(t => t.y - t.seat)) - pad, y1 = Math.max(...ts.map(t => t.y + t.seat)) + pad;
-  zs = Math.min(2.2, VB0.w / (x1 - x0), VB0.h / (y1 - y0));
-  placeAt((x0 + x1) / 2, (y0 + y1) / 2, .5, .5);
+  // 沉浸式以畫面上的大小為準（約每單位 1.2px，手機上和原本放大 2.2 倍差不多），桌機、手機看起來一樣大
+  const k = IMMERSIVE ? 1.2 / (plan.getBoundingClientRect().width / VB0.w) : 2.2;
+  zs = Math.min(k, VB0.w / (x1 - x0), VB0.h / (y1 - y0));
+  placeAt((x0 + x1) / 2, (y0 + y1) / 2, .5, IMMERSIVE ? FOCUS_FY : .5);
 }
 const focusTable = (id) => focusTables([id]);   // 從搜尋結果或名單選到某桌
 if (!POSTER && !BOARD) {
-  $("zoom-in").onclick = () => zoomBy(1.6);
-  $("zoom-out").onclick = () => zoomBy(1 / 1.6);
-  zs = 1.4 * 1.6; placeAt(VB0.x, VB0.y, 0, 0);   // 預設放大約 2.2 倍（1.4 再按一次＋），對準平面圖左上角（聖雅典舞台與左側各桌）
+  const ZSTEP = IMMERSIVE ? 1.3 : 1.6;   // 縮放鈕每按一下的倍率；沉浸式分得細一點（1 → 1.3 → 1.69 → 2.2 …最多 4）
+  $("zoom-in").onclick = () => zoomBy(ZSTEP);
+  $("zoom-out").onclick = () => zoomBy(1 / ZSTEP);
+  if (IMMERSIVE) {
+    // 沉浸式：轉向、網址列伸縮時重算，畫面中心維持不動
+    // 預設放大一級（同按一次＋），對準會場左上：往左上推到底，由 applyZoom 停在會場左緣、上緣在搜尋框下方
+    fitImmersive(); zs = ZSTEP; placeAt(-1e6, -1e6, 0, 0);
+    // 字型載入後搜尋列會變高：搜尋列、圖例或視窗大小一變就重量，畫面中心維持不動
+    const refit = () => {
+      const cx = zx + VB0.w / zs / 2, cy = zy + VB0.h / zs / 2;
+      // 原本停在會場上緣／左緣（例如剛進來）：重算後也停在那裡
+      const atTop = FIT && zy <= CONTENT.y - FIT.T / (FIT.s * zs) + .5, atLeft = zx <= CONTENT.x + .5;
+      if (fitImmersive()) placeAt(atLeft ? -1e6 : cx, atTop ? -1e6 : cy, atLeft ? 0 : .5, atTop ? 0 : .5);
+    };
+    addEventListener("resize", refit);
+    const ro = new ResizeObserver(refit);
+    ro.observe(document.querySelector(".bar-dock")); ro.observe(document.querySelector(".legend"));
+  } else { zs = 1.4 * 1.6; placeAt(VB0.x, VB0.y, 0, 0); }   // 預設放大約 2.2 倍（1.4 再按一次＋），對準平面圖左上角（聖雅典舞台與左側各桌）
   const fingers = new Map();
   let anchor = null;   // 手勢開始時：手指中心底下的 SVG 座標、兩指距離、當時倍率
   const centroid = () => { const p = [...fingers.values()]; return { x: p.reduce((a, q) => a + q.x, 0) / p.length, y: p.reduce((a, q) => a + q.y, 0) / p.length }; };
@@ -1666,6 +1745,24 @@ if (!POSTER && !BOARD) {
   plan.addEventListener("touchstart", multi, { passive: false });
   plan.addEventListener("touchmove", multi, { passive: false });
   plan.addEventListener("gesturestart", (e) => e.preventDefault());   // iOS Safari：不要把捏合當成整頁縮放
+  // 觸控板：兩指捏合在 Chrome／Edge／Firefox 是帶 ctrlKey 的滾輪事件（含桌機的手機模擬），預設會放大整頁——改成縮放平面圖，以游標為中心。
+  // 沉浸式頁面不捲動：兩指滑動（一般滾輪）就拿來平移平面圖
+  const zoomAt = (k, clientX, clientY) => {
+    const r = plan.getBoundingClientRect(), fx = (clientX - r.left) / r.width, fy = (clientY - r.top) / r.height;
+    const px = zx + fx * VB0.w / zs, py = zy + fy * VB0.h / zs;
+    zs *= k; zs = Math.min(ZMAX, Math.max(1, zs)); placeAt(px, py, fx, fy);
+  };
+  plan.addEventListener("wheel", (e) => {
+    if (e.ctrlKey) { e.preventDefault(); zoomAt(Math.exp(-e.deltaY * .01), e.clientX, e.clientY); return; }
+    if (!IMMERSIVE) return;   // 其他版面：滾輪照常捲動頁面
+    e.preventDefault();
+    const r = plan.getBoundingClientRect(), k = e.deltaMode === 1 ? 16 : 1;   // deltaMode 1＝以行為單位（Firefox 滑鼠滾輪）
+    zx += e.deltaX * k / r.width * VB0.w / zs; zy += e.deltaY * k / r.height * VB0.h / zs; applyZoom();
+  }, { passive: false });
+  // Safari 的觸控板捏合不送 ctrl＋滾輪，而是 gesturechange（scale 從 1 開始累計）
+  let gestureZs = 1;
+  plan.addEventListener("gesturestart", () => { gestureZs = zs; });
+  plan.addEventListener("gesturechange", (e) => { e.preventDefault(); zoomAt(gestureZs * e.scale / zs, e.clientX, e.clientY); });
   applyZoom();
 }
 
