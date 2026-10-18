@@ -59,6 +59,8 @@
     --warn: #a3402f;
     --kid: #8fbfa8;           /* 兒童座椅（平面圖方塊、圖例）：淺一點，和深色椅子分得清楚 */
     --kid-ink: #5f8a76;       /* 兒童座椅的文字：深一點才讀得清楚 */
+    --veg: #f5c518;           /* 素食（平面圖椅子、名單）：亮黃，比已入座的香檳棕亮得多，一眼分得出來 */
+    --veg-ink: #a07c00;       /* 素食的文字：黃字太淺，用深一點的芥末黃 */
     --serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
     --latin: "Cormorant Garamond", "Times New Roman", serif;
   }
@@ -174,6 +176,7 @@
   .tbl .chair.taken { fill: var(--accent); }
   .tbl .chair.over { fill: var(--warn); stroke: var(--warn); }
   .tbl .chair.kid { fill: var(--kid); stroke: none; }
+  .tbl .chair.veg { fill: var(--veg); stroke: var(--veg-ink); }   /* 素食座位（只有工作人員版畫） */
   body[data-mode="staff"] .tbl .chair.kid { cursor: grab; }
   .tbl .num { font-size: 21px; font-weight: 700; text-anchor: middle; dominant-baseline: central; fill: var(--body); }
   .tbl .num.long { font-size: 15px; }   /* 有沒有桌名，桌號都同樣大 */
@@ -350,8 +353,21 @@
   .add .g-count input { padding: 10px 4px; }
   .g-count.kid { font-size: 12px; }
   .g-count.kid input { width: 2.6em; }
-  .g-count.kid.on input { border-color: var(--kid); color: var(--kid-ink); font-weight: 600; }
-  .kid-n { margin-left: 6px; font-size: .8em; color: var(--kid-ink); }
+  .g-count.veg { font-size: 12px; }
+  .g-count.veg input { width: 2.6em; }   /* 兒童椅、素食的輸入框和人數同色；只有平面圖上的座位分顏色 */
+  /* 工作人員版：有素食、兒童椅的名字用對應顏色（兩者都有：素食色＋兒童色底線），滑過看細節 */
+  .is-veg { color: var(--veg-ink); cursor: help; }
+  .is-kid { color: var(--kid-ink); cursor: help; }
+  .is-veg.is-kid { color: var(--veg-ink); text-decoration: underline 2px var(--kid); text-underline-offset: 3px; }
+  /* 滑過名字或素食座位時的浮動小面板 */
+  .tip { position: fixed; z-index: 50; pointer-events: none; min-width: 120px; padding: 10px 14px 9px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(78,58,42,.18); font: 14px/1.5 var(--serif); color: var(--body); white-space: nowrap; }
+  .tip b { display: block; font-size: 15px; font-weight: 600; color: var(--ink); }
+  .tip small { margin-left: 6px; font-size: 12px; color: var(--muted); font-weight: 400; }
+  .tip .row { display: flex; align-items: center; gap: 7px; margin-top: 4px; font-size: 13px; }
+  .tip .row::before { content: ""; flex: none; width: 9px; height: 9px; }
+  .tip .row.veg::before { border-radius: 50%; background: var(--veg); box-shadow: inset 0 0 0 1px var(--veg-ink); }
+  .tip .row.kid::before { border-radius: 2px; background: var(--kid); }
   .party-n { margin-left: 6px; font-size: .8em; color: var(--muted); font-variant-numeric: lining-nums; }
   .guest-list .del { width: 32px; height: 44px; border: 0; background: transparent; color: var(--muted); font-size: 20px; cursor: pointer; flex: none; }
   .guest-list:empty { display: none; }
@@ -413,7 +429,6 @@
   /* 姓名｜人數 兩欄對齊 */
   .party-grid { display: grid; grid-template-columns: auto auto; justify-content: center; align-items: baseline; column-gap: 12px; text-align: left; }
   .party-grid .ct { text-align: right; color: var(--muted); font-size: .85em; white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; }
-  .party-grid .kid-n { font-style: normal; display: block; font-size: .9em; line-height: 1.2; }
   /* 一列兩組（姓名、人數｜姓名、人數），面板不會太高。中間空一欄 32px：左右兩組等寬，點線在中間斷開，兩組分得清楚 */
   .names-grid { justify-content: stretch; grid-template-columns: 1fr auto 32px 1fr auto; column-gap: 0; align-items: stretch; margin-top: 4px; }
   .names-grid > :nth-child(4n+3) { grid-column: 4; }
@@ -421,7 +436,6 @@
   /* 底線整列接續不斷開：兩格等高、文字貼底，人數格用左內距代替欄距 */
   .names-grid .nm, .names-grid .ct { display: flex; align-items: flex-end; padding: 7px 0; border-bottom: 1px dotted var(--line); font-size: 16px; line-height: 1.5; }
   .names-grid .ct { justify-content: flex-end; flex-wrap: wrap; padding-left: 14px; font-size: 14px; line-height: 1.7; }
-  .names-grid .ct .kid-n { flex-basis: 100%; text-align: right; }
   @media (max-width: 599px) {   /* 手機抽屜：姓名、人數、Reserved 都放大一號，比較好讀 */
     .names-grid .nm { font-size: 18px; } .names-grid .ct { font-size: 16px; }
     #detail .reserved { font-size: 17px; } #detail .reserved em { font-size: 20px; }
@@ -666,10 +680,13 @@
     <div class="legend">
       <span class="side-tag" data-side="主婚人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>主婚人親友</span>
       <span class="side-tag" data-side="新人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>新人親友</span>
+      <span class="side-tag seat-tag staff-only"><svg viewBox="0 0 14 14" aria-hidden="true"><rect x="2" y="2" width="10" height="10" rx="1.5" fill="var(--kid)"/></svg>兒童座椅</span>
+      <span class="side-tag seat-tag staff-only"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5" style="fill:var(--veg);stroke:var(--veg)"/></svg>素食</span>
     </div>
   </div>
   </section>
 
+  <div class="tip" id="tip" role="tooltip" hidden></div>
   <div class="toast" id="toast" role="status" hidden><span id="toast-text"></span><button type="button" id="toast-undo">復原</button></div>
 
   <!-- 賓客：點桌子後浮出同桌名單 -->
@@ -701,6 +718,7 @@
       <input id="f-new" placeholder="姓名" title="代表人姓名；可一次貼上多行，每人各 1 位" autocomplete="off" enterkeyhint="done" aria-label="新增一組賓客：代表人姓名，可一次貼上多行">
       <label class="g-count boxed"><input id="f-new-count" type="number" inputmode="numeric" min="1" max="20" value="1" aria-label="這組共幾位">位</label>
       <label class="g-count kid boxed"><input id="f-new-child" type="number" inputmode="numeric" min="0" max="10" value="0" aria-label="兒童椅幾張">兒童椅</label>
+      <label class="g-count veg boxed"><input id="f-new-veg" type="number" inputmode="numeric" min="0" max="20" value="0" aria-label="素食幾份">素食</label>
       <button class="btn solid" type="submit">加入</button>
     </form>
     <div class="pool" id="pool" hidden>
@@ -825,6 +843,17 @@ function kidSlots(t, d) {
   return chosen;
 }
 
+// 素食座位：大人椅依名單順序一組一組坐下去（兒童座椅另外擺），每組前幾張是吃素的那幾位；回傳「第 i 張大人椅 → 吃素的那一組」，不吃素是 null
+function vegChairs(d) {
+  const out = [];
+  for (const g of d.guests) {
+    if (!g.name) continue;
+    const adults = Math.max(0, g.count - (g.child || 0));
+    for (let i = 0; i < adults; i++) out.push(i < (g.veg || 0) ? g : null);
+  }
+  return out;
+}
+
 /* ───────────── 資料（本機 localStorage 快取，雲端同步見下方）───────────── */
 const KEY = "wedding-seating-v1";
 const DEFAULT_CAP = 10;                   // 每桌固定 10 人
@@ -842,7 +871,8 @@ function toParty(g) {
   if (!g || typeof g !== "object" || typeof g.name !== "string" || !g.name.trim()) return null;
   const count = Math.min(20, Math.max(1, Math.round(+g.count) || 1));
   const child = Math.min(count, Math.max(0, Math.round(+g.child) || 0));
-  return child ? { name: g.name.trim().slice(0, 20), count, child } : { name: g.name.trim().slice(0, 20), count };
+  const veg = Math.min(count, Math.max(0, Math.round(+g.veg) || 0));   // 素食：這組有幾位吃素
+  return { name: g.name.trim().slice(0, 20), count, ...(child ? { child } : {}), ...(veg ? { veg } : {}) };
 }
 const SIDES = ["主婚人親友", "新人親友"];
 const DEFAULT_NUM = Object.fromEntries(Object.entries(defaultState().tables).map(([id, d]) => [id, d.num]));
@@ -1069,7 +1099,36 @@ const seatsOf = (d) => d.guests.reduce((n, g) => n + (g.name ? g.count : 0), 0);
 // 名單排成兩欄：姓名（靠左）｜人數（靠右），整塊置中，每一行就會對齊
 // 兩個中文字的姓名（伍氏、志昆）中間補一個全形空格，和三個字的名字一樣寬、看起來整齊；只影響顯示，不改存檔
 const showName = (n) => /^[\u3400-\u9fff\uf900-\ufaff]{2}$/.test(n) ? n[0] + "\u3000" + n[1] : n;
-const partyCells = (g, all) => `<span class="nm">${esc(showName(g.name))}</span><span class="ct">${g.count > 1 || all ? `${g.count} 位` : ""}${g.child && mode === "staff" ? `<em class="kid-n">兒童椅 ${g.child}</em>` : ""}</span>`;
+const partyCells = (g, all) => `<span class="nm${dietClass(g)}"${dietTitle(g)}>${esc(showName(g.name))}</span><span class="ct">${g.count > 1 || all ? `${g.count} 位` : ""}</span>`;
+// 工作人員版：有素食或兒童椅的名字換成對應的顏色，滑過顯示細節（seat＝這組的第幾個座位，給一人一格的名單用：前幾位是素食、最後幾位是兒童）
+function dietClass(g, seat) {
+  if (mode !== "staff") return "";
+  const veg = seat === undefined ? g.veg > 0 : seat < (g.veg || 0);
+  const kid = seat === undefined ? g.child > 0 : seat >= g.count - (g.child || 0);
+  return (veg ? " is-veg" : "") + (kid ? " is-kid" : "");
+}
+// 細節放在 data-tip-*，滑過時由浮動小面板（#tip）顯示，不用瀏覽器預設的 title 提示
+function dietTitle(g) {
+  if (mode !== "staff" || !(g.veg || g.child)) return "";
+  return ` data-tip="${esc(g.name)}" data-tip-count="${g.count}" data-tip-veg="${g.veg || 0}" data-tip-kid="${g.child || 0}"`;
+}
+{
+  const tip = $("tip");
+  document.body.append(tip);   // 移到 body 底下：桌機版的輸出版版面會把 .wrap 整個藏起來
+  const show = (el) => {
+    const n = +el.dataset.tipCount, v = +el.dataset.tipVeg, k = +el.dataset.tipKid;
+    tip.innerHTML = `<b>${esc(el.dataset.tip)}${n > 1 ? `<small>共 ${n} 位</small>` : ""}</b>` +
+      (v ? `<div class="row veg">素食 ${v} 位</div>` : "") + (k ? `<div class="row kid">兒童椅 ${k} 張</div>` : "");
+    tip.hidden = false;
+    // 放在名字正上方置中；上面不夠就放下面，左右不超出視窗
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const x = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2));
+    const y = r.top - h - 8 >= 8 ? r.top - h - 8 : r.bottom + 8;
+    tip.style.left = x + "px"; tip.style.top = y + "px";
+  };
+  document.addEventListener("mouseover", (e) => { const el = e.target.closest?.("[data-tip]"); if (el) show(el); else tip.hidden = true; });
+  document.addEventListener("scroll", () => tip.hidden = true, true);
+}
 // 座位條：10 個小點代表 10 個座位，已入座的塗滿，超過的標紅（工作人員才看得到）
 const meterHTML = (d) => { const used = seatsOf(d), n = Math.max(d.cap, used);
   return `<span class="meter" title="${used} / ${d.cap} 位" aria-label="${used} / ${d.cap} 位">` +
@@ -1110,6 +1169,8 @@ function renderPlan() {
     const angle = (k) => slotAngle(k, n);
     const kidSeats = kidSlots(t, d);
     let filled = kidSeats.size;   // 兒童也算入座人數
+    const vegOf = vegChairs(d);   // 工作人員版：第幾張大人椅是誰、吃不吃素
+    let adult = 0;
     g.querySelector(".chairs").innerHTML = bare ? "" : Array.from({ length: n }, (_, k) => {
       const a = angle(k), cx = (t.x + cr * Math.cos(a)).toFixed(1), cy = (t.y + cr * Math.sin(a)).toFixed(1);
       if (kidSeats.has(k)) {
@@ -1118,8 +1179,9 @@ function renderPlan() {
         return `<rect class="chair kid" data-slot="${k}" x="${(kx - side / 2).toFixed(2)}" y="${(ky - side / 2).toFixed(2)}" width="${side}" height="${side}" rx="1" transform="rotate(${(a * 180 / Math.PI).toFixed(1)} ${kx.toFixed(2)} ${ky.toFixed(2)})"><title>兒童座椅</title></rect>`;
       }
       const taken = filled < used && (filled++, true);
-      const cls = mode !== "staff" ? "chair" : k >= d.cap && taken ? "chair over" : taken ? "chair taken" : "chair";
-      return `<circle class="${cls}" cx="${cx}" cy="${cy}" r="3.6"/>`;
+      const veg = taken && mode === "staff" ? vegOf[adult++] : null;
+      const cls = mode !== "staff" ? "chair" : k >= d.cap && taken ? "chair over" : veg ? "chair taken veg" : taken ? "chair taken" : "chair";
+      return `<circle class="${cls}" cx="${cx}" cy="${cy}" r="3.6"${veg ? dietTitle(veg) : ""}/>`;
     }).join("");
     g.dataset.side = d.side;
     g.classList.toggle("selected", g.dataset.id === selected);
@@ -1165,7 +1227,8 @@ function renderEditor() {
       `<span class="grip" data-i="${i}" title="拖曳調整順序" aria-hidden="true"></span>` +
       `<input class="g-name" value="${esc(p.name)}" data-i="${i}" aria-label="第 ${i + 1} 組代表人">` +
       `<label class="g-count"><input type="number" inputmode="numeric" min="1" max="20" value="${p.count}" data-i="${i}" data-f="count" aria-label="${esc(p.name)} 這組共幾位">位</label>` +
-      `<label class="g-count kid${p.child ? " on" : ""}" title="兒童座椅"><input type="number" inputmode="numeric" min="0" max="10" value="${p.child || 0}" data-i="${i}" data-f="child" aria-label="${esc(p.name)} 兒童座椅幾張">兒童椅</label>` +
+      `<label class="g-count kid" title="兒童座椅"><input type="number" inputmode="numeric" min="0" max="10" value="${p.child || 0}" data-i="${i}" data-f="child" aria-label="${esc(p.name)} 兒童座椅幾張">兒童椅</label>` +
+      `<label class="g-count veg" title="素食"><input type="number" inputmode="numeric" min="0" max="20" value="${p.veg || 0}" data-i="${i}" data-f="veg" aria-label="${esc(p.name)} 幾位吃素">素食</label>` +
       `<button type="button" class="del" data-i="${i}" aria-label="移除 ${esc(p.name)}">×</button></li>`).join("");
   }
 }
@@ -1175,7 +1238,8 @@ function renderStats() {
   const seated = ts.reduce((s, d) => s + seatsOf(d), 0);
   const left = roster ? unassigned().reduce((s, p) => s + p.count, 0) : null;
   // 有賓客、或勾了「保留」的桌都算已安排
-  $("s-stats").textContent = `已安排 ${ts.filter(d => d.guests.length || d.reserved).length} / ${ts.length} 桌・${seated} 位入座` + (left === null ? "" : `・待安排 ${left} 位`);
+  const veg = ts.reduce((s, d) => s + d.guests.reduce((n, g) => n + (g.veg || 0), 0), 0);
+  $("s-stats").textContent = `已安排 ${ts.filter(d => d.guests.length || d.reserved).length} / ${ts.length} 桌・${seated} 位入座` + (veg ? `・素食 ${veg} 份` : "") + (left === null ? "" : `・待安排 ${left} 位`);
 }
 
 function renderRoster() {
@@ -1412,7 +1476,9 @@ $("f-list").addEventListener("input", (e) => {
   if (e.target.matches(".g-name")) edit(d => d.guests[i].name = e.target.value.trim());
   else if (e.target.value !== "" && e.target.dataset.f === "child")
     edit(d => { const g = d.guests[i], c = Math.min(g.count, Math.max(0, parseInt(e.target.value, 10) || 0)); if (c) g.child = c; else delete g.child; });
-  else if (e.target.value !== "") edit(d => { const g = d.guests[i]; g.count = clampCount(e.target.value); if (g.child > g.count) g.child = g.count; });
+  else if (e.target.value !== "" && e.target.dataset.f === "veg")
+    edit(d => { const g = d.guests[i], v = Math.min(g.count, Math.max(0, parseInt(e.target.value, 10) || 0)); if (v) g.veg = v; else delete g.veg; });
+  else if (e.target.value !== "") edit(d => { const g = d.guests[i]; g.count = clampCount(e.target.value); if (g.child > g.count) g.child = g.count; if (g.veg > g.count) g.veg = g.count; });
   refreshCount();
 });
 $("f-list").addEventListener("focusout", (e) => {
@@ -1458,10 +1524,11 @@ function refreshCount() { const d = state.tables[selected], n = seatsOf(d); $("f
 function addNames(text) {
   const names = text.split(/[\n,，、]+/).map(x => x.trim()).filter(Boolean);
   if (!names.length) return;
-  const count = names.length === 1 ? clampCount($("f-new-count").value) : 1;   // 一次貼多人時每人各 1 位、不帶兒童椅
+  const count = names.length === 1 ? clampCount($("f-new-count").value) : 1;   // 一次貼多人時每人各 1 位、不帶兒童椅與素食
   const child = names.length === 1 ? Math.min(count, Math.max(0, parseInt($("f-new-child").value, 10) || 0)) : 0;
-  edit(d => d.guests.push(...names.map(name => child ? { name: name.slice(0, 20), count, child } : { name: name.slice(0, 20), count })));
-  $("f-new").value = ""; $("f-new-count").value = 1; $("f-new-child").value = 0;
+  const veg = names.length === 1 ? Math.min(count, Math.max(0, parseInt($("f-new-veg").value, 10) || 0)) : 0;
+  edit(d => d.guests.push(...names.map(name => toParty({ name, count, child, veg }))));
+  $("f-new").value = ""; $("f-new-count").value = 1; $("f-new-child").value = 0; $("f-new-veg").value = 0;
   renderEditor();
   $("f-list").lastElementChild?.scrollIntoView({ block: "nearest" });
 }
@@ -1476,7 +1543,7 @@ $("pool-side").addEventListener("click", (e) => { const b = e.target.closest("bu
 $("pool-q").addEventListener("input", (e) => { poolQ = e.target.value; poolActive = -1; renderPool(); });
 function addFromPool(name) {
   const p = roster.find(x => x.name === name); if (!p) return;
-  edit(d => d.guests.push(toParty({ name: p.name, count: p.count, child: p.child })));
+  edit(d => d.guests.push(toParty({ name: p.name, count: p.count, child: p.child, veg: p.veg })));
   renderEditor();
   $("f-list").lastElementChild?.scrollIntoView({ block: "nearest" });
 }
@@ -1849,13 +1916,13 @@ function renderPosterList() {
     let html = "", row = 1, seg = [];
     const flush = () => {
       const rows = Math.ceil(seg.length / 2);
-      html += seg.map((n, i) => `<span style="grid-row:${row + i % rows};grid-column:${i < rows ? 1 : 2}">${esc(n)}</span>`).join("");
+      html += seg.map(([g, k], i) => `<span class="${dietClass(g, k).trim()}"${dietTitle(g)} style="grid-row:${row + i % rows};grid-column:${i < rows ? 1 : 2}">${esc(showName(g.name))}</span>`).join("");
       row += rows; seg = [];
     };
     for (const g of groups) {
-      if (perSeat(g)) { seg.push(...Array(g.count).fill(showName(g.name))); continue; }
+      if (perSeat(g)) { seg.push(...Array.from({ length: g.count }, (_, k) => [g, k])); continue; }
       flush();
-      html += `<span class="grp" style="grid-row:${row++}">${esc(g.name)}${g.count > 1 ? `<small>${g.count} 位</small>` : ""}</span>`;
+      html += `<span class="grp${dietClass(g)}"${dietTitle(g)} style="grid-row:${row++}">${esc(g.name)}${g.count > 1 ? `<small>${g.count} 位</small>` : ""}</span>`;
     }
     flush();
     who.innerHTML = html;
