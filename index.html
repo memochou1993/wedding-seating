@@ -482,9 +482,11 @@
   /* ───── 桌卡（?cards）：A4 直式一張一桌，沿中線對折成 210×148.5mm 的立牌；上半張整面轉 180°，折起來兩面都是正的 ───── */
   body.cards-mode { padding: 24px 0; background: #d9d4cc; }
   body.cards-mode > :not(#cards):not(script) { display: none !important; }
-  /* 螢幕預覽：整張依視窗寬縮小（--cz，setupCards 依視窗寬計算；手機上一次看到一整張）；列印時不縮放，照實際 A4 */
-  @media screen { .card-sheet { zoom: var(--cz, 1); } }
-  .card-sheet { position: relative; width: 210mm; height: 297mm; margin: 0 auto 24px; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.18); overflow: hidden; }
+  /* 螢幕預覽：整張依視窗寬縮小（--cz，setupCards 依視窗寬計算；手機上一次看到一整張）。用 transform 縮放，外面包一層佔縮小後的大小；
+     不用 CSS zoom：iPhone Safari 的 zoom 不會縮 mm 單位的字，字會撐出紙外。列印時不縮放，照實際 A4 */
+  .card-slot { width: calc(210mm * var(--cz, 1)); height: calc(297mm * var(--cz, 1)); margin: 0 auto 24px; }
+  .card-slot > .card-sheet { transform: scale(var(--cz, 1)); transform-origin: 0 0; }
+  .card-sheet { position: relative; width: 210mm; height: 297mm; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.18); overflow: hidden; }
   /* 對折記號：左右邊緣各一小段，印在花框外面，摺的時候對齊用 */
   .card-sheet::before, .card-sheet::after { content: ""; position: absolute; top: 50%; width: 5mm; border-top: .3mm solid #c9c2b8; }
   .card-sheet::before { left: 0; } .card-sheet::after { right: 0; }
@@ -500,7 +502,8 @@
     font-family: var(--serif); font-weight: 600; font-size: var(--fs, 16mm); line-height: 1.2; letter-spacing: .2em; padding-left: .2em; color: var(--body); white-space: nowrap; }   /* 桌名和桌號同色、細一級、字小一點：數字仍是重點 */
   @media print {
     body.cards-mode { padding: 0; background: none; }
-    body.cards-mode .card-sheet { margin: 0; box-shadow: none; break-after: page; }
+    body.cards-mode .card-slot { width: auto; height: auto; margin: 0; break-after: page; }
+    body.cards-mode .card-sheet { transform: none; box-shadow: none; }
     body.cards-mode * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 
@@ -1691,7 +1694,7 @@ function setupCards() {
   const ids = ORDER.slice().sort((a, b) => numKey(state.tables[a]) - numKey(state.tables[b]) || ORDER.indexOf(a) - ORDER.indexOf(b));
   const art = `<svg class="cf-art" viewBox="0 0 ${CF_W} ${CF_H}" preserveAspectRatio="none" aria-hidden="true">${cardFrameSVG()}</svg>`;
   const face = (pos) => `<div class="card-face ${pos}"><div class="card-frame">${art}<span class="cf-eyebrow">TABLE</span><span class="cf-num"></span><span class="cf-name"></span></div></div>`;
-  $("cards").innerHTML = ids.map(id => `<div class="card-sheet" data-id="${id}">${face("top")}${face("bottom")}</div>`).join("");
+  $("cards").innerHTML = ids.map(id => `<div class="card-slot"><div class="card-sheet" data-id="${id}">${face("top")}${face("bottom")}</div></div>`).join("");
   $("cards").hidden = false;
   const fitCards = () => $("cards").style.setProperty("--cz", Math.min(1, (innerWidth - 24) / (210 * 96 / 25.4)).toFixed(4));
   fitCards(); addEventListener("resize", fitCards);
