@@ -126,6 +126,13 @@
   .plan-zoom .edge::before { content: ""; position: absolute; box-shadow: inset 0 0 var(--edge-blur, 22px) rgba(43,30,20,var(--edge-alpha, .4));   /* 深咖啡，比原本的咖啡色更深 */
     top: calc((1 - var(--t)) * -48px); right: calc((1 - var(--r)) * -48px); bottom: calc((1 - var(--b)) * -48px); left: calc((1 - var(--l)) * -48px);
     transition: top .25s, right .25s, bottom .25s, left .25s; }
+  /* 沉浸式：上下的陰影比左右淡（iPhone Safari 會把上下邊緣的深色染到自己的工具列，上下看起來會比左右濃）。
+     第一層四邊一樣、濃度只取 30%（上下就是這個深度）；第二層左右各一道往內偏移的內陰影（80%），把左右補回原本的深度 */
+  body.immersive .plan-zoom .edge::before {
+    box-shadow: inset 0 0 var(--edge-blur, 22px) rgba(43,30,20,calc(var(--edge-alpha, .4) * .3)),
+      inset calc(var(--edge-blur, 22px) * .5) 0 var(--edge-blur, 22px) calc(var(--edge-blur, 22px) * -.5) rgba(43,30,20,calc(var(--edge-alpha, .4) * .8)),
+      inset calc(var(--edge-blur, 22px) * -.5) 0 var(--edge-blur, 22px) calc(var(--edge-blur, 22px) * -.5) rgba(43,30,20,calc(var(--edge-alpha, .4) * .8));
+  }
   .plan-zoom.more-l .edge { --l: 1; }
   .plan-zoom.more-t .edge { --t: 1; }
   .plan-zoom.more-r .edge { --r: 1; }
@@ -468,6 +475,7 @@
   body.immersive #zoom-out svg { transform: translateX(2px); }
   body.immersive #zoom-in svg { transform: translateX(-2px); }
   .zoom-pct { display: none; }
+  body.immersive .zoom-ctl #zoom-pct { width: 46px; }   /* 倍率也是按鈕（點了回到預設畫面），寬度和一般 －／＋ 不同 */
   body.immersive .zoom-pct { display: flex; align-items: center; justify-content: center; width: 46px; height: 30px; background: var(--paper);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 13px; font-weight: 300; font-variant-numeric: tabular-nums; letter-spacing: .02em; color: var(--muted); }   /* 目前倍率：全圖＝100%；和 －／＋、圖例文字同色；數字用系統內建字型，不用思源宋體 */
 
@@ -507,7 +515,7 @@
   /* 實驗：輸出版不畫外牆、門和柱子，入口改用一條長條標示 */
   body.poster-mode .plan .wall, body.poster-mode .plan .door, body.poster-mode .plan .pillar, body.poster-mode .plan > .entrance { display: none; }
   .plan .entrance-mark { display: none; }
-  body.poster-mode .plan .entrance-mark { display: inline; }
+  body.poster-mode .plan .entrance-mark, body.immersive .plan .entrance-mark { display: inline; }   /* 賓客版（不畫牆）也用輸出版的入口標示：左右門廊各一條淡金粗線＋「入口」 */
   .plan .entrance-mark line { stroke: var(--line); stroke-width: 4; stroke-linecap: round; }   /* 和卡片框線同色，比桌框淡，不搶眼 */
   .p-plan svg.plan { width: 100%; height: 100%; overflow: visible; }
   /* 標題區左右兩欄：左「座位表／SEATING CHART」靠右對齊，右「林府文定／新人／日期」靠左對齊，中間一條淡金直線；左右等寬，直線落在花冠的中線上 */
@@ -600,7 +608,7 @@
       <span class="edge" aria-hidden="true"></span>
       <div class="zoom-ctl" aria-label="平面圖縮放">
         <button type="button" id="zoom-out" aria-label="縮小"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h9"/></svg></button>
-        <output class="zoom-pct" id="zoom-pct" aria-live="polite">100%</output>
+        <button type="button" class="zoom-pct" id="zoom-pct" aria-label="恢復預設大小" title="恢復預設大小">100%</button>
         <button type="button" id="zoom-in" aria-label="放大"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h9M6 1.5v9"/></svg></button>
       </div>
     </div>
@@ -1705,7 +1713,7 @@ let VB0 = (() => { const b = plan.viewBox.baseVal; return { x: b.x, y: b.y, w: b
 const ZMAX = 4;
 // 沉浸式：全圖（倍率 1）＝桌子與舞台（左右各留 16 單位）剛好塞進上方搜尋列與下方圖例之間；
 // 窗口比例隨螢幕而變，VB0 跟著窗口比例重算，縮放與拖曳的座標才對得上
-const CONTENT = { x: 94, y: 95, w: 734, h: 1110 };
+const CONTENT = { x: 94, y: 95, w: 734, h: 1180 };   // 下緣含入口標示（「入口」字在 y≈1258）
 let FOCUS_FY = .5;   // 把桌子移進畫面時放在窗口高度的哪裡（避開上方搜尋列與下方的同桌名單）
 let FIT = null;      // 全圖時：每單位幾 px（s）、上方搜尋列與下方圖例佔掉的高度（T、B，px）
 // 同桌名單（抽屜）蓋住窗口下方多少 px；沒開時 0。抽屜貼底，用版面高度算（不受滑入動畫影響）
@@ -1787,8 +1795,10 @@ if (!POSTER && !BOARD) {
   $("zoom-out").onclick = () => zoomBy(IMMERSIVE ? nextLevel(-1) / zs : 1 / 1.6);
   if (IMMERSIVE) {
     // 沉浸式：轉向、網址列伸縮時重算，畫面中心維持不動
-    // 預設 250%，對準會場左上：往左上推到底，由 applyZoom 停在會場左緣、上緣在搜尋框下方
-    fitImmersive(); zs = 2.5; placeAt(-1e6, -1e6, 0, 0);
+    // 預設 250%，對準會場左上：往左上推到底，由 applyZoom 停在會場左緣、上緣在搜尋框下方；點中間的倍率也回到這個畫面
+    const resetView = () => { zs = 2.5; placeAt(-1e6, -1e6, 0, 0); };
+    fitImmersive(); resetView();
+    $("zoom-pct").onclick = resetView;
     // 字型載入後搜尋列會變高：搜尋列、圖例或視窗大小一變就重量，畫面中心維持不動
     const refit = () => {
       const cx = zx + VB0.w / zs / 2, cy = zy + VB0.h / zs / 2;
