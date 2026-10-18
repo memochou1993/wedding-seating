@@ -479,6 +479,29 @@
   body.immersive .zoom-pct { display: flex; align-items: center; justify-content: center; width: 46px; height: 30px; background: var(--paper);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 13px; font-weight: 300; font-variant-numeric: tabular-nums; letter-spacing: .02em; color: var(--muted); }   /* 目前倍率：全圖＝100%；和 －／＋、圖例文字同色；數字用系統內建字型，不用思源宋體 */
 
+  /* ───── 桌卡（?cards）：A4 直式一張一桌，沿中線對折成 210×148.5mm 的立牌；上半張整面轉 180°，折起來兩面都是正的 ───── */
+  body.cards-mode { padding: 24px 0; background: #d9d4cc; }
+  body.cards-mode > :not(#cards):not(script) { display: none !important; }
+  .card-sheet { position: relative; width: 210mm; height: 297mm; margin: 0 auto 24px; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.18); overflow: hidden; }
+  /* 對折記號：左右邊緣各一小段，印在花框外面，摺的時候對齊用 */
+  .card-sheet::before, .card-sheet::after { content: ""; position: absolute; top: 50%; width: 5mm; border-top: .3mm solid #c9c2b8; }
+  .card-sheet::before { left: 0; } .card-sheet::after { right: 0; }
+  .card-face { box-sizing: border-box; height: 50%; padding: 8mm; }   /* 花框離紙邊至少 8mm＋框內縮，家用印表機印不到的邊緣不會切到 */
+  .card-face.top { transform: rotate(180deg); }
+  .card-frame { position: relative; height: 100%; box-sizing: border-box; padding: 17.5mm 0 8mm;   /* 上方大花冠比下方小捲飾高得多：內容往下推，置中在花冠與捲飾之間 */
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .cf-art { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; color: var(--accent); }   /* 花框：網頁同款＋告示的四角芽，單位 mm */
+  .cf-eyebrow { position: relative; top: -1mm; font-family: var(--latin); font-size: 6mm; letter-spacing: .5em; padding-left: .5em; color: var(--accent); line-height: 1; }
+  .cf-num { font-family: var(--latin); font-weight: 600; font-size: 70mm; line-height: .86; margin-top: -.4mm; color: var(--body); font-variant-numeric: lining-nums; }   /* 桌號：數字約 4.5cm 高，隔幾桌也看得清楚 */
+  .cf-num.zh { font-family: var(--serif); font-weight: 700; font-size: 44mm; line-height: 1.15; letter-spacing: .1em; padding-left: .1em; }   /* 主桌 */
+  .cf-name { margin-top: 1.2mm;   /* 數字字身下方留白較多：拉近桌名，讓「TABLE→數字」和「數字→桌名」的實際間距一樣（約 9mm） */
+    font-family: var(--serif); font-weight: 600; font-size: var(--fs, 16mm); line-height: 1.2; letter-spacing: .2em; padding-left: .2em; color: var(--body); white-space: nowrap; }   /* 桌名和桌號同色、細一級、字小一點：數字仍是重點 */
+  @media print {
+    body.cards-mode { padding: 0; background: none; }
+    body.cards-mode .card-sheet { margin: 0; box-shadow: none; break-after: page; }
+    body.cards-mode * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
   /* ───── 輸出版海報：尺寸由 --pw/--ph 決定（預設 A2 橫式 594×420mm），字級跟著紙張等比放大 ───── */
   body.poster-mode { padding: 0; background: #d9d4cc; overflow: auto; }
   body.poster-mode .wrap { display: none; }
@@ -602,7 +625,7 @@
 
   <div class="plan-card">
     <!-- 工作人員：排桌統計與同步狀態放在平面圖上方 -->
-    <p class="status staff-only" id="status"><span id="s-stats"></span><span class="saved" id="saved">連線中…</span><a id="guest-link" target="_blank">賓客畫面 ↗</a><a id="poster-link" target="_blank">A1 輸出版 ↗</a></p>
+    <p class="status staff-only" id="status"><span id="s-stats"></span><span class="saved" id="saved">連線中…</span><a id="guest-link" target="_blank">手機版 ↗</a><a id="poster-link" target="_blank">大圖版 ↗</a><a id="cards-link" target="_blank">桌卡 ↗</a></p>
     <div class="plan-zoom">
       <svg class="plan" id="plan" viewBox="88.8 103.8 744.4 1202.2" role="group" aria-label="宴會廳平面圖"></svg>
       <span class="edge" aria-hidden="true"></span>
@@ -693,6 +716,9 @@
   </section>
 
 </div>
+
+<!-- 桌卡（?cards）：每桌一張 A4，對折成兩面一樣的立牌；預覽完直接用瀏覽器列印（Cmd+P）存成 PDF -->
+<section class="cards" id="cards" hidden></section>
 
 <script>
 /* ───────────── 會場幾何（依會場平面圖描繪，單位 = 110dpi 像素）───────────── */
@@ -1187,7 +1213,7 @@ function markActive() {
   opts.forEach((b, i) => b.classList.toggle("active", i === poolActive));
   opts[poolActive]?.scrollIntoView({ block: "nearest" });
 }
-function renderAll() { renderPlan(); renderDetail(); renderEditor(); renderStats(); renderRoster(); renderSearch(); renderPool(); renderPosterList(); }
+function renderAll() { renderPlan(); renderDetail(); renderEditor(); renderStats(); renderRoster(); renderSearch(); renderPool(); renderPosterList(); renderCards(); }
 
 function select(id, fromPlan) {
   if (id && id !== selected) { poolSide = state.tables[id].side; poolQ = ""; $("pool-q").value = ""; }
@@ -1208,6 +1234,7 @@ function setMode(m) {
 /* ───────────── 事件 ───────────── */
 $("guest-link").href = location.pathname;
 $("poster-link").href = location.pathname + "?poster=a1";   // 即時讀雲端最新資料；要存 PDF 就在那個分頁用瀏覽器列印
+$("cards-link").href = location.pathname + "?cards";         // 桌卡：同樣在分頁裡預覽、用瀏覽器列印存成 PDF
 // 找座位列一捲到頂端就加上 .stuck（鋪底色擋住後面的內容）
 new IntersectionObserver(([e]) => document.querySelector(".bar-dock").classList.toggle("stuck", !e.isIntersecting), { rootMargin: "-1px 0px 0px 0px" })
   .observe(document.querySelector(".bar-sentinel"));
@@ -1605,7 +1632,8 @@ const POSTER = new URLSearchParams(location.search).get("poster");
 const PAPER = { a1: [841, 594], a2: [594, 420], a3: [420, 297] };
 // 桌機的工作人員版也用這個版面當編輯畫面（BOARD）：上方找座位列，下方整張海報縮放到剛好塞滿視窗
 const BOARD = STAFF && !POSTER && matchMedia("(min-width: 1100px)").matches;
-const IMMERSIVE = !STAFF && !POSTER;   // 賓客版：平面圖滿版
+const CARDS = new URLSearchParams(location.search).has("cards");   // 桌卡列印版
+const IMMERSIVE = !STAFF && !POSTER && !CARDS;   // 賓客版：平面圖滿版
 if (IMMERSIVE) { document.body.classList.add("immersive"); document.documentElement.classList.add("immersive"); }
 // 輸出版：平面圖往上多畫一段（高度 = 標題列＋列間距），比例尺不變；外牆上緣跟著上移，標題就落在牆內
 function extendPlanForPoster() {
@@ -1653,6 +1681,59 @@ function setupPoster() {
 }
 // 海報右邊的 7×6 格：41 桌＋最後一格放圖例與網址
 const QR_PATH = "M0 0.5h7m2 0h2m2 0h1m2 0h5m2 0h1m2 0h7m-33 1h1m5 0h1m3 0h1m2 0h5m4 0h1m3 0h1m5 0h1m-33 1h1m1 0h3m1 0h1m1 0h2m1 0h1m1 0h1m1 0h1m1 0h5m1 0h2m1 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h2m4 0h1m1 0h1m2 0h2m1 0h1m1 0h1m1 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m3 0h2m1 0h1m2 0h1m4 0h1m2 0h1m1 0h3m1 0h1m-33 1h1m5 0h1m1 0h2m1 0h1m1 0h5m2 0h2m4 0h1m5 0h1m-33 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-25 1h2m4 0h2m5 0h1m2 0h1m-25 1h1m1 0h5m3 0h1m1 0h2m1 0h1m1 0h1m4 0h3m1 0h5m-31 1h1m2 0h1m4 0h1m7 0h1m1 0h2m1 0h1m1 0h1m2 0h2m1 0h2m1 0h1m-32 1h1m1 0h9m3 0h1m2 0h1m1 0h1m1 0h1m2 0h2m1 0h1m1 0h2m-32 1h1m1 0h3m2 0h2m3 0h1m1 0h1m1 0h1m2 0h1m1 0h3m1 0h1m2 0h4m-32 1h1m2 0h4m1 0h1m1 0h1m7 0h1m4 0h3m1 0h3m1 0h1m-32 1h3m1 0h2m2 0h2m2 0h1m1 0h4m2 0h1m2 0h1m1 0h3m1 0h4m-31 1h3m1 0h2m1 0h2m1 0h2m4 0h2m2 0h1m1 0h3m1 0h1m1 0h2m-32 1h1m1 0h4m3 0h2m5 0h1m2 0h4m2 0h2m2 0h2m-31 1h3m1 0h1m1 0h2m1 0h1m1 0h4m2 0h1m1 0h2m1 0h1m1 0h2m1 0h2m3 0h1m-32 1h1m2 0h2m2 0h1m3 0h1m1 0h1m2 0h1m1 0h1m2 0h2m2 0h2m1 0h2m1 0h1m-32 1h1m1 0h4m3 0h1m1 0h4m1 0h1m2 0h1m1 0h1m4 0h2m1 0h2m-31 1h1m1 0h1m1 0h1m4 0h1m1 0h1m1 0h1m2 0h2m2 0h2m2 0h8m-33 1h1m1 0h1m1 0h1m1 0h1m1 0h1m2 0h2m2 0h2m2 0h3m1 0h1m1 0h1m1 0h3m1 0h1m-32 1h2m2 0h1m2 0h1m2 0h1m1 0h1m1 0h2m2 0h1m2 0h1m1 0h1m2 0h1m2 0h2m1 0h1m-33 1h1m2 0h6m1 0h2m1 0h4m3 0h3m2 0h4m1 0h2m-32 1h1m3 0h1m2 0h1m1 0h4m2 0h1m2 0h1m2 0h2m1 0h2m2 0h5m-33 1h1m1 0h1m1 0h1m1 0h1m5 0h2m1 0h1m1 0h1m2 0h1m3 0h5m2 0h2m-25 1h1m2 0h2m3 0h1m1 0h2m1 0h2m1 0h1m3 0h1m1 0h3m-33 1h7m5 0h2m1 0h2m1 0h1m1 0h2m1 0h2m1 0h1m1 0h1m1 0h2m-32 1h1m5 0h1m1 0h1m1 0h1m4 0h2m4 0h1m1 0h2m3 0h5m-33 1h1m1 0h3m1 0h1m1 0h2m1 0h3m1 0h1m2 0h2m1 0h1m2 0h6m1 0h2m-33 1h1m1 0h3m1 0h1m1 0h1m2 0h2m2 0h3m2 0h2m1 0h3m2 0h1m3 0h1m-33 1h1m1 0h3m1 0h1m1 0h2m1 0h1m1 0h2m3 0h2m1 0h1m1 0h2m1 0h2m1 0h2m-31 1h1m5 0h1m2 0h1m1 0h1m4 0h1m1 0h5m2 0h1m2 0h3m-31 1h7m1 0h1m2 0h2m1 0h1m1 0h2m1 0h2m2 0h3m1 0h1m3 0h1";   // https://memochou1993.github.io/wedding-seating/（segno，version 4-M）
+/* ───────────── 桌卡（?cards）：主桌＋1–41 桌，每桌一張 A4，上下兩面內容相同（上半張轉 180°）───────────── */
+function setupCards() {
+  mode = "guest";
+  document.body.classList.add("cards-mode");
+  document.head.insertAdjacentHTML("beforeend", `<style>@media print { @page { size: 210mm 297mm; margin: 0; } }</style>`);
+  const ids = ORDER.slice().sort((a, b) => numKey(state.tables[a]) - numKey(state.tables[b]) || ORDER.indexOf(a) - ORDER.indexOf(b));
+  const art = `<svg class="cf-art" viewBox="0 0 ${CF_W} ${CF_H}" preserveAspectRatio="none" aria-hidden="true">${cardFrameSVG()}</svg>`;
+  const face = (pos) => `<div class="card-face ${pos}"><div class="card-frame">${art}<span class="cf-eyebrow">TABLE</span><span class="cf-num"></span><span class="cf-name"></span></div></div>`;
+  $("cards").innerHTML = ids.map(id => `<div class="card-sheet" data-id="${id}">${face("top")}${face("bottom")}</div>`).join("");
+  $("cards").hidden = false;
+  renderCards();
+}
+// 桌卡花框：網頁同款（直角外框、四角小弧＋菱形、上方花冠、下方小捲飾），再補上 wedding-signs 告示四角沿邊捲出的「芽」。
+// 圖形照原版大小（1 單位 ≈ 0.688mm，和網頁版 decorate 在 A4 上畫出來一樣大），離花框區邊緣 3.7mm；線寬以 mm 指定
+const CF_W = 194, CF_H = 132.5;   // 花框區 = A4 寬 210 × 半張 148.5，扣掉四周 8mm
+function cardFrameSVG() {
+  const off = 3.7, k = 0.688, W = (CF_W - 2 * off) / k, H = (CF_H - 2 * off) / k, CX = W / 2;
+  const ln = (mm) => `fill="none" stroke="currentColor" stroke-width="${mm / k}"`;
+  const dot = `fill="currentColor"`;
+  const diamond = (x, y, r) => `<path d="M${x},${y - r} L${x + r},${y} L${x},${y + r} L${x - r},${y} Z" ${dot}/>`;
+  const leaf = (x, y, ang, len, wid) => `<path d="M0,0 Q${len / 2},${-wid} ${len},0 Q${len / 2},${wid} 0,0 Z" transform="translate(${x},${y}) rotate(${ang})" ${dot}/>`;
+  const four = (g) => ["", `translate(${W},0) scale(-1,1)`, `translate(0,${H}) scale(1,-1)`, `translate(${W},${H}) scale(-1,-1)`].map(t => `<g transform="${t}">${g}</g>`).join("");
+  const diag = (g) => `<g>${g}</g><g transform="matrix(0,1,1,0,0,0)">${g}</g>`;   // 沿對角線鏡射：左緣一個、上緣一個
+  const scaleAt = (kk, x, y, g) => `<g transform="translate(${x},${y}) scale(${kk}) translate(${-x},${-y})">${g}</g>`;
+  // 四角：以框角為圓心的四分之一圓弧，兩端正好接在上緣與左緣；芽從圓弧和邊的交接處長出、往內捲（告示同款的小捲草）
+  const R = 11.8;
+  const corner = scaleAt(1.25, 0, 0,
+    `<path d="M0,${R} A${R},${R} 0 0 0 ${R},0" ${ln(.5)}/>` + diamond(6.4, 6.4, 1.3) +
+    diag(`<path d="M0,${R} c4,0 6.5,2.5 6.5,6.5 c0,2.6 -2.6,3.4 -3.8,1.7 c-0.8,-1.2 0.2,-2.5 1.4,-2" ${ln(.35)}/>`));
+  const arm = (s) =>
+    `<path d="M${CX},10 C${CX + s * 6},10 ${CX + s * 8},4.5 ${CX + s * 14},4.8 C${CX + s * 22},5.2 ${CX + s * 23},12.5 ${CX + s * 30},11.5 C${CX + s * 35},10.8 ${CX + s * 35.5},5.6 ${CX + s * 31.5},6 C${CX + s * 29},6.3 ${CX + s * 29.5},9 ${CX + s * 31.5},8.8" ${ln(.45)}/>` +
+    `<path d="M${CX + s * 3},13.5 C${CX + s * 9},14.5 ${CX + s * 12},17.5 ${CX + s * 17},16 c${s * 2.6},-0.8 ${s * 2.2},-3.6 0,-3.4" ${ln(.3)}/>` +
+    leaf(CX + s * 18.5, 7.2, s > 0 ? -20 : 200, 6, 1.5);
+  const crest = scaleAt(1.25, CX, 0, arm(1) + arm(-1) + diamond(CX, 7, 2.8) + `<circle cx="${CX}" cy="13" r="1.2" ${dot}/>`);
+  const curl = (s) => `<path d="M${CX + s * 4},4 C${CX + s * 10},4 ${CX + s * 12},8 ${CX + s * 17},7 C${CX + s * 20.5},6.2 ${CX + s * 20},2.8 ${CX + s * 17.5},3.4" ${ln(.35)}/>`;
+  const foot = `<g transform="translate(0,${H}) scale(1,-1)">${diamond(CX, 4, 2.4) + curl(1) + curl(-1)}</g>`;
+  return `<g transform="translate(${off},${off}) scale(${k})"><rect x="0" y="0" width="${W}" height="${H}" ${ln(.5)}/>${four(corner)}${crest}${foot}</g>`;
+}
+function renderCards() {
+  if (!CARDS) return;
+  for (const sheet of $("cards").querySelectorAll(".card-sheet")) {
+    // 只改顯示、不動資料：桌名的數字換成全形（「合作夥伴 3」→「合作夥伴３」），和中文字一樣佔一個字寬；中間的空格拿掉，間距就和字與字之間一樣
+    const d = state.tables[sheet.dataset.id], main = d.num === "主桌";
+    const name = main ? "" : (d.name || "").replace(/\s+/g, "").replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0));
+    // 桌名太長就縮小：花框內約 165mm 寬，每字約 1.2 個字寬（含字距），最大 16mm
+    const fs = Math.min(16, 165 / Math.max(1, [...name].length * 1.2));
+    for (const f of sheet.querySelectorAll(".card-frame")) {
+      const n = f.querySelector(".cf-num"), nm = f.querySelector(".cf-name");
+      n.textContent = main ? "主桌" : d.num; n.classList.toggle("zh", main);
+      nm.textContent = name; nm.hidden = !name; nm.style.setProperty("--fs", fs + "mm");
+    }
+  }
+}
 function renderPosterList() {
   if (!POSTER && !BOARD) return;
   // 最後一格：查找座位的 QR code（網址固定，用 tools 產生好的 SVG 路徑內嵌；CSP 不允許外部圖片或程式）
@@ -1705,6 +1786,7 @@ function fitPosterNames() {
   if (common) list.style.setProperty("--name-fs", common);
 }
 document.fonts.ready.then(() => fitPosterNames());   // 字型載入後字寬會變，重算一次
+if (CARDS) setupCards();
 if (POSTER) { mode = "guest"; setupPoster(); }
 else if (BOARD) setupPoster();
 
