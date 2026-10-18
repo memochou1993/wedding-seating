@@ -482,6 +482,8 @@
   /* ───── 桌卡（?cards）：A4 直式一張一桌，沿中線對折成 210×148.5mm 的立牌；上半張整面轉 180°，折起來兩面都是正的 ───── */
   body.cards-mode { padding: 24px 0; background: #d9d4cc; }
   body.cards-mode > :not(#cards):not(script) { display: none !important; }
+  /* 螢幕預覽：整張依視窗寬縮小（--cz，setupCards 依視窗寬計算；手機上一次看到一整張）；列印時不縮放，照實際 A4 */
+  @media screen { .card-sheet { zoom: var(--cz, 1); } }
   .card-sheet { position: relative; width: 210mm; height: 297mm; margin: 0 auto 24px; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.18); overflow: hidden; }
   /* 對折記號：左右邊緣各一小段，印在花框外面，摺的時候對齊用 */
   .card-sheet::before, .card-sheet::after { content: ""; position: absolute; top: 50%; width: 5mm; border-top: .3mm solid #c9c2b8; }
@@ -1691,6 +1693,8 @@ function setupCards() {
   const face = (pos) => `<div class="card-face ${pos}"><div class="card-frame">${art}<span class="cf-eyebrow">TABLE</span><span class="cf-num"></span><span class="cf-name"></span></div></div>`;
   $("cards").innerHTML = ids.map(id => `<div class="card-sheet" data-id="${id}">${face("top")}${face("bottom")}</div>`).join("");
   $("cards").hidden = false;
+  const fitCards = () => $("cards").style.setProperty("--cz", Math.min(1, (innerWidth - 24) / (210 * 96 / 25.4)).toFixed(4));
+  fitCards(); addEventListener("resize", fitCards);
   renderCards();
 }
 // 桌卡花框：網頁同款（直角外框、四角小弧＋菱形、上方花冠、下方小捲飾），再補上 wedding-signs 告示四角沿邊捲出的「芽」。
