@@ -35,7 +35,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23a8875a' d='M16 28.5C14.9 27.6 2.5 19.6 2.5 10.9 2.5 6.9 5.5 4 9.2 4c2.8 0 5.2 1.6 6.8 4 1.6-2.4 4-4 6.8-4 3.7 0 6.7 2.9 6.7 6.9 0 8.7-12.4 16.7-13.5 17.6z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Pinyon+Script&family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
 <style>
   /* 版面：上方花框標題 → 左平面圖、右側面板 → 下方席次一覽。配色沿用告示牌。 */
   /* 注音組字用系統字型：思源宋體的注音比較小、比較細，打字時看起來像縮了一號。
@@ -479,31 +479,54 @@
   body.immersive .zoom-pct { display: flex; align-items: center; justify-content: center; width: 46px; height: 30px; background: var(--paper);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 13px; font-weight: 300; font-variant-numeric: tabular-nums; letter-spacing: .02em; color: var(--muted); }   /* 目前倍率：全圖＝100%；和 －／＋、圖例文字同色；數字用系統內建字型，不用思源宋體 */
 
-  /* ───── 桌卡（?cards）：A4 直式一張一桌，沿中線對折成 210×148.5mm 的立牌；上半張整面轉 180°，折起來兩面都是正的 ───── */
+  /* ───── 桌卡（?cards）：三角立牌，每面寬 90 × 高 140mm。攤開是一長條，由上而下：黏貼邊 12、底座 35、背面 140、正面 140（共 327mm）；
+     A3 直式一張並排三條。背面倒印，沿頂端對折後兩面都是正的；底座折到下面，黏貼邊塗膠黏在正面底部內側 ───── */
   body.cards-mode { padding: 24px 0; background: #d9d4cc; }
-  body.cards-mode > :not(#cards):not(script) { display: none !important; }
+  body.cards-mode > :not(#cards):not(.tent-themes):not(.tent-pv):not(script) { display: none !important; }
   /* 螢幕預覽：整張依視窗寬縮小（--cz，setupCards 依視窗寬計算；手機上一次看到一整張）。用 transform 縮放，外面包一層佔縮小後的大小；
-     不用 CSS zoom：iPhone Safari 的 zoom 不會縮 mm 單位的字，字會撐出紙外。列印時不縮放，照實際 A4 */
-  .card-slot { width: calc(210mm * var(--cz, 1)); height: calc(297mm * var(--cz, 1)); margin: 0 auto 24px; }
+     不用 CSS zoom：iPhone Safari 的 zoom 不會縮 mm 單位的字，字會撐出紙外。列印時不縮放，照實際 A3 */
+  .card-slot { width: calc(297mm * var(--cz, 1)); height: calc(420mm * var(--cz, 1)); margin: 0 auto 24px; }
   .card-slot > .card-sheet { transform: scale(var(--cz, 1)); transform-origin: 0 0; }
-  .card-sheet { position: relative; width: 210mm; height: 297mm; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.18); overflow: hidden; }
-  /* 對折記號：左右邊緣各一小段，印在花框外面，摺的時候對齊用 */
-  .card-sheet::before, .card-sheet::after { content: ""; position: absolute; top: 50%; width: 5mm; border-top: .3mm solid #c9c2b8; }
-  .card-sheet::before { left: 0; } .card-sheet::after { right: 0; }
-  .card-face { box-sizing: border-box; height: 50%; padding: 8mm; }   /* 花框離紙邊至少 8mm＋框內縮，家用印表機印不到的邊緣不會切到 */
-  .card-face.top { transform: rotate(180deg); }
-  .card-frame { position: relative; height: 100%; box-sizing: border-box; padding: 17.5mm 0 8mm;   /* 上方大花冠比下方小捲飾高得多：內容往下推，置中在花冠與捲飾之間 */
-    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-  .cf-art { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; color: var(--accent); }   /* 花框：網頁同款＋告示的四角芽，單位 mm */
-  .cf-eyebrow { position: relative; top: -1mm; font-family: var(--latin); font-size: 6mm; letter-spacing: .5em; padding-left: .5em; color: var(--accent); line-height: 1; }
-  .cf-num { font-family: var(--latin); font-weight: 600; font-size: 70mm; line-height: .86; margin-top: -.4mm; color: var(--body); font-variant-numeric: lining-nums; }   /* 桌號：數字約 4.5cm 高，隔幾桌也看得清楚 */
-  .cf-num.zh { font-family: var(--serif); font-weight: 700; font-size: 44mm; line-height: 1.15; letter-spacing: .1em; padding-left: .1em; }   /* 主桌 */
-  .cf-name { margin-top: 1.2mm;   /* 數字字身下方留白較多：拉近桌名，讓「TABLE→數字」和「數字→桌名」的實際間距一樣（約 9mm） */
-    font-family: var(--serif); font-weight: 600; font-size: var(--fs, 16mm); line-height: 1.2; letter-spacing: .2em; padding-left: .2em; color: var(--body); white-space: nowrap; }   /* 桌名和桌號同色、細一級、字小一點：數字仍是重點 */
+  .card-sheet, .tent-pv { --tent: #faf5ec; --script: "Pinyon Script", var(--latin); --hand: "LXGW WenKai TC", var(--serif); }   /* 立牌底色：淡香檳，左右與下緣出血 3mm（TENT.BLEED） */
+  .card-sheet { position: relative; width: 297mm; height: 420mm; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.18); overflow: hidden; }
+  .tent-marks, .strip-art, .tf-art { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }   /* 單位都是 mm */
+  .strip { position: absolute; width: 90mm; height: 327mm; }
+  .tent-face { position: absolute; left: 0; width: 90mm; height: 140mm; color: var(--accent); }
+  .tent-face.back { top: 47mm; transform: rotate(180deg); }
+  .tent-face.front { top: 187mm; }
+  .tent-face > span { position: absolute; left: 0; right: 0; text-align: center; line-height: 1; }
+  .tf-table { top: 31mm; font-family: var(--script); font-size: 12mm; }
+  .tf-num { top: 43mm; font-family: var(--latin); font-style: italic; font-weight: 500; font-size: 56mm; color: var(--body); font-variant-numeric: lining-nums; }
+  .tf-num.zh { top: 60mm; font-family: var(--serif); font-style: normal; font-weight: 700; font-size: 19mm; letter-spacing: .15em; padding-left: .15em; }   /* 主桌 */
+  .tf-name { top: calc(113.1mm - var(--fs, 8mm) / 2);   /* 分隔線（101mm）和拱門內框底線（125.2mm）的正中間 */
+    font-family: var(--serif); font-weight: 600; font-size: var(--fs, 6mm); letter-spacing: .2em; padding-left: .2em; color: var(--body); white-space: nowrap; }
+  .tf-name.rsv { font-family: var(--latin); font-style: italic; font-weight: 500; letter-spacing: .06em; padding-left: .06em; }
+  .tent-face > .tf-poem { top: 34mm; font-family: var(--hand); font-size: 3.8mm; line-height: 1.55; color: var(--ink); }   /* 霞鶩文楷；整段往下放，最長的第二行落在拱門已經變寬的地方，左右才有呼吸空間 */
+  .tf-poem p { margin: 0 0 1.4mm; }
+  .tf-thanks { font-family: var(--script); font-size: 8mm; }   /* 不算 y 的尾巴，T 頂端到 you 的基線約 104.6–117.8mm：在文案最後一行（約 97.3mm）和拱門內框底線（125.1mm）的正中間 */
+  .tent-face > .tf-bg { left: -3mm; right: -3mm; top: 0; bottom: -3mm; overflow: hidden; }   /* 3mm＝TENT.BLEED */
+  .tf-bg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  /* 版本切換：固定在螢幕上方，列印不印 */
+  .tent-themes { position: sticky; top: 12px; z-index: 5; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin: 0 auto 16px; padding: 0 12px; }
+  .tent-themes .tent-view { display: inline-flex; }
+  .tent-themes .tent-view button:first-child { border-radius: 999px 0 0 999px; }
+  .tent-themes .tent-view button:last-child { border-radius: 0 999px 999px 0; margin-left: -1px; }
+  body[data-view="preview"] #cards, body[data-view="print"] .tent-pv { display: none; }
+  /* 預覽版：每桌一組（正面｜背面），依視窗寬縮放（--pz） */
+  .tent-pv { display: flex; flex-wrap: wrap; justify-content: center; gap: 28px 40px; padding: 0 16px 24px; }
+  .pv-card { margin: 0; text-align: center; font-size: 13px; color: var(--muted); }
+  .pv-pair { display: flex; gap: 16px; margin-bottom: 8px; }
+  .pv-slot { width: calc(90mm * var(--pz, 1)); height: calc(140mm * var(--pz, 1)); box-shadow: 0 2px 12px rgba(0,0,0,.18); }
+  .pv-face { position: relative; width: 90mm; height: 140mm; transform: scale(var(--pz, 1)); transform-origin: 0 0; overflow: hidden; background: var(--tent); }
+  .pv-face .tent-face { top: 0; transform: none; }
+  .tent-themes button { padding: 6px 16px; border: 1px solid var(--accent); border-radius: 999px; background: var(--paper); color: var(--body); font-size: 14px; letter-spacing: .1em; cursor: pointer; }
+  .tent-themes button[aria-pressed="true"] { background: var(--accent); color: #fff; }
   @media print {
     body.cards-mode { padding: 0; background: none; }
     body.cards-mode .card-slot { width: auto; height: auto; margin: 0; break-after: page; }
     body.cards-mode .card-sheet { transform: none; box-shadow: none; }
+    body.cards-mode .tent-themes, body.cards-mode .tent-pv { display: none !important; }
+    body.cards-mode #cards { display: block !important; }
     body.cards-mode * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 
@@ -1686,61 +1709,132 @@ function setupPoster() {
 }
 // 海報右邊的 7×6 格：41 桌＋最後一格放圖例與網址
 const QR_PATH = "M0 0.5h7m2 0h2m2 0h1m2 0h5m2 0h1m2 0h7m-33 1h1m5 0h1m3 0h1m2 0h5m4 0h1m3 0h1m5 0h1m-33 1h1m1 0h3m1 0h1m1 0h2m1 0h1m1 0h1m1 0h1m1 0h5m1 0h2m1 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h2m4 0h1m1 0h1m2 0h2m1 0h1m1 0h1m1 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m3 0h2m1 0h1m2 0h1m4 0h1m2 0h1m1 0h3m1 0h1m-33 1h1m5 0h1m1 0h2m1 0h1m1 0h5m2 0h2m4 0h1m5 0h1m-33 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-25 1h2m4 0h2m5 0h1m2 0h1m-25 1h1m1 0h5m3 0h1m1 0h2m1 0h1m1 0h1m4 0h3m1 0h5m-31 1h1m2 0h1m4 0h1m7 0h1m1 0h2m1 0h1m1 0h1m2 0h2m1 0h2m1 0h1m-32 1h1m1 0h9m3 0h1m2 0h1m1 0h1m1 0h1m2 0h2m1 0h1m1 0h2m-32 1h1m1 0h3m2 0h2m3 0h1m1 0h1m1 0h1m2 0h1m1 0h3m1 0h1m2 0h4m-32 1h1m2 0h4m1 0h1m1 0h1m7 0h1m4 0h3m1 0h3m1 0h1m-32 1h3m1 0h2m2 0h2m2 0h1m1 0h4m2 0h1m2 0h1m1 0h3m1 0h4m-31 1h3m1 0h2m1 0h2m1 0h2m4 0h2m2 0h1m1 0h3m1 0h1m1 0h2m-32 1h1m1 0h4m3 0h2m5 0h1m2 0h4m2 0h2m2 0h2m-31 1h3m1 0h1m1 0h2m1 0h1m1 0h4m2 0h1m1 0h2m1 0h1m1 0h2m1 0h2m3 0h1m-32 1h1m2 0h2m2 0h1m3 0h1m1 0h1m2 0h1m1 0h1m2 0h2m2 0h2m1 0h2m1 0h1m-32 1h1m1 0h4m3 0h1m1 0h4m1 0h1m2 0h1m1 0h1m4 0h2m1 0h2m-31 1h1m1 0h1m1 0h1m4 0h1m1 0h1m1 0h1m2 0h2m2 0h2m2 0h8m-33 1h1m1 0h1m1 0h1m1 0h1m1 0h1m2 0h2m2 0h2m2 0h3m1 0h1m1 0h1m1 0h3m1 0h1m-32 1h2m2 0h1m2 0h1m2 0h1m1 0h1m1 0h2m2 0h1m2 0h1m1 0h1m2 0h1m2 0h2m1 0h1m-33 1h1m2 0h6m1 0h2m1 0h4m3 0h3m2 0h4m1 0h2m-32 1h1m3 0h1m2 0h1m1 0h4m2 0h1m2 0h1m2 0h2m1 0h2m2 0h5m-33 1h1m1 0h1m1 0h1m1 0h1m5 0h2m1 0h1m1 0h1m2 0h1m3 0h5m2 0h2m-25 1h1m2 0h2m3 0h1m1 0h2m1 0h2m1 0h1m3 0h1m1 0h3m-33 1h7m5 0h2m1 0h2m1 0h1m1 0h2m1 0h2m1 0h1m1 0h1m1 0h2m-32 1h1m5 0h1m1 0h1m1 0h1m4 0h2m4 0h1m1 0h2m3 0h5m-33 1h1m1 0h3m1 0h1m1 0h2m1 0h3m1 0h1m2 0h2m1 0h1m2 0h6m1 0h2m-33 1h1m1 0h3m1 0h1m1 0h1m2 0h2m2 0h3m2 0h2m1 0h3m2 0h1m3 0h1m-33 1h1m1 0h3m1 0h1m1 0h2m1 0h1m1 0h2m3 0h2m1 0h1m1 0h2m1 0h2m1 0h2m-31 1h1m5 0h1m2 0h1m1 0h1m4 0h1m1 0h5m2 0h1m2 0h3m-31 1h7m1 0h1m2 0h2m1 0h1m1 0h2m1 0h2m2 0h3m1 0h1m3 0h1";   // https://memochou1993.github.io/wedding-seating/（segno，version 4-M）
-/* ───────────── 桌卡（?cards）：主桌＋1–41 桌，每桌一張 A4，上下兩面內容相同（上半張轉 180°）───────────── */
+/* ───────────── 桌卡（?cards）：主桌＋1–41 桌的三角立牌，A3 直式一張並排三條（單位 mm）───────────── */
+const TENT = { W: 90, H: 140, BASE: 35, TAB: 12, BLEED: 3, GAP: 6, PW: 297, PH: 420, PER: 3 };   // 出血 3mm（台灣印刷廠常見規格）；GAP＝相鄰兩條各自的出血，雙刀裁切，刀偏 3mm 內都不會切到隔壁
+const TENT_POEM = [
+  ["晨昏交替 四季流轉", "這一天因相聚而有了特別的意義"],
+  ["我們以一場溫柔的儀式", "為相愛留下印記 為承諾賦予形狀"],
+  ["感謝你遠道而來 帶著祝福赴約", "讓這場相聚 不只圓滿 更添暖意"],
+  ["願你感受此刻的真心", "也將這份溫暖 珍藏於心"],
+  ["久別重逢 幸而有你", "相聚有時 情誼長存"],
+];
+// 底圖：整張水彩（上方垂花、下方花叢），正反面都鋪滿；拱門裡鋪 60% 的底色，字才清楚、花又透得出來
+const TENT_BG = "assets/meadow-bg.jpg", TENT_VEIL = "rgba(250,245,236,.6)";
+// view：預覽版（每桌正反面並排）或輸出版（A3 印刷版面），列印一律印輸出版
+let tentView = new URLSearchParams(location.search).get("view") === "print" ? "print" : "preview";
 function setupCards() {
   mode = "guest";
   document.body.classList.add("cards-mode");
-  document.head.insertAdjacentHTML("beforeend", `<style>@media print { @page { size: 210mm 297mm; margin: 0; } }</style>`);
-  const ids = ORDER.slice().sort((a, b) => numKey(state.tables[a]) - numKey(state.tables[b]) || ORDER.indexOf(a) - ORDER.indexOf(b));
-  const art = `<svg class="cf-art" viewBox="0 0 ${CF_W} ${CF_H}" preserveAspectRatio="none" aria-hidden="true">${cardFrameSVG()}</svg>`;
-  const face = (pos) => `<div class="card-face ${pos}"><div class="card-frame">${art}<span class="cf-eyebrow">TABLE</span><span class="cf-num"></span><span class="cf-name"></span></div></div>`;
-  $("cards").innerHTML = ids.map(id => `<div class="card-slot"><div class="card-sheet" data-id="${id}">${face("top")}${face("bottom")}</div></div>`).join("");
-  $("cards").hidden = false;
-  const fitCards = () => $("cards").style.setProperty("--cz", Math.min(1, (innerWidth - 24) / (210 * 96 / 25.4)).toFixed(4));
+  document.head.insertAdjacentHTML("beforeend", `<style>@media print { @page { size: 297mm 420mm; margin: 0; } }</style>`);
+  // 預覽版／輸出版切換（只在螢幕上，列印不印）：網址記住目前的檢視（?cards&view=print），重新整理還是同一個
+  $("cards").insertAdjacentHTML("beforebegin", `<nav class="tent-themes"><span class="tent-view"><button type="button" data-view="preview">預覽版</button><button type="button" data-view="print">輸出版</button></span></nav>`);
+  $("cards").insertAdjacentHTML("afterend", `<section class="tent-pv" id="tent-pv"></section>`);
+  document.querySelector(".tent-themes").addEventListener("click", (e) => {
+    const v = e.target.closest("button[data-view]"); if (!v) return;
+    tentView = v.dataset.view; history.replaceState(null, "", `?cards${tentView === "print" ? "&view=print" : ""}`); showTentView();
+  });
+  const fitCards = () => {
+    $("cards").style.setProperty("--cz", Math.min(1, (innerWidth - 24) / (TENT.PW * 96 / 25.4)).toFixed(4));
+    $("tent-pv").style.setProperty("--pz", ((Math.min(innerWidth - 32, 720) - 16) / (2 * TENT.W * 96 / 25.4)).toFixed(4));   // 一桌（正反兩面）最寬 720px
+  };
   fitCards(); addEventListener("resize", fitCards);
+  showTentView();
+  drawCards();
+}
+// 正面、背面的內容（輸出版和預覽版共用）
+function tentFaces() {
+  // 整張底圖：鋪滿卡面＋左右下出血，頂端切齊折線（越過去會印到另一面）
+  const bg = `<span class="tf-bg"><img src="${TENT_BG}" alt=""></span>`;
+  // 分隔線：wedding-signs 告示同款（兩段細線夾一顆菱形），依卡片大小縮小；線長跟著桌名寬度（fillTent 設定）
+  const rule = `<path class="tf-rule" d="${tentRule(38)}" stroke="currentColor" stroke-width=".25"/><path d="M45,99.8 L46.2,101 L45,102.2 L43.8,101 Z" fill="currentColor"/>`;
+  // 沿拱門頂端置中：左右對稱的圓弧，字從弧的正中間往兩邊排
+  const welcome = `<path id="tf-arc" d="M18.22,39.25 A28.5,28.5 0 0 1 71.78,39.25" fill="none"/>` +
+    `<text font-family="Cormorant Garamond, serif" font-weight="500" font-size="2.3" letter-spacing=".4" fill="currentColor" text-anchor="middle"><textPath href="#tf-arc" startOffset="50%">WELCOME TO OUR WEDDING</textPath></text>`;
+  return {
+    front: `<div class="tent-face front">${bg}${tentArch(welcome + rule, TENT_VEIL)}` +
+      `<span class="tf-table">Table</span><span class="tf-num"></span><span class="tf-name"></span></div>`,
+    back: `<div class="tent-face back">${bg}${tentArch("", TENT_VEIL)}` +
+      `<span class="tf-poem">${TENT_POEM.map(p => `<p>${p.join("<br>")}</p>`).join("")}</span>` +
+      `<span class="tf-thanks" style="top:104.9mm">Thank</span><span class="tf-thanks" style="top:111.7mm">you</span></div>`,
+  };
+}
+function showTentView() {
+  document.body.dataset.view = tentView;
+  for (const b of document.querySelectorAll(".tent-themes [data-view]")) b.setAttribute("aria-pressed", b.dataset.view === tentView);
+}
+function drawCards() {
+  const ids = ORDER.slice().sort((a, b) => numKey(state.tables[a]) - numKey(state.tables[b]) || ORDER.indexOf(a) - ORDER.indexOf(b));
+  const { W, H, BASE, TAB, BLEED, GAP, PW, PH, PER } = TENT, L = TAB + BASE + 2 * H;
+  const x0 = (PW - PER * W - (PER - 1) * GAP) / 2, y0 = (PH - L) / 2;
+  const { front, back } = tentFaces();
+  // 黏貼邊（梯形，虛線照著剪）＋底座＋兩面的底色；底色往底座多鋪 2mm，折線稍微偏一點也不會露白
+  const art = `<svg class="strip-art" viewBox="0 0 ${W} ${L}" aria-hidden="true">` +
+    `<rect x="${-BLEED}" y="${TAB + BASE - 2}" width="${W + 2 * BLEED}" height="${2 * H + 2 + BLEED}" fill="var(--tent)"/>` +
+    `<path d="M0,${TAB} L6,0 H${W - 6} L${W},${TAB}" fill="none" stroke="#b8ad9c" stroke-width=".25" stroke-dasharray="1.2 .8"/>` +
+    `<text x="${W / 2}" y="${TAB / 2 + 1.2}" text-anchor="middle" font-family="Noto Serif TC, serif" font-size="3.2" letter-spacing=".6" fill="#b8ad9c">黏貼處（塗膠）</text>` +
+    `<text class="tf-label" x="${W / 2}" y="${TAB + BASE / 2 + 1.2}" text-anchor="middle" font-family="Noto Serif TC, serif" font-size="3.2" letter-spacing=".6" fill="#b8ad9c"></text></svg>`;
+  const sheets = [];
+  for (let i = 0; i < ids.length; i += PER) sheets.push(ids.slice(i, i + PER));
+  $("cards").innerHTML = sheets.map(group => `<div class="card-slot"><div class="card-sheet">${tentMarks(group.length, x0, y0)}` +
+    group.map((id, i) => `<div class="strip" data-id="${id}" style="left:${x0 + i * (W + GAP)}mm;top:${y0}mm">${art}${back}${front}</div>`).join("") +
+    `</div></div>`).join("");
+  $("cards").hidden = false;
+  // 預覽版：每桌正面、背面並排，背面轉正，只看裁切後的成品
+  $("tent-pv").innerHTML = ids.map(id => `<figure class="pv-card" data-id="${id}"><div class="pv-pair">` +
+    `<div class="pv-slot"><div class="pv-face">${front}</div></div><div class="pv-slot"><div class="pv-face">${back}</div></div></div><figcaption></figcaption></figure>`).join("");
   renderCards();
 }
-// 桌卡花框：網頁同款（直角外框、四角小弧＋菱形、上方花冠、下方小捲飾），再補上 wedding-signs 告示四角沿邊捲出的「芽」。
-// 圖形照原版大小（1 單位 ≈ 0.688mm，和網頁版 decorate 在 A4 上畫出來一樣大），離花框區邊緣 3.7mm；線寬以 mm 指定
-const CF_W = 194, CF_H = 132.5;   // 花框區 = A4 寬 210 × 半張 148.5，扣掉四周 8mm
-function cardFrameSVG() {
-  const off = 3.7, k = 0.688, W = (CF_W - 2 * off) / k, H = (CF_H - 2 * off) / k, CX = W / 2;
-  const ln = (mm) => `fill="none" stroke="currentColor" stroke-width="${mm / k}"`;
-  const dot = `fill="currentColor"`;
-  const diamond = (x, y, r) => `<path d="M${x},${y - r} L${x + r},${y} L${x},${y + r} L${x - r},${y} Z" ${dot}/>`;
-  const leaf = (x, y, ang, len, wid) => `<path d="M0,0 Q${len / 2},${-wid} ${len},0 Q${len / 2},${wid} 0,0 Z" transform="translate(${x},${y}) rotate(${ang})" ${dot}/>`;
-  const four = (g) => ["", `translate(${W},0) scale(-1,1)`, `translate(0,${H}) scale(1,-1)`, `translate(${W},${H}) scale(-1,-1)`].map(t => `<g transform="${t}">${g}</g>`).join("");
-  const diag = (g) => `<g>${g}</g><g transform="matrix(0,1,1,0,0,0)">${g}</g>`;   // 沿對角線鏡射：左緣一個、上緣一個
-  const scaleAt = (kk, x, y, g) => `<g transform="translate(${x},${y}) scale(${kk}) translate(${-x},${-y})">${g}</g>`;
-  // 四角：以框角為圓心的四分之一圓弧，兩端正好接在上緣與左緣；芽從圓弧和邊的交接處長出、往內捲（告示同款的小捲草）
-  const R = 11.8;
-  const corner = scaleAt(1.25, 0, 0,
-    `<path d="M0,${R} A${R},${R} 0 0 0 ${R},0" ${ln(.5)}/>` + diamond(6.4, 6.4, 1.3) +
-    diag(`<path d="M0,${R} c4,0 6.5,2.5 6.5,6.5 c0,2.6 -2.6,3.4 -3.8,1.7 c-0.8,-1.2 0.2,-2.5 1.4,-2" ${ln(.35)}/>`));
-  const arm = (s) =>
-    `<path d="M${CX},10 C${CX + s * 6},10 ${CX + s * 8},4.5 ${CX + s * 14},4.8 C${CX + s * 22},5.2 ${CX + s * 23},12.5 ${CX + s * 30},11.5 C${CX + s * 35},10.8 ${CX + s * 35.5},5.6 ${CX + s * 31.5},6 C${CX + s * 29},6.3 ${CX + s * 29.5},9 ${CX + s * 31.5},8.8" ${ln(.45)}/>` +
-    `<path d="M${CX + s * 3},13.5 C${CX + s * 9},14.5 ${CX + s * 12},17.5 ${CX + s * 17},16 c${s * 2.6},-0.8 ${s * 2.2},-3.6 0,-3.4" ${ln(.3)}/>` +
-    leaf(CX + s * 18.5, 7.2, s > 0 ? -20 : 200, 6, 1.5);
-  const crest = scaleAt(1.25, CX, 0, arm(1) + arm(-1) + diamond(CX, 7, 2.8) + `<circle cx="${CX}" cy="13" r="1.2" ${dot}/>`);
-  const curl = (s) => `<path d="M${CX + s * 4},4 C${CX + s * 10},4 ${CX + s * 12},8 ${CX + s * 17},7 C${CX + s * 20.5},6.2 ${CX + s * 20},2.8 ${CX + s * 17.5},3.4" ${ln(.35)}/>`;
-  const foot = `<g transform="translate(0,${H}) scale(1,-1)">${diamond(CX, 4, 2.4) + curl(1) + curl(-1)}</g>`;
-  return `<g transform="translate(${off},${off}) scale(${k})"><rect x="0" y="0" width="${W}" height="${H}" ${ln(.5)}/>${four(corner)}${crest}${foot}</g>`;
+// 分隔線兩段細線：總長 len、中間留 7.4mm 放菱形（卡面中線 x=45）
+const tentRule = (len) => `M${45 - len / 2},101 H41.3 M48.7,101 H${45 + len / 2}`;
+// 拱門框：外粗內細兩道，上緣半圓、下緣封口；extra 是框裡額外的線條（正面的沿拱字、分隔線）；fill：拱門裡鋪的半透明底色
+function tentArch(extra, fill) {
+  const arch = (d) => `M${11 + d},${127 - d} V49 A${34 - d},${34 - d} 0 0 1 ${79 - d},49 V${127 - d} Z`;
+  return `<svg class="tf-art" viewBox="0 0 ${TENT.W} ${TENT.H}" aria-hidden="true">` +
+    (fill ? `<path d="${arch(0)}" fill="${fill}"/>` : "") + `<path d="${arch(0)}" fill="none" stroke="currentColor" stroke-width=".55"/><path d="${arch(1.8)}" fill="none" stroke="currentColor" stroke-width=".25"/>${extra}</svg>`;
+}
+// 裁切記號（上下留白標直的裁線、左右留白標橫的裁線）與折線記號（左右留白的虛線；三條立牌的折線同高，影印店一刀壓過整張）
+function tentMarks(n, x0, y0) {
+  const { W, H, BASE, TAB, BLEED: B, GAP, PW, PH } = TENT, L = TAB + BASE + 2 * H;
+  const crop = `stroke="#b8ad9c" stroke-width=".2"`, fold = `${crop} stroke-dasharray="1.5 1"`;
+  let s = "";
+  for (let i = 0; i < n; i++) for (const x of [x0 + i * (W + GAP), x0 + i * (W + GAP) + W])
+    s += `<path d="M${x},${y0 - 9} V${y0 - 3} M${x},${y0 + L + B + 1} V${y0 + L + B + 7}" ${crop}/>`;   // 頂端是黏貼邊（沒有出血），底端要避開出血
+  const xr = x0 + n * W + (n - 1) * GAP;
+  // 左右的記號畫在出血外面（A3 左右只剩 7.5mm）
+  const mark = (y, st) => `<path d="M${x0 - B - 4},${y} H${x0 - B - .5} M${xr + B + .5},${y} H${xr + B + 4}" ${st}/>`;
+  for (const y of [y0, y0 + L]) s += mark(y, crop);
+  for (const y of [y0 + TAB, y0 + TAB + BASE, y0 + TAB + BASE + H]) s += mark(y, fold);
+  s += `<text x="${PW / 2}" y="${y0 + L + 20}" text-anchor="middle" font-family="Noto Serif TC, serif" font-size="3" letter-spacing=".4" fill="#b8ad9c">實線裁切・虛線壓折線　每面 9 × 14 cm　背面朝上折成三角，黏貼邊黏在正面底部內側</text>`;
+  return `<svg class="tent-marks" viewBox="0 0 ${PW} ${PH}" aria-hidden="true">${s}</svg>`;
 }
 function renderCards() {
   if (!CARDS) return;
-  for (const sheet of $("cards").querySelectorAll(".card-sheet")) {
-    // 只改顯示、不動資料：桌名的數字換成全形（「合作夥伴 3」→「合作夥伴３」），和中文字一樣佔一個字寬；中間的空格拿掉，間距就和字與字之間一樣
-    const d = state.tables[sheet.dataset.id], main = d.num === "主桌";
-    const name = main ? "" : (d.name || "").replace(/\s+/g, "").replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0));
-    // 桌名太長就縮小：花框內約 165mm 寬，每字約 1.2 個字寬（含字距），最大 16mm
-    const fs = Math.min(16, 165 / Math.max(1, [...name].length * 1.2));
-    for (const f of sheet.querySelectorAll(".card-frame")) {
-      const n = f.querySelector(".cf-num"), nm = f.querySelector(".cf-name");
-      n.textContent = main ? "主桌" : d.num; n.classList.toggle("zh", main);
-      nm.textContent = name; nm.hidden = !name; nm.style.setProperty("--fs", fs + "mm");
-    }
+  for (const strip of $("cards").querySelectorAll(".strip")) {
+    const d = state.tables[strip.dataset.id], main = d.num === "主桌";
+    fillTent(strip, d);
+    strip.querySelector(".tf-label").textContent = `底座・${main ? "主桌" : `第 ${d.num} 桌`}`;
+  }
+  for (const card of document.querySelectorAll(".pv-card")) {
+    const d = state.tables[card.dataset.id];
+    fillTent(card, d);
+    card.querySelector("figcaption").textContent = d.num === "主桌" ? "主桌" : `第 ${d.num} 桌${d.name ? `・${d.name}` : ""}`;
   }
 }
+// 填桌號與桌名
+function fillTent(root, d) {
+  // 只改顯示、不動資料：桌名的數字換成全形（「合作夥伴 3」→「合作夥伴３」），和中文字一樣佔一個字寬；中間的空格拿掉，間距就和字與字之間一樣
+  const main = d.num === "主桌", name = tentName(d);
+  // 桌名太長才縮小：寬度不超過 50mm（和分隔線差不多寬），每字約 1.2 個字寬（含字距），最大 8mm（5 個字以內都是 8mm，6 個字約 7mm）
+  const fs = Math.min(8, 50 / Math.max(1, [...name].length * 1.2));
+  const n = root.querySelector(".tf-num"), nm = root.querySelector(".tf-name");
+  n.textContent = main ? "主桌" : d.num; n.classList.toggle("zh", main);
+  // 沒有桌名（主桌、預備桌）：分隔線下方寫 Reserved，和網站賓客版一致
+  nm.textContent = name || "Reserved"; nm.classList.toggle("rsv", !name); nm.style.setProperty("--fs", (name ? fs : 8) + "mm");
+  // 分隔線和桌名差不多寬（桌名每字約 1.2 個字寬），最短是四個字桌名的寬度（約 37.4mm），最長 48mm；Reserved 也用最短的
+  const minRule = 4 * 1.2 * 8 - 1;
+  root.querySelector(".tf-rule").setAttribute("d", tentRule(name ? Math.min(48, Math.max(minRule, [...name].length * 1.2 * fs - 1)) : minRule));
+}
+const tentName = (d) => d.num === "主桌" ? "" : (d.name || "").replace(/\s+/g, "").replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0));
 function renderPosterList() {
   if (!POSTER && !BOARD) return;
   // 最後一格：查找座位的 QR code（網址固定，用 tools 產生好的 SVG 路徑內嵌；CSP 不允許外部圖片或程式）
