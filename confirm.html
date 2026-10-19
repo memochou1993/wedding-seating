@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- 編輯金鑰在網址上：不送 Referer，避免外部網站從來源網址看到金鑰 -->
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://jkzybhpzihljrluxslmy.supabase.co; img-src 'self' data:; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="robots" content="noindex">
+<title>資料確認｜林府文定</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23a8875a' d='M16 28.5C14.9 27.6 2.5 19.6 2.5 10.9 2.5 6.9 5.5 4 9.2 4c2.8 0 5.2 1.6 6.8 4 1.6-2.4 4-4 6.8-4 3.7 0 6.7 2.9 6.7 6.9 0 8.7-12.4 16.7-13.5 17.6z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* 資料確認：試算表、座位表跟原始表單回覆信不一致的地方，給家人逐筆勾選。配色沿用座位表。 */
+  :root {
+    --ground: #f3efe8;
+    --paper: #fffdf9;
+    --ink: #2b2522;
+    --body: #4e3a2a;
+    --muted: #8c7a68;
+    --accent: #a8875a;
+    --accent-soft: #efe5d3;
+    --line: #dccdb4;
+    --warn: #a3402f;
+    --done: #eef3ea;
+    --done-ink: #4f7247;
+    --serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  html, body { overflow-x: clip; }
+  body { margin: 0; padding: 32px 16px 64px; background: var(--ground); color: var(--body); font: 16px/1.6 var(--serif); }
+  button, input { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .wrap { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  header { display: grid; gap: 6px; }
+  .eyebrow { font-size: 13px; letter-spacing: .14em; color: var(--accent); }
+  h1 { margin: 0; font-size: 28px; font-weight: 700; color: var(--ink); }
+  .lede { margin: 0; color: var(--muted); max-width: 62ch; }
+  .progress { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 14px 16px;
+    background: var(--paper); border: 1px solid var(--line); border-radius: 8px; }
+  .progress[hidden] { display: none; }
+  .progress strong { font-size: 22px; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .bar { flex: 1 1 180px; height: 6px; background: var(--accent-soft); border-radius: 3px; overflow: hidden; }
+  .bar span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+  .status { font-size: 14px; color: var(--muted); }
+  .status.err { color: var(--warn); }
+  .gate { padding: 20px; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; color: var(--warn); }
+
+  section { display: grid; gap: 10px; }
+  h2 { margin: 0; font-size: 20px; font-weight: 700; color: var(--ink); display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+  h2 small { font-size: 14px; font-weight: 400; color: var(--muted); }
+  h3 { margin: 0; font-size: 16px; font-weight: 600; color: var(--muted); }
+  .ref-head { display: grid; gap: 6px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .tbl { overflow-x: auto; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; vertical-align: top; padding: 11px 14px; border-bottom: 1px solid var(--line); }
+  th { font-size: 13px; font-weight: 500; letter-spacing: .06em; color: var(--muted); background: var(--accent-soft); white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  tr.done td { background: var(--done); }
+  .guest { font-weight: 600; color: var(--ink); min-width: 5em; }
+  .guest small { display: block; font-weight: 400; font-size: 13px; color: var(--muted); }
+  .diff { color: var(--warn); }
+  .note { font-size: 14px; color: var(--muted); }
+  .result { color: var(--done-ink); font-weight: 600; }
+  .result small, .diff small { display: block; font-weight: 400; font-size: 13px; color: var(--muted); }
+  .check { display: grid; gap: 8px; min-width: 190px; }
+  .check label { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; }
+  .check input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--done-ink); cursor: pointer; }
+  .check input[type=text] { width: 100%; font-size: 15px; background: var(--ground); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+  .when { font-size: 13px; color: var(--done-ink); }
+  .opts { display: grid; gap: 6px; }
+  .opt { text-align: left; font-size: 15px; line-height: 1.4; padding: 7px 10px; border-radius: 6px; cursor: pointer;
+    background: var(--paper); border: 1px solid var(--line); }
+  .opt:hover { border-color: var(--accent); }
+  .opt[aria-pressed="true"] { background: var(--done-ink); border-color: var(--done-ink); color: var(--paper); font-weight: 600; }
+  .opt[aria-pressed="true"]::before { content: "✓ "; }
+  footer { font-size: 13px; color: var(--muted); }
+  footer p { margin: 0; max-width: 72ch; }
+
+  /* 手機：每一列改成一張卡，欄名寫在值上面 */
+  @media (max-width: 680px) {
+    h1 { font-size: 24px; }
+    table, tbody, tr, td { display: block; width: 100%; }
+    thead { display: none; }
+    tr { padding: 6px 0; border-bottom: 1px solid var(--line); }
+    tr:last-child { border-bottom: 0; }
+    td { border: 0; padding: 5px 14px; }
+    td[data-k]::before { content: attr(data-k); display: block; font-size: 12px; letter-spacing: .06em; color: var(--muted); }
+    .check { min-width: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .bar span { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">2026.10.25 林府文定・賓客資料</div>
+    <h1>賓客資料確認結果</h1>
+    <p class="lede">試算表、線上座位表，跟賓客當初填的表單回覆信件有出入的地方，以及 10/19 確認的結果。「線上座位表」欄是即時讀取的。</p>
+  </header>
+
+  <div class="progress" aria-live="polite">
+    <div><strong id="done-n">0</strong> / <span id="total-n">0</span> 已確認</div>
+    <div class="bar"><span id="bar"></span></div>
+    <div class="status" id="status">讀取中…</div>
+  </div>
+
+  <div id="content"></div>
+
+  <footer>
+    <p>原始信件：Google 表單寄出的回覆通知信（6/19–10/5，共 151 封）。試算表：「1025訂婚」試算表，10/19 讀取。線上座位表：排座位網站目前的資料。</p>
+  </footer>
+</div>
+
+<script>
+const SB_URL = "https://jkzybhpzihljrluxslmy.supabase.co";
+const SB_KEY = "sb_publishable__eJX3f2Vw1CY-Dilst5Qfg_cgXw-i16";
+const EVENT = "lin-20261025";
+const EDIT_KEY = new URLSearchParams(location.search).get("edit") || "";
+
+let items = [], seats = {}, tables = [];   // seats：姓名 → { count, veg, child }（座位表上同名的組加總）
+const pending = {};                  // 正在送出的項目，送完前不讓讀取結果蓋掉畫面
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+async function rpc(fn, args) {
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method: "POST", headers: { apikey: SB_KEY, "Content-Type": "application/json" }, body: JSON.stringify(args) });
+  if (!r.ok) throw Object.assign(new Error(`${fn} ${r.status}`), { status: r.status });
+  return r.json();
+}
+
+// 線上座位表：把座位表上這些姓名的人數、素食、兒童座椅加總起來；
+// show = table（某一桌坐幾位）、reserved（保留席有沒有名單）、static（固定文字）、none（不適用）
+function seatText(c) {
+  if (c.show === "none") return "—";
+  if (c.show === "static") return c.seat || "—";
+  if (c.show === "table") {
+    const t = tables.find(t => t.num === c.tableNum);
+    return t ? `${t.guests.reduce((a, g) => a + (g.count || 0), 0)} 位，可坐 ${t.cap} 位` : "找不到這桌";
+  }
+  if (c.show === "reserved") {
+    const empty = (c.tableNums || []).filter(n => !tables.find(t => t.num === n)?.guests.length);
+    return empty.length ? `${empty.length} 桌還沒有名單` : "都已經有名單";
+  }
+  const found = (c.names || []).map(n => seats[n]).filter(Boolean);
+  if (!found.length) return "沒有座位";
+  const sum = (k) => found.reduce((a, s) => a + (s[k] || 0), 0);
+  if (c.show === "veg") return sum("veg") ? `素食 ${sum("veg")} 份` : "沒有素食";
+  if (c.show === "kid") return `${sum("count")} 位，` + (sum("child") ? `兒童座椅 ${sum("child")} 張` : "沒有兒童座椅");
+  return `${sum("count")} 位`;
+}
+
+const groupsOf = (list) => list.reduce((m, it) => ((m[it.content.group] ||= []).push(it), m), {});
+
+// 章節的副標題寫在該章節任一項目的 content.hint
+const hintOf = (list) => list.find(it => it.content.hint)?.content.hint || "";
+
+function render() {
+  const checks = items.filter(it => it.kind === "check"), infos = items.filter(it => it.kind === "info");
+  $("#content").innerHTML = `<div style="display:grid;gap:28px">` +
+    Object.entries(groupsOf(checks)).map(([g, list]) => `
+      <section>
+        <h2>${esc(g)} <small>${esc(hintOf(list))}</small></h2>
+        <div class="tbl"><table>
+          <thead><tr><th>賓客</th><th>原始信件</th><th>試算表</th><th>線上座位表</th><th>要確認的事</th><th>確認</th></tr></thead>
+          <tbody>${list.map(checkRow).join("")}</tbody>
+        </table></div>
+      </section>`).join("") +
+    (infos.length && checks.length ? `
+      <div class="ref-head">
+        <h2>僅供參考 <small>不用處理</small></h2>
+        <p class="lede">已經確認過、先當作沒問題，或是沒辦法對照的，都列在這裡。</p>
+      </div>` : "") +
+    Object.entries(groupsOf(infos)).map(([g, list]) => {
+      // 確認完的項目（有 result）多兩欄：確認的事、確認結果
+      const answered = list.some(it => it.content.result);
+      return `
+      <section>
+        ${checks.length ? `<h3>${esc(g)}${hintOf(list) ? `・${esc(hintOf(list))}` : ""}</h3>` : `<h2>${esc(g)} <small>${esc(hintOf(list))}</small></h2>`}
+        <div class="tbl"><table>
+          <thead><tr><th>賓客</th><th>原始信件</th><th>試算表</th><th>線上座位表</th>${answered ? "<th>確認的事</th><th>確認結果</th>" : "<th>說明</th>"}</tr></thead>
+          <tbody>${list.map(it => infoRow(it, answered)).join("")}</tbody>
+        </table></div>
+      </section>`; }).join("") + `</div>`;
+  checks.forEach(paint);
+  progress();
+  $(".progress").hidden = !checks.length;
+}
+
+function checkRow(it) {
+  const c = it.content;
+  return `<tr id="row-${it.id}">
+    <td class="guest" data-k="賓客">${esc(c.guest)}<small>${esc(c.table)}</small></td>
+    <td data-k="原始信件">${esc(c.mail)}</td>
+    <td class="diff" data-k="試算表">${esc(c.sheet)}</td>
+    <td class="diff" data-k="線上座位表">${esc(seatText(c))}</td>
+    <td data-k="要確認的事">${esc(c.ask)}</td>
+    <td data-k="確認"><div class="check">
+      ${c.options?.length
+        ? `<div class="opts" role="group" aria-label="${esc(c.ask)}">${c.options.map(o =>
+            `<button type="button" class="opt" data-id="${it.id}" data-choice="${esc(o.value)}" aria-pressed="false">${esc(o.label)}</button>`).join("")}</div>`
+        : `<label><input type="checkbox" id="cb-${it.id}" data-id="${it.id}"> 已確認</label>`}
+      <input type="text" id="note-${it.id}" data-id="${it.id}" maxlength="200" placeholder="補充說明（選填）">
+      <div class="when" id="when-${it.id}"></div>
+    </div></td>
+  </tr>`;
+}
+
+function infoRow(it, answered) {
+  const c = it.content, open = c.result === "還沒確認";
+  return `<tr${it.done ? ' class="done"' : ""}>
+    <td class="guest" data-k="賓客">${esc(c.guest)}${c.table ? `<small>${esc(c.table)}</small>` : ""}</td>
+    <td data-k="原始信件">${esc(c.mail)}</td>
+    <td data-k="試算表">${esc(c.sheet)}</td>
+    <td data-k="線上座位表">${esc(seatText(c))}</td>
+    ${answered
+      ? `<td data-k="確認的事">${esc(c.ask)}</td>
+         <td class="${open ? "diff" : "result"}" data-k="確認結果">${esc(c.result || c.note)}${it.note ? `<small>${esc(it.note)}</small>` : ""}</td>`
+      : `<td class="note" data-k="說明">${esc(c.note) || "—"}</td>`}
+  </tr>`;
+}
+
+function paint(it) {
+  const cb = $("#cb-" + it.id), note = $("#note-" + it.id);
+  if (!note) return;
+  if (cb) cb.checked = !!it.done;
+  document.querySelectorAll(`.opt[data-id="${it.id}"]`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.choice === it.choice)));
+  if (document.activeElement !== note) note.value = it.note || "";
+  $("#row-" + it.id).classList.toggle("done", !!it.done);
+  $("#when-" + it.id).textContent = it.updated_at
+    ? `${it.done ? "已確認" : "已更新"}・${new Date(it.updated_at).toLocaleString("zh-TW", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}`
+    : "";
+}
+
+function progress() {
+  const checks = items.filter(it => it.kind === "check");
+  const done = checks.filter(it => it.done).length;
+  $("#done-n").textContent = done;
+  $("#total-n").textContent = checks.length;
+  $("#bar").style.width = checks.length ? `${done / checks.length * 100}%` : "0";
+}
+
+function setStatus(msg, err) { const el = $("#status"); el.textContent = msg; el.classList.toggle("err", !!err); }
+
+async function load() {
+  try {
+    const [remote, seating] = await Promise.all([
+      rpc("seating_get_confirms", { p_event: EVENT, p_key: EDIT_KEY }), rpc("seating_get", { p_event: EVENT })]);
+    seats = {};
+    tables = Object.values(seating.tables || {}).map(t => ({ ...t, guests: t.guests || [] }));
+    for (const t of tables) for (const g of t.guests) {
+      const s = seats[g.name] ||= { count: 0, veg: 0, child: 0 };
+      s.count += g.count || 0; s.veg += g.veg || 0; s.child += g.child || 0;
+    }
+    // 自己還在送出的項目保留畫面上的值
+    items = remote.map(it => pending[it.id] ? { ...it, ...pending[it.id] } : it);
+    render();
+    setStatus(`已更新・${new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" })}`);
+  } catch (e) {
+    if (e.status === 400 || e.status === 403) gate();
+    else setStatus("連不上資料庫，請檢查網路後重新整理。", true);
+  }
+}
+
+function gate() {
+  $("#content").innerHTML = `<div class="gate">這一頁需要工作人員網址才能開啟，請跟分享的人要完整網址。</div>`;
+  $(".progress").hidden = true;
+}
+
+async function save(id, patch) {
+  const it = items.find(x => x.id === id); if (!it) return;
+  Object.assign(it, patch);
+  pending[id] = { done: it.done, note: it.note, choice: it.choice };
+  paint(it); progress();
+  setStatus("儲存中…");
+  try {
+    it.updated_at = await rpc("seating_set_confirm", { p_event: EVENT, p_key: EDIT_KEY, p_item: id, p_done: !!it.done, p_note: it.note || "", p_choice: it.choice || "" });
+    delete pending[id];
+    paint(it);
+    setStatus("已儲存");
+  } catch (e) {
+    delete pending[id];
+    setStatus("沒有存到，請再試一次。", true);
+  }
+}
+
+document.addEventListener("change", (e) => {
+  const id = e.target.dataset?.id;
+  if (id && e.target.type === "checkbox") save(id, { done: e.target.checked });
+});
+// 選項：選了就算確認；再按一次已選的選項＝取消
+document.addEventListener("click", (e) => {
+  const b = e.target.closest?.(".opt"); if (!b) return;
+  const it = items.find(x => x.id === b.dataset.id); if (!it) return;
+  const choice = it.choice === b.dataset.choice ? "" : b.dataset.choice;
+  save(it.id, { choice, done: !!choice });
+});
+const noteTimers = {};
+document.addEventListener("input", (e) => {
+  const id = e.target.dataset?.id;
+  if (!id || e.target.type !== "text") return;
+  clearTimeout(noteTimers[id]);
+  noteTimers[id] = setTimeout(() => save(id, { note: e.target.value.trim() }), 700);
+});
+
+if (!EDIT_KEY) gate();
+else {
+  load();
+  // 每 20 秒讀一次別人的勾選；有人正在打字時跳過，避免畫面重畫打斷輸入
+  setInterval(() => {
+    if (document.hidden || document.activeElement?.matches?.("input[type=text]") || Object.keys(pending).length) return;
+    load();
+  }, 20000);
+}
+</script>
+</body>
+</html>

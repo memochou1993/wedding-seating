@@ -189,3 +189,75 @@ revoke all on function public.seating_get_roster(text, text) from public;
 revoke all on function public.seating_set_roster(text, text, jsonb) from public;
 grant execute on function public.seating_get_roster(text, text) to anon, authenticated;
 grant execute on function public.seating_set_roster(text, text, jsonb) to anon, authenticated;
+
+-- ───────────── 資料確認（工作人員專用，需要編輯金鑰才能讀寫）─────────────
+-- confirm.html：試算表、座位表跟原始表單回覆信不一致的地方，給家人逐筆確認。
+-- 項目內容直接寫進資料庫，不放在網頁原始碼（repo 是公開的）。
+-- kind：'check' 要勾選確認、'info' 只列出參考
+-- content = { "group", "hint"（章節副標題）, "guest", "names": [座位表上要對照的姓名], "table", "mail", "sheet", "ask", "note",
+--             "show": "veg" | "kid" | "count" | "table"（配 "tableNum"）| "reserved"（配 "tableNums"）| "static"（配 "seat"）| "none",
+--             "options": [{ "value", "label" }]（選填） }
+create table if not exists seating.confirms (
+  event_id text not null references seating.events (id) on delete cascade,
+  item_id text not null check (item_id ~ '^[a-z0-9-]{1,40}$'),
+  kind text not null check (kind in ('check', 'info')),
+  sort int not null default 0,
+  content jsonb not null check (jsonb_typeof(content) = 'object' and octet_length(content::text) < 4000),
+  done boolean not null default false,
+  note text not null default '' check (char_length(note) <= 200),
+  updated_at timestamptz,
+  primary key (event_id, item_id)
+);
+alter table seating.confirms enable row level security;
+-- 有 content.options 的項目改用選項回答（例如「要改座位表」「不用改」）；choice 存選到的 value，選了就算確認
+alter table seating.confirms add column if not exists choice text not null default '' check (char_length(choice) <= 40);
+
+-- 讀：[{ id, kind, content, done, note, updated_at }, …]，依 sort 排序
+create or replace function public.seating_get_confirms(p_event text, p_key text)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  if not public.seating_check_key(p_event, p_key) then
+    raise exception 'invalid edit key' using errcode = '42501';
+  end if;
+  return coalesce((select jsonb_agg(jsonb_build_object(
+      'id', c.item_id, 'kind', c.kind, 'content', c.content, 'done', c.done, 'choice', c.choice, 'note', c.note, 'updated_at', c.updated_at)
+      order by c.sort, c.item_id)
+    from seating.confirms c where c.event_id = p_event), '[]'::jsonb);
+end;
+$$;
+
+-- 寫：只改勾選、選項和確認結果，項目內容不能從網頁改；回傳寫入時間
+-- （舊版沒有 p_choice，換參數要先刪掉舊的函式）
+drop function if exists public.seating_set_confirm(text, text, text, boolean, text);
+create or replace function public.seating_set_confirm(p_event text, p_key text, p_item text, p_done boolean, p_note text, p_choice text default '')
+returns timestamptz
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_now timestamptz := now();
+begin
+  if not public.seating_check_key(p_event, p_key) then
+    raise exception 'invalid edit key' using errcode = '42501';
+  end if;
+  update seating.confirms
+     set done = coalesce(p_done, false), note = left(btrim(coalesce(p_note, '')), 200),
+         choice = left(coalesce(p_choice, ''), 40), updated_at = v_now
+   where event_id = p_event and item_id = p_item and kind = 'check';
+  if not found then
+    raise exception 'unknown item' using errcode = '22023';
+  end if;
+  return v_now;
+end;
+$$;
+
+revoke all on function public.seating_get_confirms(text, text) from public;
+revoke all on function public.seating_set_confirm(text, text, text, boolean, text, text) from public;
+grant execute on function public.seating_get_confirms(text, text) to anon, authenticated;
+grant execute on function public.seating_set_confirm(text, text, text, boolean, text, text) to anon, authenticated;
