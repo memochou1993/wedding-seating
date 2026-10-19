@@ -987,9 +987,9 @@ function showSync(msg) {
   const el = document.getElementById("saved");
   if (!el || mode !== "staff") return;
   el.classList.toggle("bad", !canSync || offline);
-  el.textContent = msg || (!canSync ? "編輯金鑰不正確：修改只會存在這台電腦，不會同步。請確認網址是否完整。"
+  el.textContent = msg || (!canSync ? "座位表已凍結，暫停修改：在這裡的變動只會留在這台裝置，不會同步到線上座位表。"
     : offline ? `無法連線，修改先存在這台電腦（${dirty.size} 桌待上傳），恢復連線後會自動補傳。`
-    : "");   // 同步正常時不顯示，只在同步中、斷線或金鑰錯誤時出現
+    : "");   // 同步正常時不顯示，只在同步中、斷線或凍結時出現（凍結＝換了編輯金鑰，舊網址的金鑰驗證不過）
 }
 
 /* ───────────── 花框（同告示牌：上方大花冠、下方小捲飾、四角內凹圓弧）───────────── */
@@ -1574,7 +1574,7 @@ $("pool-list").addEventListener("click", (e) => {
 // 從出席名單移除一筆（例如不會出席）：先讀雲端最新的名單再寫回，免得蓋掉別人剛匯入的資料。
 // 注意：重新執行 tools/import_roster.py 會依試算表整份覆蓋，被移除的人會再出現，要一併改試算表
 async function removeFromRoster(name) {
-  if (!canSync) { showToast("編輯金鑰不正確，無法修改出席名單"); return; }
+  if (!canSync) { showToast("座位表已凍結，無法修改出席名單"); return; }
   if (!confirm(`從出席名單移除「${name}」？\n（只影響待安排清單，不會動到已排好的座位）`)) return;
   try {
     const people = (await rpc("seating_get_roster", { p_event: EVENT, p_key: EDIT_KEY })).people || [];
