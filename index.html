@@ -109,10 +109,10 @@
 
   /* 版面：手機優先的單欄。標題 → 固定在頂端的找座位列 → 平面圖 → 席次一覽（手機不顯示，點平面圖的桌子就看得到名單）；電腦上置中最寬 880px */
   /* 搜尋列夾在標題與平面圖之間，左右和平面圖對齊；下方拉長避開四角花飾 */
-  .intro .bar-dock { padding: 0 36px; margin: 0; }   /* 左右和平面圖窗口對齊（同 .plan-card 的左右留白）；下方不留（預留的提示行就是間隔） */
+  .intro .bar-dock, .intro > .saved { padding: 0 36px; margin: 0; }   /* 左右和平面圖窗口對齊（同 .plan-card 的左右留白）；下方不留（預留的提示行就是間隔） */
   .intro .bar-sentinel { height: 0; }
   .plan-card { padding: 0 36px 104px; }   /* 左右：花框內線往內再留 14px（同花框到卡片邊的距離）；手機版下方只留到避開底部花飾；頁面不留邊，卡片貼滿螢幕、四周不露底色 */
-  @media (max-width: 560px) { body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); } .intro .bar-dock { padding: 0 28px; } .plan-card { padding: 0 28px 56px; } .roster { display: none; } }
+  @media (max-width: 560px) { body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); } .intro .bar-dock, .intro > .saved { padding: 0 28px; } .plan-card { padding: 0 28px 56px; } .roster { display: none; } }
   .plan-card svg.plan { display: block; width: 100%; height: auto; }
   body.immersive .plan-zoom .edge { --l: 1; --t: 1; --r: 1; --b: 1; }   /* 沉浸式：四邊一律有內陰影，不管倍率（含全圖）、也不管那一邊有沒有拖到底 */
   /* 平面圖畫布：雙指縮放、放大後單指拖曳（桌機用滑鼠拖）；沒放大時單指上下滑照常捲動整頁 */
@@ -268,7 +268,11 @@
   .status { margin: 0; font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: baseline; font-variant-numeric: tabular-nums; }
   .status a { color: var(--accent); margin-left: auto; text-decoration: none; }
   .status a + a { margin-left: 0; }
+  .saved { font-size: 13px; color: var(--muted); }
+  .intro > .saved { margin: 8px 0 0; }   /* 搜尋框上方的系統訊息；和輸入框之間就是搜尋列上方原本的 24px 留白（不能用負邊距靠近，會被搜尋列的底色蓋住） */
+  .saved:empty { display: none; }
   .saved.bad { color: var(--warn); }
+  body.board-mode .saved { margin: 0; }
   body[data-mode="guest"] .staff-only, body[data-mode="guest"] .card .meter { display: none; }
 
   /* 底部面板：手機從下方滑出，電腦上浮在下方中央。賓客＝同桌名單（不擋畫面），工作人員＝編輯（對話框） */
@@ -672,6 +676,8 @@
     <div class="rule"><span></span></div>
   </header>
 
+  <!-- 工作人員：同步、斷線、凍結等系統訊息，放在搜尋框上方；沒有訊息時不佔位置 -->
+  <p class="saved staff-only" id="saved" role="status">連線中…</p>
   <div class="bar-sentinel" aria-hidden="true"></div>
   <div class="bar-dock">
   <div class="mini-title"><b>林府文定座位表</b><small>2026.10.25</small></div>
@@ -688,7 +694,7 @@
 
   <div class="plan-card">
     <!-- 工作人員：排桌統計與同步狀態放在平面圖上方 -->
-    <p class="status staff-only" id="status"><span id="s-stats"></span><span class="saved" id="saved">連線中…</span><a id="guest-link" target="_blank">手機版 ↗</a><a id="poster-link" target="_blank">大圖版 ↗</a><a id="cards-link" target="_blank">桌卡 ↗</a></p>
+    <p class="status staff-only" id="status"><span id="s-stats"></span><a id="guest-link" target="_blank">手機版 ↗</a><a id="poster-link" target="_blank">大圖版 ↗</a><a id="cards-link" target="_blank">桌卡 ↗</a></p>
     <div class="plan-zoom">
       <svg class="plan" id="plan" viewBox="88.8 103.8 744.4 1202.2" role="group" aria-label="宴會廳平面圖"></svg>
       <span class="edge" aria-hidden="true"></span>
@@ -1788,7 +1794,7 @@ function setupPoster() {
   const bar = document.querySelector(".bar");
   if (BOARD) {
     document.body.prepend(bar);                                  // 找座位與同步狀態留在最上方
-    bar.append($("status"));                                     // 統計與同步狀態原本在平面圖上方，桌機編輯畫面改放進頂端列
+    bar.append($("saved"), $("status"));                       // 系統訊息、統計原本在搜尋框上方與平面圖上方，桌機編輯畫面改放進頂端列
     document.body.append($("editor"), $("toast"), $("detail"));  // 對話框也移出被藏起來的 .wrap
   }
   // 列印：取消螢幕預覽的縮放，舞台高度也要還原，否則只印得出縮小後那一截
