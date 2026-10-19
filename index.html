@@ -369,13 +369,29 @@
   .tip .row.veg::before { border-radius: 50%; background: var(--veg); box-shadow: inset 0 0 0 1px var(--veg-ink); }
   .tip .row.kid::before { border-radius: 2px; background: var(--kid); }
   .party-n { margin-left: 6px; font-size: .8em; color: var(--muted); font-variant-numeric: lining-nums; }
-  .guest-list .del { width: 32px; height: 44px; border: 0; background: transparent; color: var(--muted); font-size: 20px; cursor: pointer; flex: none; }
+  .guest-list .del { width: 40px; height: 44px; border: 0; background: transparent; color: var(--muted); font-size: 20px; cursor: pointer; flex: none; }
   .guest-list:empty { display: none; }
-  /* 新增列和名單對齊：左邊讓出編號欄（1.6em × 15px＋間距），人數、兒童椅在同一欄，加入鈕和 × 同寬 */
-  .add { display: flex; align-items: center; gap: 6px; margin-top: 10px; padding-left: calc(28px + 6px); }
+  /* 新增列和名單對齊：左邊是下一個編號（和名單的編號欄同寬），人數、兒童椅在同一欄，加入鈕和 × 同寬（40px） */
+  .add { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+  .add .next-n { flex: none; width: 28px; text-align: right; font-size: 15px; font-variant-numeric: lining-nums tabular-nums; color: var(--muted); }
   .add .btn.solid { flex: none; width: 40px; padding: 0; font-size: 14px; min-height: 44px; }
   .add input { flex: 1; min-width: 0; padding: 10px 8px; border: 1px solid var(--line); background: #fff; font-size: 16px; }
   .add input:focus { border-color: var(--accent); outline: none; }
+  /* 手機：一列放不下姓名＋三個數字，改成兩行。第一行姓名（和 ×／加入鈕），第二行位數、兒童椅、素食，左邊和姓名對齊 */
+  @media (max-width: 599px) {
+    .guest-list li, .add { flex-wrap: wrap; row-gap: 6px; }
+    .guest-list .grip { align-self: center; }
+    .guest-list .g-name { flex: 1 1 calc(100% - 28px - 40px - 12px); }
+    .guest-list .del { order: 1; }
+    .guest-list .g-count { order: 2; }
+    .guest-list .g-count:not(.kid):not(.veg) { margin-left: calc(28px + 6px); }
+    .add #f-new { flex: 1 1 calc(100% - 28px - 40px - 12px); }
+    .add .btn.solid { order: 1; }
+    .add .g-count { order: 2; }
+    .add .g-count:not(.kid):not(.veg) { margin-left: calc(28px + 6px); }
+    .g-count, .g-count.kid, .g-count.veg { font-size: 14px; }
+    .g-count input, .g-count.kid input, .g-count.veg input { width: 3.2em; }
+  }
   .nav { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; }
   .muted { color: var(--muted); font-size: 12px; }
   .text-input { display: block; width: 100%; padding: 10px 12px; border: 1px solid var(--line); background: #fff; font-size: 16px; color: var(--body); }
@@ -715,6 +731,7 @@
     <div class="field-label">賓客</div>
     <ol class="guest-list" id="f-list"></ol>
     <form class="add" id="f-add">
+      <span class="next-n" id="f-new-n" aria-hidden="true"></span>
       <input id="f-new" placeholder="姓名" title="代表人姓名；可一次貼上多行，每人各 1 位" autocomplete="off" enterkeyhint="done" aria-label="新增一組賓客：代表人姓名，可一次貼上多行">
       <label class="g-count boxed"><input id="f-new-count" type="number" inputmode="numeric" min="1" max="20" value="1" aria-label="這組共幾位">位</label>
       <label class="g-count kid boxed"><input id="f-new-child" type="number" inputmode="numeric" min="0" max="10" value="0" aria-label="兒童椅幾張">兒童椅</label>
@@ -1219,6 +1236,7 @@ function renderEditor() {
   if (document.activeElement !== $("f-name")) $("f-name").value = d.name;
   for (const b of $("f-side").children) b.setAttribute("aria-pressed", b.dataset.v === d.side);
   $("f-reserved").checked = !!d.reserved;
+  $("f-new-n").textContent = d.guests.length + 1;   // 新增列的編號＝下一組
   // 名單：正在其中一格打字時不重畫，避免游標跳掉
   if (!$("f-list").contains(document.activeElement)) {
     const before = []; d.guests.reduce((n, g, i) => (before[i] = n, n + g.count), 0);   // 這組之前已坐了幾位
