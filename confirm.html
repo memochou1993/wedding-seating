@@ -48,7 +48,6 @@
   .bar span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
   .status { font-size: 14px; color: var(--muted); }
   .status.err { color: var(--warn); }
-  .gate { padding: 20px; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; color: var(--warn); }
 
   section { display: grid; gap: 10px; }
   h2 { margin: 0; font-size: 20px; font-weight: 700; color: var(--ink); display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
@@ -262,14 +261,8 @@ async function load() {
     render();
     setStatus(`已更新・${new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" })}`);
   } catch (e) {
-    if (e.status === 400 || e.status === 403) gate();
-    else setStatus("連不上資料庫，請檢查網路後重新整理。", true);
+    setStatus("連不上資料庫，請檢查網路後重新整理。", true);
   }
-}
-
-function gate() {
-  $("#content").innerHTML = `<div class="gate">這一頁需要工作人員網址才能開啟，請跟分享的人要完整網址。</div>`;
-  $(".progress").hidden = true;
 }
 
 async function save(id, patch) {
@@ -308,15 +301,13 @@ document.addEventListener("input", (e) => {
   noteTimers[id] = setTimeout(() => save(id, { note: e.target.value.trim() }), 700);
 });
 
-if (!EDIT_KEY) gate();
-else {
+// 確認完畢後改成公開唯讀，不需要金鑰（seating_get_confirms 不再檢查）
+load();
+// 每 20 秒重新讀一次（線上座位表欄會跟著更新）；有人正在打字時跳過，避免畫面重畫打斷輸入
+setInterval(() => {
+  if (document.hidden || document.activeElement?.matches?.("input[type=text]") || Object.keys(pending).length) return;
   load();
-  // 每 20 秒讀一次別人的勾選；有人正在打字時跳過，避免畫面重畫打斷輸入
-  setInterval(() => {
-    if (document.hidden || document.activeElement?.matches?.("input[type=text]") || Object.keys(pending).length) return;
-    load();
-  }, 20000);
-}
+}, 20000);
 </script>
 </body>
 </html>

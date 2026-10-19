@@ -213,7 +213,8 @@ alter table seating.confirms enable row level security;
 alter table seating.confirms add column if not exists choice text not null default '' check (char_length(choice) <= 40);
 
 -- 讀：[{ id, kind, content, done, note, updated_at }, …]，依 sort 排序
-create or replace function public.seating_get_confirms(p_event text, p_key text)
+-- 確認完畢（10/19）後改成公開唯讀：不檢查金鑰，p_key 留著讓舊網頁照樣能呼叫
+create or replace function public.seating_get_confirms(p_event text, p_key text default null)
 returns jsonb
 language plpgsql
 stable
@@ -221,9 +222,6 @@ security definer
 set search_path = ''
 as $$
 begin
-  if not public.seating_check_key(p_event, p_key) then
-    raise exception 'invalid edit key' using errcode = '42501';
-  end if;
   return coalesce((select jsonb_agg(jsonb_build_object(
       'id', c.item_id, 'kind', c.kind, 'content', c.content, 'done', c.done, 'choice', c.choice, 'note', c.note, 'updated_at', c.updated_at)
       order by c.sort, c.item_id)
