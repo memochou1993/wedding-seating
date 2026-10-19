@@ -165,6 +165,11 @@
   .plan .plan-legend circle[data-side="主婚人親友"] { fill: var(--parents); }
   .plan .plan-legend circle[data-side="新人親友"] { fill: var(--couple); }
   .plan .plan-legend text { letter-spacing: .1em; }
+  .plan .plan-legend .seat-legend { display: none; }
+  body.board-mode .plan .plan-legend .seat-legend { display: inline; }
+  body.board-mode .plan .plan-legend { transform: translateY(-22px); }   /* 兩行：整組往上移，第二行才不會碰到入口線 */
+  .plan .plan-legend .kid-mark { fill: var(--kid); stroke: none; }
+  .plan .plan-legend .veg-mark { fill: var(--veg); stroke: var(--veg); }
   .plan .hall-name { font-family: var(--latin); font-size: 14px; letter-spacing: .3em; fill: var(--body); }   /* 和中文廳名同色 */
 
   .tbl { cursor: pointer; }
@@ -219,6 +224,7 @@
   .side-tag[data-side="主婚人親友"] circle { fill: var(--parents); }
   .side-tag[data-side="新人親友"] circle { fill: var(--couple); }
   .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; margin-top: 22px; font-size: 13px; color: var(--muted); }
+  .legend .legend-break { flex-basis: 100%; height: 0; }   /* 工作人員版分兩行：桌子底色一行、兒童座椅與素食一行 */
 
   /* 找座位列：捲動時固定在畫面頂端 */
   /* 找座位列：外面包一層和頁面同色的底（上下各留一點空），固定在頂端時後面的內容不會從縫隙透出來 */
@@ -696,6 +702,7 @@
     <div class="legend">
       <span class="side-tag" data-side="主婚人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>主婚人親友</span>
       <span class="side-tag" data-side="新人親友"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25"/></svg>新人親友</span>
+      <span class="legend-break staff-only" aria-hidden="true"></span>
       <span class="side-tag seat-tag staff-only"><svg viewBox="0 0 14 14" aria-hidden="true"><rect x="2" y="2" width="10" height="10" rx="1.5" fill="var(--kid)"/></svg>兒童座椅</span>
       <span class="side-tag seat-tag staff-only"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5" style="fill:var(--veg);stroke:var(--veg)"/></svg>素食</span>
     </div>
@@ -790,6 +797,7 @@
  * 與牆、伸展台保持 GAP 的走道；同一區兩欄左右錯開半排。
  */
 const TABLE_R = 30, SEAT = 37;            // 桌面半徑、連椅子的佔地半徑（桌面放大，桌名可放 6 個字）
+const LEG_Y = 1174;   // 輸出版圖例（10、20 桌下方）第一行的圓心高度
 const PITCH = 158, ROW_A = 365, ROW_B = ROW_A + PITCH / 2;   // 主桌往上移，第一排跟著往上；排與排之間加寬，填滿到圖例上方
 const rowsA = [0, 1, 2, 3, 4].map(k => ROW_A + k * PITCH);
 const rowsB = [0, 1, 2, 3, 4].map(k => ROW_B + k * PITCH);
@@ -987,7 +995,7 @@ function showSync(msg) {
   const el = document.getElementById("saved");
   if (!el || mode !== "staff") return;
   el.classList.toggle("bad", !canSync || offline);
-  el.textContent = msg || (!canSync ? "座位表已凍結，暫停修改：在這裡的變動只會留在這台裝置，不會同步到線上座位表。"
+  el.textContent = msg || (!canSync ? "座位表已凍結，暫停修改。"
     : offline ? `無法連線，修改先存在這台電腦（${dirty.size} 桌待上傳），恢復連線後會自動補傳。`
     : "");   // 同步正常時不顯示，只在同步中、斷線或凍結時出現（凍結＝換了編輯金鑰，舊網址的金鑰驗證不過）
 }
@@ -1083,9 +1091,14 @@ function staticPlan() {
     `<g class="entrance-mark">` + [[v[0], v[3]], [vr[0], vr[3]]].map(([a, b]) =>
       `<line x1="${a}" y1="1226" x2="${b}" y2="1226"/>` + txt((a + b) / 2, 1258, "入口", "entrance", `style="font-size:24px;letter-spacing:.4em"`)).join("") + `</g>`,
     // 圖例：輸出版放在 10、20 桌下方的空地（網頁版圖例在平面圖卡片下方，這裡隱藏）
+    // 工作人員桌機版（board-mode）多一行兒童座椅、素食；印出來的輸出版不顯示
     `<g class="plan-legend">` +
-      `<circle cx="316" cy="1174" r="10" data-side="主婚人親友"/>` + txt(394.5, 1182, "主婚人親友", "label", `style="font-size:22px"`) +
-      `<circle cx="501" cy="1174" r="10" data-side="新人親友"/>` + txt(567.5, 1182, "新人親友", "label", `style="font-size:22px"`) +
+      `<circle cx="316" cy="${LEG_Y}" r="10" data-side="主婚人親友"/>` + txt(394.5, LEG_Y + 8, "主婚人親友", "label", `style="font-size:22px"`) +
+      `<circle cx="501" cy="${LEG_Y}" r="10" data-side="新人親友"/>` + txt(567.5, LEG_Y + 8, "新人親友", "label", `style="font-size:22px"`) +
+      `<g class="seat-legend">` +
+        `<rect x="307" y="${LEG_Y + 26}" width="18" height="18" rx="3" class="kid-mark"/>` + txt(383.5, LEG_Y + 43, "兒童座椅", "label", `style="font-size:22px"`) +
+        `<circle cx="501" cy="${LEG_Y + 35}" r="8" class="veg-mark"/>` + txt(545.5, LEG_Y + 43, "素食", "label", `style="font-size:22px"`) +
+      `</g>` +
     `</g>`,
   ].join("");
 }
