@@ -71,6 +71,7 @@
   .check input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--done-ink); cursor: pointer; }
   .check input[type=text] { width: 100%; font-size: 15px; background: var(--ground); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
   .when { font-size: 13px; color: var(--done-ink); }
+  .when.err { color: var(--warn); font-weight: 600; }
   .opts { display: grid; gap: 6px; }
   .opt { text-align: left; font-size: 15px; line-height: 1.4; padding: 7px 10px; border-radius: 6px; cursor: pointer;
     background: var(--paper); border: 1px solid var(--line); }
@@ -267,9 +268,21 @@ async function load() {
 
 async function save(id, patch) {
   const it = items.find(x => x.id === id); if (!it) return;
+  const before = { done: it.done, note: it.note, choice: it.choice };
+  // 沒有金鑰或金鑰不對（座位表凍結後換了金鑰）存不進去：按鈕跳回原狀，在這一列顯示紅字
+  const fail = (msg) => {
+    Object.assign(it, before);
+    paint(it); progress();
+    const when = $("#when-" + id);
+    when.textContent = msg;
+    when.classList.add("err");
+    setStatus(msg, true);
+  };
+  if (!EDIT_KEY) return fail("需要編輯金鑰才能存檔");
   Object.assign(it, patch);
   pending[id] = { done: it.done, note: it.note, choice: it.choice };
   paint(it); progress();
+  $("#when-" + id).classList.remove("err");
   setStatus("儲存中…");
   try {
     it.updated_at = await rpc("seating_set_confirm", { p_event: EVENT, p_key: EDIT_KEY, p_item: id, p_done: !!it.done, p_note: it.note || "", p_choice: it.choice || "" });
@@ -278,7 +291,7 @@ async function save(id, patch) {
     setStatus("已儲存");
   } catch (e) {
     delete pending[id];
-    setStatus("沒有存到，請再試一次。", true);
+    fail([400, 401, 403].includes(e.status) ? "需要編輯金鑰才能存檔" : "沒有存到，請再試一次。");
   }
 }
 
