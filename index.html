@@ -52,9 +52,9 @@
     --accent-soft: #efe5d3;
     --card: #fdfaf5;        /* 桌卡底色：非常淡的香檳色 */
     --line: #dccdb4;
-    --parents: #e7edf1;     /* 主婚人親友桌底色 */
+    --parents: #e2effa;     /* 主婚人親友桌底色：淡馬卡龍粉藍（#cfe6f7 的 65%，壓在白底上） */
     --parents-ink: #4d6576;
-    --couple: #f6e6e3;      /* 新人親友桌底色 */
+    --couple: #fce6ed;      /* 新人親友桌底色：淡馬卡龍粉紅（#fbd9e4 的 65%，壓在白底上） */
     --couple-ink: #8a5149;
     --warn: #a3402f;
     --kid: #8fbfa8;           /* 兒童座椅（平面圖方塊、圖例）：淺一點，和深色椅子分得清楚 */
@@ -591,10 +591,25 @@
   .poster {
     --k: calc(var(--ph) / 420mm);   /* 相對 A2 的倍率 */
     width: var(--pw); height: var(--ph); box-sizing: border-box; background: #fff;   /* 印刷用純白：紙本身就是白的，不用滿版上一層淡米白（印不到邊會留白邊，也容易印不均勻） */
-    padding: calc(24mm * var(--k)) calc(26mm * var(--k)) calc(24mm * var(--k)) calc(26mm * var(--k));   /* 上下都是小捲飾，留白一樣，重心置中 */ display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;
+    padding: calc(24mm * var(--k)) calc(20mm * var(--k)) calc(24mm * var(--k)) calc(20mm * var(--k));   /* 以 A2 為準：上下 24mm、左右 20mm（左右省下來的寬度都給名單卡片），A1／A3 等比縮放 */ display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;
     column-gap: calc(14mm * var(--k)); row-gap: calc(5mm * var(--k)); box-shadow: none;
   }
+  body.poster-mode .poster { --body: #2e2117; --muted: #6b5a48; --print-gold: #8a6a33; }   /* 大圖輸出：咖啡色文字加深（原本的深咖啡印出來偏淺），網頁和工作人員版不變 */
+  body.poster-mode .p-kicker, body.poster-mode .plan .entrance { color: var(--print-gold); fill: var(--print-gold); }   /* 「座位表／SEATING CHART」和「入口」：香檳金印出來太淡，改用較深的金 */
+  /* 標題每一塊字後面各墊一團白霧（和「入口」一樣，貼著字、往外淡出；用漸層，不用 text-shadow 或描邊：text-shadow 印成 PDF 會變成白色色塊，描邊太分明像白框） */
+  body.poster-mode:not(.board-mode) .p-head > * { position: relative; justify-self: start; }
+  body.poster-mode:not(.board-mode) .p-head > .p-kicker { justify-self: end; }
+  body.poster-mode:not(.board-mode) .p-head > *::before { content: ""; position: absolute; inset: -.3em -.5em; z-index: -1; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(255,255,255,.92) 45%, rgba(255,255,255,0)); }
+  body.poster-mode:not(.board-mode) .p-list .card, body.poster-mode:not(.board-mode) .p-list .note { background: rgba(253,250,245,.72); }   /* 卡片微透明，後面的花隱約透出來 */
   .poster > .frame-art { inset: calc(8mm * var(--k)); width: calc(100% - 16mm * var(--k)); height: calc(100% - 16mm * var(--k)); }
+  /* 輸出版：拿掉線條花框，改用水彩花裝飾（素材在 assets/deco，位置存在 assets/poster-deco.js） */
+  body.poster-mode:not(.board-mode) .poster { overflow: hidden; }
+  body.poster-mode:not(.board-mode) .poster > .frame-art { display: none; }
+  .poster > :not(.p-deco) { position: relative; z-index: 1; }
+  .p-deco { position: absolute; inset: 0; z-index: auto; pointer-events: none; }
+  .p-deco .d-item { position: absolute; height: auto; z-index: 0; user-select: none; }
+  .p-deco .d-item.over { z-index: 2; }
   /* 標題橫跨整張、置中在花冠下方；平面圖與座位表都從標題下方開始，左右等高，重心不偏 */
   /* 標題放在平面圖正上方（左欄第 1 列）；右邊座位表從頂端排到底（跨兩列），名單高度更多 */
   .p-head { grid-column: 1; grid-row: 1; height: calc(44mm * var(--k)); box-sizing: border-box; }
@@ -606,7 +621,10 @@
   body.poster-mode .plan .wall, body.poster-mode .plan .door, body.poster-mode .plan .pillar, body.poster-mode .plan > .entrance { display: none; }
   .plan .entrance-mark { display: none; }
   body.poster-mode .plan .entrance-mark, body.immersive .plan .entrance-mark { display: inline; }   /* 賓客版（不畫牆）也用輸出版的入口標示：左右門廊各一條淡金粗線＋「入口」 */
-  .plan .entrance-mark line { stroke: var(--line); stroke-width: 4; stroke-linecap: round; }   /* 和卡片框線同色，比桌框淡，不搶眼 */
+  .plan .entrance-mark line { stroke: var(--line); stroke-width: 4; stroke-linecap: round; }
+  body.poster-mode .plan .plan-legend text { paint-order: stroke; stroke: #fff; stroke-width: 8px; stroke-linejoin: round; }   /* 花園壓在下方，字加一圈白邊才讀得清楚 */
+  .plan .entrance-mark .glow { display: none; }
+  body.poster-mode .plan .entrance-mark .glow { display: inline; }   /* 「入口」後面一團柔和的白霧（和標題一樣用漸層，不用描邊） */   /* 和卡片框線同色，比桌框淡，不搶眼 */
   .p-plan svg.plan { width: 100%; height: 100%; overflow: visible; }
   /* 標題區左右兩欄：左「座位表／SEATING CHART」靠右對齊，右「林府文定／新人／日期」靠左對齊，中間一條淡金直線；左右等寬，直線落在花冠的中線上 */
   .p-head { display: grid; grid-template-columns: 1fr 1fr; align-content: center; padding-bottom: calc(4mm * var(--k)); }
@@ -616,18 +634,19 @@
   /* 字距會加在每個字後面（含最後一個），左邊補一樣寬的 padding，整行才會真正置中 */
   .p-kicker b { display: block; font-weight: 500; line-height: 1.15; letter-spacing: .35em; margin-right: -.35em; }   /* 字距加在每個字後面，靠右對齊時把最後一段收回來 */
   .p-kicker span { display: block; font-family: var(--latin); font-size: calc(3.8mm * var(--k)); letter-spacing: .4em; margin-right: -.4em; margin-top: calc(1.5mm * var(--k)); }
-  .p-head h1 { margin: 0; padding-bottom: calc(1mm * var(--k)); font-size: calc(13mm * var(--k)); letter-spacing: .14em; color: var(--body); line-height: 1.15; }
-  .p-head .couple { font-size: calc(6.5mm * var(--k)); font-weight: 500; letter-spacing: .3em; color: var(--body); padding-bottom: calc(1.5mm * var(--k)); }
+  .p-head h1 { margin: 0; padding-bottom: calc(1.6mm * var(--k)); font-size: calc(13mm * var(--k)); letter-spacing: .14em; color: var(--body); line-height: 1.15; }
+  .p-head .couple { font-size: calc(6.5mm * var(--k)); font-weight: 500; letter-spacing: .3em; color: var(--body); padding-bottom: calc(.9mm * var(--k)); }   /* 上下留白 1.6／0.9mm：日期是數字、沒有下伸筆畫，看起來比較遠，新人名字往下挪一點才會落在標題和日期正中間 */
   .p-date { font-size: calc(5mm * var(--k)); letter-spacing: .1em; }
+  .p-head .couple, .p-head .p-date { padding-left: calc(9mm * var(--k)); }   /* 比「林府文定」多內縮 1mm：「林」左邊的豎筆離字框有一段距離，眼睛會把豎筆當成左緣，下面兩行跟著它對齊才順 */
   .p-list { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: repeat(6, minmax(0, 1fr)); gap: calc(3mm * var(--k)); min-height: 0; }
   /* 海報的桌卡：桌號與桌名同一行，下方細線，名單往下排，省下高度給名單 */
-  .p-list .card { cursor: default; padding: calc(2.6mm * var(--k)) calc(2.6mm * var(--k)); overflow: hidden; min-height: 0;
+  .p-list .card { cursor: default; padding: calc(2.6mm * var(--k)) calc(1.8mm * var(--k)); overflow: hidden; min-height: 0;
     display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr; align-content: start; align-items: center; column-gap: calc(2.2mm * var(--k)); text-align: left; }
   .p-list .card .eyebrow, .p-list .card .mini-rule { display: none; }
   .p-list .card .n { grid-column: 1; line-height: 1.15; margin: 0; }
   /* 桌號與桌名同一行、同字級、同字體、基線對齊；字級依整行字寬放到最大（上限 5.6mm），不折行 */
   .p-list .card .tname { grid-column: 2; margin: 0; letter-spacing: 0; padding-left: 0; line-height: 1.15; white-space: nowrap; overflow: hidden; color: var(--body); }
-  .p-list .card .n, .p-list .card .tname { font-family: var(--serif); font-size: min(calc(5.2mm * var(--k)), calc(36mm * var(--k) / var(--hw, 6))); }   /* 統一 5.2mm；放不下的長桌名才各自縮小（卡片內寬約 40mm，扣掉桌號與桌名的間距） */
+  .p-list .card .n, .p-list .card .tname { font-family: var(--serif); font-size: var(--name-fs, calc(5.2mm * var(--k))); }   /* 和名單最常見的字級一樣大（--name-fs，fitPosterNames 算出）；放不下的長桌名由 fitPosterNames 收緊字距 */
   .p-list .card .n { font-weight: 900; font-variant-numeric: lining-nums; }
   .p-list .card .tname { font-weight: 700; }
   .p-list .card { align-items: baseline; }
@@ -635,16 +654,17 @@
   .p-list .card .who { grid-column: 1 / -1; align-self: start; font-size: var(--nfs, calc(3.1mm * var(--k))); line-height: 1.4;
     border-top: calc(.3mm * var(--k)) solid var(--accent-soft); margin-top: calc(1.8mm * var(--k)); padding-top: calc(1.6mm * var(--k)); }
   /* 兩欄放的都是 2–3 字的人名，欄寬就是名字寬，整組置中，左右留白一樣 */
-  .p-list .p-names { display: grid; grid-template-columns: repeat(2, max-content); justify-content: center; column-gap: 1.2em; }
+  .p-list .p-names { display: grid; grid-template-columns: repeat(2, max-content); justify-content: space-around; column-gap: .4em;
+    margin-inline: calc(-1.8mm * var(--k)); padding-inline: .2em; }   /* 名單撐到卡片左右邊框，space-around＋兩邊各 0.2em：人名到邊框＝人名到中線（多出來的空白平均分） */
   .p-list .p-names span { white-space: nowrap; }
   /* 團體／非人名：佔滿一整行、太長就折行；contain 讓它不把兩欄撐寬。整張卡都是團體時改成單欄滿版 */
   .p-list .p-names .grp { grid-column: 1 / -1; white-space: normal; contain: inline-size; }
   .p-list .p-names.solo { grid-template-columns: 1fr; justify-content: stretch; }
   .p-list .p-names .grp small { margin-left: .5em; font-size: .8em; color: var(--muted); white-space: nowrap; }
   /* 「尚未安排」和 Reserved 同大小、同一條基線（和其他卡片第一行名字對齊），只是用中文字、淡色 */
-  .p-list .card .who.none { font-size: calc(5mm * var(--k)); text-align: center; line-height: calc(5.8mm * 1.4 * var(--k)); position: relative; top: calc(.15mm * var(--k)); }
-  /* Reserved 水平置中，垂直和其他卡片的第一行名字同一條基線（同一個行高：名字常見字級 5.8mm × 1.4） */
-  .p-list .card .who.none.rsv { font-size: calc(5mm * var(--k)); text-align: center; line-height: calc(5.8mm * 1.4 * var(--k)); position: relative; top: calc(.8mm * var(--k)); }   /* 英文字的基線比中文高，往下補 0.8mm 才和名字同一條線 */
+  .p-list .card .who.none { font-size: var(--name-fs, calc(5mm * var(--k))); text-align: center; line-height: 1.4; position: relative; top: .03em; }
+  /* Reserved 水平置中，和名字同字級、同行高（名字常見字級 --name-fs × 1.4），垂直和其他卡片的第一行名字同一條基線 */
+  .p-list .card .who.none.rsv { font-size: var(--name-fs, calc(5mm * var(--k))); align-self: stretch; display: flex; align-items: center; justify-content: center; line-height: 1; padding-bottom: calc(3mm * var(--k)); }   /* 空桌的 Reserved 在名單區上下置中（分隔線留在原位），卡片才不會上半擠、下半空 */
   .p-list .card .meter { display: none; }
   /* 最後一格：「查找座位」在上、QR code 在下，整組在卡片裡上下置中 */
   /* 卡片框線用 mm：印在 A2 上約 0.4mm，遠看也清楚（1px 只有 0.26mm） */
@@ -795,6 +815,7 @@
 <!-- 桌卡（?cards）：每桌一張 A4，對折成兩面一樣的立牌；預覽完直接用瀏覽器列印（Cmd+P）存成 PDF -->
 <section class="cards" id="cards" hidden></section>
 
+<script src="assets/poster-deco.js"></script>
 <script>
 /* ───────────── 會場幾何（依會場平面圖描繪，單位 = 110dpi 像素）───────────── */
 /*
@@ -841,6 +862,8 @@ function awayFromAisle(t) {
 const angDist = (a, b) => { const d = Math.abs(a - b) % (2 * Math.PI); return d > Math.PI ? 2 * Math.PI - d : d; };
 // 桌名分行：以字寬計（中文 1、英數 0.55），一行最多約 5 個中文字寬；
 // 有空白就在空白處斷（「合作夥伴 1」），否則從中間平均斷（「揪咪團／家人們」）；第二行太長用「…」
+// 桌卡用：桌名的數字換成全形、空格拿掉（「合作夥伴 3」→「合作夥伴３」），和中文字一樣寬；只改顯示、不動資料
+const fwName = (s) => (s || "").replace(/\s+/g, "").replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0));
 const nameWidth = (str) => [...str].reduce((n, c) => n + (/[\x00-\x7f]/.test(c) ? 0.55 : 1), 0);
 function tableNameLines(name) {
   name = (name || "").trim();
@@ -1094,7 +1117,9 @@ function staticPlan() {
     // 輸出版（不畫牆）用的入口標示：一條跨過三個門廊的淡金色長條，中間寫「入口」
     // 實際只有左右兩個門廊是入口（中間是背板區）：各畫一條粗線，下方寫「入口」
     `<g class="entrance-mark">` + [[v[0], v[3]], [vr[0], vr[3]]].map(([a, b]) =>
-      `<line x1="${a}" y1="1226" x2="${b}" y2="1226"/>` + txt((a + b) / 2, 1258, "入口", "entrance", `style="font-size:24px;letter-spacing:.4em"`)).join("") + `</g>`,
+      `<ellipse class="glow" cx="${(a + b) / 2 + 5}" cy="1250" rx="62" ry="30" fill="url(#entrance-glow)"/>` +
+      `<line x1="${a}" y1="1226" x2="${b}" y2="1226"/>` + txt((a + b) / 2, 1258, "入口", "entrance", `style="font-size:24px;letter-spacing:.4em"`)).join("") +
+      `<defs><radialGradient id="entrance-glow"><stop offset=".35" stop-color="#fff" stop-opacity=".92"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs></g>`,
     // 圖例：輸出版放在 10、20 桌下方的空地（網頁版圖例在平面圖卡片下方，這裡隱藏）
     // 工作人員桌機版（board-mode）多一行兒童座椅、素食；印出來的輸出版不顯示
     `<g class="plan-legend">` +
@@ -1787,6 +1812,9 @@ function setupPoster() {
   const poster = $("poster");
   poster.style.setProperty("--pw", pw + "mm"); poster.style.setProperty("--ph", ph + "mm");
   poster.hidden = false;
+  // 水彩花裝飾：x、w 是紙張寬度的 %，y 是紙張高度的 %，高度照素材比例；layer＝over 的浮在卡片上面（蜻蜓）
+  if (!BOARD) poster.insertAdjacentHTML("afterbegin", `<div class="p-deco">${(window.POSTER_DECO_LAYOUT || []).map(it =>
+    `<img class="d-item ${it.layer === "over" ? "over" : "under"}" src="assets/deco/${it.src}.webp" alt="" style="left:${it.x}%;top:${it.y}%;width:${it.w}%;transform:rotate(${it.rot || 0}deg) scaleX(${it.flip ? -1 : 1})">`).join("")}</div>`);
   $("p-plan").append(plan);                 // 同一張平面圖搬進海報
   const stage = document.createElement("div"); stage.className = "poster-stage";
   document.body.prepend(stage); stage.append(poster);   // 移出 .wrap（海報模式會把 .wrap 藏起來）
@@ -1802,8 +1830,9 @@ function setupPoster() {
   const fit = () => {
     const top = BOARD ? bar.offsetHeight + 16 : 16;
     // 編輯畫面以寬度為準（字比較大，可往下捲）；預覽／列印則整張塞進視窗
-    const k = BOARD ? (innerWidth - 32) / poster.offsetWidth : Math.min((innerWidth - 32) / poster.offsetWidth, (innerHeight - top - 16) / poster.offsetHeight, 1);
-    stage.style.transform = `translate(${(innerWidth - poster.offsetWidth * k) / 2}px, ${top}px) scale(${k})`;
+    const vw = innerWidth;
+    const k = BOARD ? (vw - 32) / poster.offsetWidth : Math.min((vw - 32) / poster.offsetWidth, (innerHeight - top - 16) / poster.offsetHeight, 1);
+    stage.style.transform = `translate(${(vw - poster.offsetWidth * k) / 2}px, ${top}px) scale(${k})`;
     stage.style.height = (top + poster.offsetHeight * k + 16) + "px";
   };
   addEventListener("resize", fit); requestAnimationFrame(fit); document.fonts?.ready.then(fit);
@@ -1940,7 +1969,7 @@ function fillTent(root, d) {
   const minRule = 4 * 1.2 * 8 - 1;
   root.querySelector(".tf-rule").setAttribute("d", tentRule(name ? Math.min(48, Math.max(minRule, [...name].length * 1.2 * fs - 1)) : minRule));
 }
-const tentName = (d) => d.num === "主桌" ? "" : (d.name || "").replace(/\s+/g, "").replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0));
+const tentName = (d) => d.num === "主桌" ? "" : fwName(d.name);
 function renderPosterList() {
   if (!POSTER && !BOARD) return;
   // 最後一格：查找座位的 QR code（網址固定，用 tools 產生好的 SVG 路徑內嵌；CSP 不允許外部圖片或程式）
@@ -1970,11 +1999,11 @@ function renderPosterList() {
 }
 // 一家人（1–3 字的名字、6 位以內）每位寫一次名字；公司、社團、親屬稱謂、多人並列，或 7 位以上的團體聯絡人，只寫一次加人數
 const perSeat = (g) => /^[\u3400-\u9fff\uf900-\ufaff]{1,3}$/.test(g.name) && g.count <= 6;
-// 每張卡各自找出名單放得下的最大字級（二分法）：人少的卡字大、人多的照樣塞得下；兩欄不能比卡片寬，上限 6mm 免得各卡差太多
+// 每張卡各自找出名單放得下的最大字級（二分法）：人少的卡字大、人多的照樣塞得下；兩欄不能比卡片寬，上限 6.5mm 免得各卡差太多
 function fitPosterNames() {
   const list = $("p-list");
   if (!list.clientHeight) return;
-  const max = 6 * $("poster").offsetHeight / 420;   // 6mm（海報高 420mm 對應 A2，其他尺寸等比）
+  const max = 6.5 * $("poster").offsetHeight / 420;   // 6.5mm（海報高 420mm 對應 A2，其他尺寸等比）
   for (const card of list.querySelectorAll(".card[data-id]")) {
     const who = card.querySelector(".p-names");
     if (!who) continue;
@@ -1991,6 +2020,21 @@ function fitPosterNames() {
   const freq = sizes.reduce((m, v) => (m[v] = (m[v] || 0) + 1, m), {});
   const common = Object.keys(freq).sort((a, b) => freq[b] - freq[a])[0];
   if (common) list.style.setProperty("--name-fs", common);
+  // 團體（「和平扶輪社 10 位」）盡量排成一行：放不下時這一行稍微縮小（最多縮到 85%），還是放不下才照常折行
+  for (const g of list.querySelectorAll(".p-names .grp")) {
+    g.style.fontSize = ""; g.style.whiteSpace = "nowrap";
+    const over = g.scrollWidth / g.clientWidth;
+    if (over > 1 / .85) g.style.whiteSpace = "";
+    else if (over > 1) g.style.fontSize = (1 / over).toFixed(3) + "em";
+  }
+  // 桌名一律和名單同字級；放不下的長桌名（六個字）先稍微收緊字距（最多 0.08 字寬），還是放不下才縮小；有調整的右邊留 0.15 字寬，不要頂到卡片邊
+  for (const t of list.querySelectorAll(".card .tname")) {
+    t.style.letterSpacing = t.style.fontSize = "";
+    if (t.scrollWidth <= t.clientWidth) continue;
+    const fs = parseFloat(getComputedStyle(t).fontSize), room = t.clientWidth - .15 * fs, over = t.scrollWidth - room;
+    t.style.letterSpacing = Math.max(-.08 * fs, -over / [...t.textContent].length) + "px";
+    if (t.scrollWidth > room) t.style.fontSize = fs * room / t.scrollWidth + "px";
+  }
 }
 document.fonts.ready.then(() => fitPosterNames());   // 字型載入後字寬會變，重算一次
 if (CARDS) setupCards();
