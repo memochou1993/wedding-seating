@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """把出席調查試算表的「能出席」名單匯入座位表的出席名單（工作人員專用）。
 
-    python3 tools/import_roster.py            # 匯入
+    python3 tools/import_roster.py            # 匯入（1025 文定）
     python3 tools/import_roster.py --dry-run  # 只看結果、不上傳
+    python3 tools/import_roster.py --event 1122   # 1122 喜宴（試算表 ID 在 .sheet-id-1122）
 
 需要兩個不進版控的本機檔案：
-    .sheet-id   試算表 ID（網址 /d/ 與 /edit 之間那段）
+    .sheet-id   試算表 ID（網址 /d/ 與 /edit 之間那段；1122 用 .sheet-id-1122）
     .edit-key   工作人員編輯金鑰
 只上傳排座位需要的欄位：姓名、人數、歸屬、關係、單位、素食、兒童椅。電話與祝福留言不會上傳。
 """
@@ -15,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SB_URL = "https://jkzybhpzihljrluxslmy.supabase.co"
 SB_KEY = "sb_publishable__eJX3f2Vw1CY-Dilst5Qfg_cgXw-i16"
-EVENT = "lin-20261025"
+EVENTS = {"1025": ("lin-20261025", ".sheet-id"), "1122": ("zhou-20261122", ".sheet-id-1122")}
 SIDES = {"主婚人的親友": "主婚人親友", "新人的親友": "新人親友"}
 
 
@@ -35,7 +36,9 @@ def fetch_rows(sheet_id):
 def build(rows):
     people, seen, notes = [], {}, []
     for r in rows:
-        if r.get("是否出席", "").strip() != "能出席":
+        att = r.get("是否出席", "").strip()
+        # 能出席才算；1122 試算表裡手動加的列「是否出席」空白，有填人數就當成會來。後來才說不能來的，分類改成「無法出席」
+        if not (att == "能出席" or (not att and num(r.get("出席人數")) > 0)) or r.get("分類", "").strip() == "無法出席":
             continue
         name = r.get("姓名", "").strip()
         if not name:
@@ -47,7 +50,7 @@ def build(rows):
             "count": max(count, 1),
             "side": side,
             "relation": r.get("與主婚人的關係", "").strip()[:20],
-            "unit": r.get("單位名稱", "").strip()[:30],
+            "unit": (r.get("單位名稱", "").strip() or r.get("分類", "").strip())[:30],   # 1122 的表單沒填單位，用試算表的「分類」
             "veg": num(r.get("素食份數")),
             "child": num(r.get("兒童座椅")),
             "note": "表單人數填 0，請確認" if count == 0 else "",
@@ -64,7 +67,9 @@ def build(rows):
 
 def main():
     dry = "--dry-run" in sys.argv
-    sheet_id = (ROOT / ".sheet-id").read_text().strip()
+    show = sys.argv[sys.argv.index("--event") + 1] if "--event" in sys.argv else "1025"
+    event, sheet_file = EVENTS[show]
+    sheet_id = (ROOT / sheet_file).read_text().strip()
     people, notes = build(fetch_rows(sheet_id))
     total = sum(p["count"] for p in people)
     by_side = {}
@@ -83,7 +88,7 @@ def main():
     if dry:
         return
     key = (ROOT / ".edit-key").read_text().strip()
-    body = json.dumps({"p_event": EVENT, "p_key": key, "p_people": people}).encode()
+    body = json.dumps({"p_event": event, "p_key": key, "p_people": people}).encode()
     req = urllib.request.Request(f"{SB_URL}/rest/v1/rpc/seating_set_roster", data=body, method="POST",
                                  headers={"apikey": SB_KEY, "Content-Type": "application/json"})
     with urllib.request.urlopen(req) as r:

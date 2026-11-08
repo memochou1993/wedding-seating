@@ -3,3 +3,6 @@
 reference/
 .sheet-id
 dist/
+.sheet-id-1122
+supabase/.temp/
+__pycache__/

@@ -1,0 +1,2332 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- 編輯金鑰在網址上：不送 Referer，避免外部網站從來源網址看到金鑰 -->
+<meta name="referrer" content="no-referrer">
+<!-- 只允許自己的程式、Google Fonts，以及連線到 wedding 的 Supabase -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://jkzybhpzihljrluxslmy.supabase.co; img-src 'self' data:; base-uri 'none'; form-action 'none'; object-src 'none'">
+<title>座位表｜周林府喜宴</title>
+<!-- 分享預覽（LINE、FB 只讀 HTML 原始碼裡的 Open Graph，不執行 JS）：預覽圖用 tools/gen-og.py 產生 -->
+<!-- 名單上都是賓客的真實姓名：不讓搜尋引擎收錄，分享預覽不受影響 -->
+<meta name="robots" content="noindex">
+<meta name="description" content="2026.11.22 周林府喜宴・輸入姓名，找到你的座位">
+<meta name="theme-color" content="#f3efe8">
+<link rel="canonical" href="https://memochou1993.github.io/wedding-seating/1122/">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://memochou1993.github.io/wedding-seating/1122/">
+<meta property="og:site_name" content="周林府喜宴">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:title" content="座位表｜周林府喜宴">
+<meta property="og:description" content="2026.11.22・輸入姓名，找到你的座位">
+<meta property="og:image" content="https://memochou1993.github.io/wedding-seating/og.jpg">
+<meta property="og:image:secure_url" content="https://memochou1993.github.io/wedding-seating/og.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="林文瑜與周杰鋐・婚紗合照，座位表">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="座位表｜周林府喜宴">
+<meta name="twitter:description" content="2026.11.22・輸入姓名，找到你的座位">
+<meta name="twitter:image" content="https://memochou1993.github.io/wedding-seating/og.jpg">
+<!-- favicon：花框的香檳金愛心 -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23a8875a' d='M16 28.5C14.9 27.6 2.5 19.6 2.5 10.9 2.5 6.9 5.5 4 9.2 4c2.8 0 5.2 1.6 6.8 4 1.6-2.4 4-4 6.8-4 3.7 0 6.7 2.9 6.7 6.9 0 8.7-12.4 16.7-13.5 17.6z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;600;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Pinyon+Script&family=LXGW+WenKai+TC&display=swap" rel="stylesheet">
+<style>
+  /* 版面：上方花框標題 → 左平面圖、右側面板 → 下方席次一覽。配色沿用告示牌。 */
+  /* 注音組字用系統字型：思源宋體的注音比較小、比較細，打字時看起來像縮了一號。
+     只涵蓋注音與聲調符號，中文字仍然是思源宋體 */
+  @font-face { font-family: "Bopomofo"; src: local("PingFang TC"), local("PingFangTC-Regular"), local("Noto Sans CJK TC"), local("Microsoft JhengHei");
+    unicode-range: U+3100-312F, U+31A0-31BF, U+02C7, U+02C9-02CB, U+02D9; }
+  :root {
+    --ground: #f3efe8;      /* 頁面底色：帶一點香檳的灰白 */
+    --paper: #fffdf9;
+    --ink: #2b2522;
+    --body: #4e3a2a;        /* 深咖啡：主要文字 */
+    --muted: #8c7a68;
+    --accent: #a8875a;      /* 香檳金：框線、花飾 */
+    --accent-soft: #efe5d3;
+    --card: #fdfaf5;        /* 桌卡底色：非常淡的香檳色 */
+    --line: #dccdb4;
+    --parents: #e2effa;     /* 主婚人親友桌底色：淡馬卡龍粉藍（#cfe6f7 的 65%，壓在白底上） */
+    --parents-ink: #4d6576;
+    --couple: #fce6ed;      /* 新人親友桌底色：淡馬卡龍粉紅（#fbd9e4 的 65%，壓在白底上） */
+    --couple-ink: #8a5149;
+    --warn: #a3402f;
+    --kid: #8fbfa8;           /* 兒童座椅（平面圖方塊、圖例）：淺一點，和深色椅子分得清楚 */
+    --kid-ink: #5f8a76;       /* 兒童座椅的文字：深一點才讀得清楚 */
+    --veg: #f5c518;           /* 素食（平面圖椅子、名單）：亮黃，比已入座的香檳棕亮得多，一眼分得出來 */
+    --veg-ink: #a07c00;       /* 素食的文字：黃字太淺，用深一點的芥末黃 */
+    --serif: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+    --latin: "Cormorant Garamond", "Times New Roman", serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  /* 手機：任何元素都不能把畫面撐寬（撐寬會讓瀏覽器自動縮放）；關掉連點兩下放大，保留雙指縮放看平面圖 */
+  html, body { overflow-x: clip; touch-action: manipulation; }
+  body {
+    margin: 0; padding: 32px 16px 64px;
+    background: var(--ground); color: var(--body);
+    font: 16px/1.6 var(--serif);
+  }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .wrap { max-width: 880px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+
+  /* 花框卡片：.framed 內會插入一張依尺寸重畫的 SVG 邊框 */
+  .framed { position: relative; background: var(--paper); box-shadow: 0 1px 2px rgba(78,58,42,.06), 0 10px 30px rgba(78,58,42,.07); }
+  .framed > .frame-art { position: absolute; inset: 14px; width: calc(100% - 28px); height: calc(100% - 28px); pointer-events: none; color: var(--accent); overflow: visible; }
+
+  /* 標題 */
+  .hero { padding: 92px 40px 32px; text-align: center; }
+  .hero .zh-kicker { font-size: 15px; letter-spacing: 1.2em; padding-left: 1.2em; color: var(--accent); font-weight: 500; }
+  .hero .en-kicker { font-family: var(--latin); font-size: 13px; letter-spacing: .4em; padding-left: .4em; color: var(--accent); margin-top: 2px; }
+  .hero h1 { margin: 22px 0 6px; font-size: clamp(32px, 6vw, 56px); font-weight: 700; letter-spacing: .14em; padding-left: .14em; color: var(--body); line-height: 1.25; text-wrap: balance; }
+  .hero .couple { font-size: 21px; font-weight: 500; letter-spacing: .3em; padding-left: .3em; color: var(--body); margin-bottom: 6px; }   /* 新人名字，夾在標題與日期之間 */
+  .hero .date { font-size: 17px; letter-spacing: .12em; color: var(--body); }
+  /* 手機：照輸出版的標題排成左右兩欄——左「座位表」靠右、右邊標題／新人／日期靠左，中間一條細直線；不畫下方菱形線。
+     兩欄等寬，直線落在正中、和上方花飾的中軸對齊；上方離花飾、下方離搜尋框的留白差不多，整組才不會往一邊偏 */
+  @media (max-width: 560px) {
+    .hero { display: grid; grid-template-columns: 1fr 1fr; align-items: center; padding: 96px 16px 8px; }
+    .hero .kicker { grid-row: 1 / span 3; text-align: right; padding-right: 18px; }
+    /* 左欄只有兩行、金色較淡：字放大到和「周林府喜宴」差不多、加粗一級，左右的份量才平衡 */
+    .hero .zh-kicker { font-size: clamp(23px, 7vw, 30px); font-weight: 600; letter-spacing: .2em; padding-left: 0; margin-right: -.2em; line-height: 1.2; }   /* 字距加在每個字後面，靠右對齊時把最後一段收回來 */
+    .hero .en-kicker { font-size: 10px; letter-spacing: .26em; padding-left: 0; margin: 8px -.26em 0 0; }
+    .hero h1, .hero .couple, .hero .date { grid-column: 2; text-align: left; padding-left: 18px; border-left: 1px solid var(--line); }
+    .hero h1 { margin: 0; padding-bottom: 2px; font-size: clamp(24px, 7.2vw, 31px); line-height: 1.15; }
+    .hero .couple { margin: 0; padding-bottom: 2px; font-size: 15px; line-height: 1.4; }
+    .hero .date { font-size: 13px; line-height: 1.4; }
+    .hero .rule { display: none; }
+  }
+  .rule { display: flex; align-items: center; gap: 12px; width: 220px; max-width: 70%; margin: 20px auto 0; color: var(--accent); }
+  .rule::before, .rule::after { content: ""; flex: 1; height: 1px; background: currentColor; }
+  .rule span { width: 7px; height: 7px; background: currentColor; transform: rotate(45deg); }
+
+  /* 版面：手機優先的單欄。標題 → 固定在頂端的找座位列 → 平面圖 → 席次一覽（手機不顯示，點平面圖的桌子就看得到名單）；電腦上置中最寬 880px */
+  /* 搜尋列夾在標題與平面圖之間，左右和平面圖對齊；下方拉長避開四角花飾 */
+  .intro .bar-dock, .intro > .saved { padding: 0 36px; margin: 0; }   /* 左右和平面圖窗口對齊（同 .plan-card 的左右留白）；下方不留（預留的提示行就是間隔） */
+  .intro .bar-sentinel { height: 0; }
+  .plan-card { padding: 0 36px 104px; }   /* 左右：花框內線往內再留 14px（同花框到卡片邊的距離）；手機版下方只留到避開底部花飾；頁面不留邊，卡片貼滿螢幕、四周不露底色 */
+  @media (max-width: 560px) { body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); } .intro .bar-dock, .intro > .saved { padding: 0 28px; } .plan-card { padding: 0 28px 56px; } .roster { display: none; } }
+  .plan-card svg.plan { display: block; width: 100%; height: auto; }
+  body.immersive .plan-zoom .edge { --l: 1; --t: 1; --r: 1; --b: 1; }   /* 沉浸式：四邊一律有內陰影，不管倍率（含全圖）、也不管那一邊有沒有拖到底 */
+  /* 平面圖畫布：雙指縮放、放大後單指拖曳（桌機用滑鼠拖）；沒放大時單指上下滑照常捲動整頁 */
+  .plan-zoom { position: relative; padding: 0; }   /* 平面圖貼齊窗口，左右和搜尋框、上方提示文字切齊 */
+  .plan-zoom svg.plan { touch-action: pan-y; }
+  .plan-zoom svg.plan.zoomed { touch-action: none; cursor: grab; }
+  body.panning, body.panning * { cursor: grabbing !important; user-select: none; -webkit-user-select: none; }
+  /* 邊緣陰影：那一側還有沒看到的內容時，沿窗口內緣出現一道淡咖啡內陰影，提示可以往那邊滑。
+     一層直角、四邊同一道模糊的 inset 陰影：外圍貼齊窗口是直角，往內淡出時轉角自然成圓弧。
+     沒有內容的那一側把這層推出窗口外（被 overflow 裁掉），那邊就沒有陰影；各邊用 --l/--t/--r/--b（0 或 1）開關 */
+  .plan-zoom .edge { position: absolute; inset: 0; overflow: hidden; pointer-events: none; --l: 0; --t: 0; --r: 0; --b: 0; }
+  .plan-zoom .edge::before { content: ""; position: absolute; box-shadow: inset 0 0 var(--edge-blur, 22px) rgba(43,30,20,var(--edge-alpha, .4));   /* 深咖啡，比原本的咖啡色更深 */
+    top: calc((1 - var(--t)) * -48px); right: calc((1 - var(--r)) * -48px); bottom: calc((1 - var(--b)) * -48px); left: calc((1 - var(--l)) * -48px);
+    transition: top .25s, right .25s, bottom .25s, left .25s; }
+  /* 沉浸式：上下的陰影比左右淡（iPhone Safari 會把上下邊緣的深色染到自己的工具列，上下看起來會比左右濃）。
+     第一層四邊一樣、濃度只取 30%（上下就是這個深度）；第二層左右各一道往內偏移的內陰影（80%），把左右補回原本的深度 */
+  body.immersive .plan-zoom .edge::before {
+    box-shadow: inset 0 0 var(--edge-blur, 22px) rgba(43,30,20,calc(var(--edge-alpha, .4) * .3)),
+      inset calc(var(--edge-blur, 22px) * .5) 0 var(--edge-blur, 22px) calc(var(--edge-blur, 22px) * -.5) rgba(43,30,20,calc(var(--edge-alpha, .4) * .8)),
+      inset calc(var(--edge-blur, 22px) * -.5) 0 var(--edge-blur, 22px) calc(var(--edge-blur, 22px) * -.5) rgba(43,30,20,calc(var(--edge-alpha, .4) * .8));
+  }
+  .plan-zoom.more-l .edge { --l: 1; }
+  .plan-zoom.more-t .edge { --t: 1; }
+  .plan-zoom.more-r .edge { --r: 1; }
+  .plan-zoom.more-b .edge { --b: 1; }
+  .zoom-ctl { position: absolute; right: 8px; bottom: 8px; display: flex; gap: 4px; }   /* 水平排在右下角（入口旁的空白） */
+  .zoom-ctl button { width: 26px; height: 26px; padding: 0; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); color: var(--accent);
+    font-size: 14px; line-height: 1; cursor: pointer; box-shadow: 0 1px 4px rgba(78,58,42,.1); }
+  .zoom-ctl button:disabled { color: var(--line); cursor: default; }
+  /* －／＋ 用線條圖示（字型的全形符號太細太長，和數字不搭）：線寬固定、跟著按鈕文字顏色 */
+  .zoom-ctl button svg { display: block; width: 11px; height: 11px; margin: auto; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; }
+
+  /* 平面圖 */
+  .plan text { font-family: var(--serif); fill: var(--body); }
+  .plan .wall { fill: none; stroke: #b9a891; stroke-width: 2.4; stroke-linejoin: miter; stroke-linecap: butt; }
+  .plan .door { fill: none; stroke: #b9a891; stroke-width: 2.4; }   /* 門弧、門片和牆一樣粗 */
+  .plan .pillar { fill: #b9a891; }
+  /* 賓客版不畫外牆、門、柱子和「入口」字，只留舞台、伸展台和桌子；工作人員版才看得到牆和門的細節 */
+  body[data-mode="guest"] .plan .wall, body[data-mode="guest"] .plan .door, body[data-mode="guest"] .plan .pillar, body[data-mode="guest"] .plan > .entrance { display: none; }
+  .plan .entrance { font-size: 15px; letter-spacing: .5em; fill: var(--accent); }
+  .plan .stage { fill: #f6f0e5; stroke: #cdb894; stroke-width: 1.2; }   /* 和星光大道同一個底色、框線，舞台和走道看起來是一體的 */
+  .plan .stair { fill: var(--paper); stroke: #c7b394; stroke-width: 1; }
+  .plan .runway { fill: #f6f0e5; stroke: #cdb894; stroke-width: 1.2; }
+  .plan .label { font-size: 17px; letter-spacing: .2em; fill: var(--muted); }
+  .plan .label-lg { font-size: 30px; letter-spacing: .3em; fill: var(--body); font-weight: 500; }
+  .plan .plan-legend { display: none; }
+  body.poster-mode .plan .plan-legend { display: inline; }
+  .plan .plan-legend circle { stroke: var(--accent); stroke-width: 1.4; }
+  .plan .plan-legend circle[data-side="主婚人親友"] { fill: var(--parents); }
+  .plan .plan-legend circle[data-side="新人親友"] { fill: var(--couple); }
+  .plan .plan-legend text { letter-spacing: .1em; }
+  .plan .plan-legend .seat-legend { display: none; }
+  body.board-mode .plan .plan-legend .seat-legend { display: inline; }
+  body.board-mode .plan .plan-legend { transform: translateY(-17.5px); }   /* 工作人員桌機版多一行兒童座椅、素食：整組往上半行，三行一樣置中 */
+  body.board-mode .plan .plan-legend { transform: translateY(-14px); }   /* 兩行：整組往上移半行，兩行合起來還是在最後一排桌子和入口的正中間 */
+  .plan .plan-legend .kid-mark, .plan .plan-legend .veg-mark { stroke: var(--accent); stroke-width: 1.4; }   /* 和桌子底色的圓點一樣有框線；方塊邊長約圓直徑的 0.9（面積相近），看起來才一樣大 */
+  .plan .plan-legend .kid-mark { fill: var(--kid); }
+  .plan .plan-legend .veg-mark { fill: var(--veg); }
+  .plan .hall-name { font-family: var(--latin); font-size: 14px; letter-spacing: .3em; fill: var(--body); }   /* 和中文廳名同色 */
+
+  .tbl { cursor: pointer; }
+  .tbl circle.disc { fill: var(--paper); stroke: var(--accent); stroke-width: 1.6; transition: stroke-width .15s, fill .15s; }
+  .tbl[data-side="主婚人親友"] circle.disc { fill: var(--parents); }
+  .tbl[data-side="新人親友"] circle.disc { fill: var(--couple); }
+  :root { --g-zhou: var(--parents); --g-jiang: #fff1c2; --g-mom: #dfdcf7; --g-groom: var(--couple); --g-dad: #fde0c8; --g-rotary: #e8f1e4; }
+  /* 桌子底色分六組，桌子和圖例都讀這組變數，一個顏色只定義一次：新郎親友（淡粉，新人親友預設）、周府親友（淡藍，主婚人親友預設）、
+     江家親友（淡檸檬黃：江家親友、舅舅阿姨）、爸爸好友（淺橘：廣太好友、南中之友、竹棧之友）、媽媽好友（淡紫）、扶輪社（淡綠：扶輪社、北區扶輪社） */
+  .tbl.rotary circle.disc { fill: var(--g-rotary); }   /* 扶輪社、北區扶輪社：淡綠 */
+  .tbl.jiang circle.disc { fill: var(--g-jiang); }   /* 江家親友、舅舅阿姨：淡檸檬黃 */
+  .tbl.mom circle.disc { fill: var(--g-mom); }       /* 媽媽好友：偏藍的淡薰衣草紫（紅色少一點，不會和新郎親友的粉紅混在一起） */
+  .tbl.pals circle.disc { fill: var(--g-dad); }     /* 廣太好友、南中之友、竹棧之友：淺橘 */
+  .tbl circle.halo { fill: none; stroke: var(--accent); stroke-width: 1; opacity: 0; }
+  .tbl .chair { fill: var(--paper); stroke: var(--accent); stroke-width: 1; }
+  .tbl .chair.taken { fill: var(--accent); }
+  .tbl .chair.over { fill: var(--warn); stroke: var(--warn); }
+  .tbl .chair.kid { fill: var(--kid); stroke: var(--kid-ink); }   /* 和素食座位一樣，用同色系深一階的框線 */
+  .tbl .chair.veg { fill: var(--veg); stroke: var(--veg-ink); }   /* 素食座位（只有工作人員版畫） */
+  body[data-mode="staff"] .tbl .chair.kid { cursor: grab; }
+  .tbl .num { font-size: 21px; font-weight: 700; text-anchor: middle; dominant-baseline: central; fill: var(--body); }
+  .tbl .num.long { font-size: 15px; }   /* 有沒有桌名，桌號都同樣大 */
+  .tbl .num.empty { fill: #c9b99f; font-weight: 500; }
+  .tbl .num.with-name { font-size: 21px; }
+  .tbl .num.with-name.long { font-size: 15px; }
+  .tbl .tn { font-size: 9px; font-weight: 500; letter-spacing: 0; text-anchor: middle; dominant-baseline: central; fill: var(--body); pointer-events: none; }
+  /* 選取／聚焦：桌子後方一圈淡淡的香檳金光暈 */
+  .tbl circle.hit { fill: transparent; }   /* 放大觸控範圍，手機上比較好點 */
+  .tbl circle.glow { fill: var(--accent); opacity: 0; transition: opacity .2s; }
+  .tbl:hover circle.glow { opacity: .08; }
+  .tbl:focus-visible circle.glow, .tbl.selected circle.glow { opacity: .2; }
+  .tbl.selected circle.disc { stroke-width: 2; }
+  .tbl:focus { outline: none; }
+  /* 找到的桌子：淡香檳底、加粗金框，字維持深色（不用整片實心金色，太重） */
+  .tbl.match circle.disc { fill: #f1e1c2; stroke: var(--accent); stroke-width: 3.2; }
+  .tbl.match circle.halo { opacity: 1; animation: ping 1.6s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+  .tbl.dup .num { fill: var(--warn); }
+  /* 拖曳交換整桌（工作人員） */
+  body[data-mode="staff"] .tbl { touch-action: manipulation; }
+  .plan { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+  .tbl.lifting { opacity: .35; }
+  .tbl.drop-target circle.glow { opacity: .35; }
+  .tbl.drop-target circle.disc { stroke-width: 2.6; }
+  .ghost { pointer-events: none; }
+  .ghost circle { fill: var(--paper); stroke: var(--accent); stroke-width: 2; stroke-dasharray: 5 4; opacity: .95; }
+  .ghost text { font-size: 24px; font-weight: 700; text-anchor: middle; dominant-baseline: central; fill: var(--body); }
+  body.dragging { user-select: none; -webkit-user-select: none; cursor: grabbing; }
+  .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 30;
+    display: flex; align-items: center; gap: 14px; padding: 10px 12px 10px 18px; background: var(--body); color: #fff; border-radius: 999px;
+    box-shadow: 0 10px 30px rgba(43,37,34,.3); font-size: 14px; white-space: nowrap; max-width: calc(100% - 32px); }
+  .toast button { border: 0; background: transparent; color: #f3dfb8; font: inherit; font-weight: 500; min-height: 36px; padding: 0 8px; cursor: pointer; }
+  @keyframes ping { from { transform: scale(1); opacity: .9; } to { transform: scale(1.45); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .tbl.match circle.halo { animation: none; } }
+
+  /* 圖例：淺色圓圈（顏色＝平面圖上桌子的底色）＋文字；圓圈用 SVG 畫才不會歪 */
+  .side-tag { display: inline-flex; align-items: center; gap: 6px; letter-spacing: .06em; color: var(--muted); }
+  .side-tag svg { flex: none; width: 14px; height: 14px; }
+  .side-tag .jus { display: inline-block; width: 4.18em; letter-spacing: 0; text-align-last: justify; }   /* 扶輪社撐成四個字寬，和其他標籤對齊 */
+  .side-tag circle, .side-tag rect { fill: var(--paper); stroke: var(--accent); stroke-width: 1.1; }
+  .side-tag[data-side="主婚人親友"] circle { fill: var(--parents); }
+  .side-tag[data-side="新人親友"] circle { fill: var(--couple); }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; margin-top: 22px; font-size: 13px; color: var(--muted); }
+  .legend .legend-break { flex-basis: 100%; height: 0; }   /* 工作人員版分兩行：桌子底色一行、兒童座椅與素食一行 */
+
+  /* 找座位列：捲動時固定在畫面頂端 */
+  /* 找座位列：外面包一層和頁面同色的底（上下各留一點空），固定在頂端時後面的內容不會從縫隙透出來 */
+  .bar-dock { position: sticky; top: 0; z-index: 10; padding: 10px 0; margin: -10px 0; }
+  .bar-dock.stuck { background: var(--ground); }   /* 只有真的固定在頂端時才鋪底色，平常不會蓋到上一張卡片的陰影 */
+  /* 第一張卡裡的搜尋列：平常和卡片融在一起；固定在頂端時變成一條有陰影的浮動列 */
+  /* 黏在頂端時整條（含上方與左右的留白）鋪卡片底色，後面捲動的平面圖不會透出來；陰影加在整條下方 */
+  .intro .bar-dock.stuck { background: var(--paper); box-shadow: 0 6px 16px rgba(78,58,42,.12); padding-bottom: 14px; }
+  .intro .bar-dock.stuck .bar { padding-bottom: 0; }   /* 輸入框上方平常和黏住時都是 24px，黏住瞬間不會跳 */   /* 黏住時輸入框上下留白一致（14px 也夠「請輸入您的姓名」標籤浮起來） */
+  .intro .bar { box-shadow: none; padding: 24px 0 0; gap: 0; }   /* 左右不內縮：輸入框外框、下方提示文字、平面圖窗口外框切齊同一條線；輸入框下方不留白，緊接著預留的一行提示 */
+  .bar-sentinel { height: 0; margin: 0; }
+  .bar { position: relative; grid-template-columns: minmax(0, 1fr); background: var(--paper); box-shadow: 0 1px 2px rgba(78,58,42,.06), 0 10px 30px rgba(78,58,42,.07); padding: 12px 16px; display: grid; gap: 6px; }   /* 和其他卡片一樣用陰影 */
+  /* 搜尋框：空著時「搜尋」在框裡；點進去或有輸入時，縮小浮到外框上緣（外框在標籤處斷開），外框與標籤轉成香檳金。
+     placeholder 是一個空白，只用來偵測欄位是不是空的（:placeholder-shown） */
+  .bar-row { position: relative; display: flex; }
+  .bar input { font-family: "Bopomofo", var(--serif); flex: 1; min-width: 0; padding: 12px 14px 11px 44px; border: 1px solid var(--accent); border-radius: 4px; background: var(--paper); font-size: 18px; line-height: 1.4; }   /* 18px 字在框裡比較飽滿；外框用和桌子圓框同一個香檳金，圖示、提示字和「周林府喜宴」同色 */
+  .bar input:focus { border-color: var(--accent); outline: none; box-shadow: inset 0 0 0 1px var(--accent); }
+  .notch-label { position: absolute; top: 0; left: 10px; transform: translateY(-50%); padding: 0 6px; background: var(--paper); font-size: 13px; line-height: 1; color: var(--body); pointer-events: none;
+    transition: top .18s ease, left .18s ease, font-size .18s ease, color .18s ease; }
+  .bar input:placeholder-shown:not(:focus) + .notch-label { top: 50%; left: 38px; font-size: 18px; }
+  /* 放大鏡：放在框內左側，標籤躺在框裡時排在它右邊 */
+  .search-icon { position: absolute; left: 14px; top: 50%; width: 20px; height: 20px; transform: translateY(-50%); fill: none; stroke: var(--body); stroke-width: 1.6; stroke-linecap: round; pointer-events: none; transition: stroke .18s; }
+  .bar-row:focus-within .search-icon { stroke: var(--accent); }
+  .bar-row:focus-within .notch-label { color: var(--accent); }
+  /* 清除鈕（×）：換掉瀏覽器預設的藍色，改用和文字同色系的細線 */
+  .bar input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; cursor: pointer; background: var(--muted);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 2l10 10M12 2L2 12' stroke='black' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 2l10 10M12 2L2 12' stroke='black' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+  .results { list-style: none; position: absolute; left: 12px; right: 12px; top: calc(100% - 4px); margin: 0; padding: 8px; display: grid; gap: 6px; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(78,58,42,.12); max-height: 50vh; overflow: auto; }
+  .results:empty, .bar:not(:focus-within):not(.keep-open) .results { display: none; }   /* keep-open：iPhone 點建議字時搜尋框可能失焦，清單照樣留著 */
+  .results button { width: 100%; min-width: 0; text-align: left; border: 1px solid var(--line); background: #fff; padding: 10px 12px; cursor: pointer; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 12px; }
+  .results button > span { min-width: 0; overflow-wrap: anywhere; }
+  .results .empty { padding: 10px 12px; font-size: 14px; color: var(--muted); }
+  .results button:hover { border-color: var(--accent); }
+  .results b { color: var(--accent); margin-left: auto; text-align: right; }   /* 放不下就整段換到下一行靠右，長桌名不會撐寬畫面 */
+  .hint { color: var(--muted); font-size: 13px; margin: 0; }
+  .hint:empty { display: none; }
+  /* 搜尋提示先預留一行高度，出現時不會把下面的平面圖推下去；黏在頂端時也照樣顯示 */
+  #search-hint { font-size: 12px; min-height: 24px; line-height: 24px; }   /* 和搜尋列上方的 24px 一致 */
+  #search-hint:empty { display: block; }
+  .intro .bar-dock.stuck { padding-bottom: 0; }   /* 黏住時底部也不留白，預留的提示那一行就是下緣 */
+  .status { margin: 0; font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: baseline; font-variant-numeric: tabular-nums; }
+  .status a { color: var(--accent); margin-left: auto; text-decoration: none; }
+  .status a + a { margin-left: 0; }
+  .saved { font-size: 13px; color: var(--muted); }
+  .intro > .saved { margin: 8px 0 0; }   /* 搜尋框上方的系統訊息；和輸入框之間就是搜尋列上方原本的 24px 留白（不能用負邊距靠近，會被搜尋列的底色蓋住） */
+  .saved:empty { display: none; }
+  .saved.bad { color: var(--warn); }
+  body.board-mode .saved { margin: 0; }
+  body[data-mode="guest"] .staff-only, body[data-mode="guest"] .card .meter { display: none; }
+
+  /* 底部面板：手機從下方滑出，電腦上浮在下方中央。賓客＝同桌名單（不擋畫面），工作人員＝編輯（對話框） */
+  .sheet {
+    position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); z-index: 20;
+    width: min(560px, 100%); max-height: 85vh; max-height: 85dvh; overflow: auto; margin: 0;
+    background: var(--paper); color: var(--body); border: 1px solid var(--accent); border-bottom: 0; border-radius: 16px 16px 0 0;
+    box-shadow: 0 -12px 40px rgba(78,58,42,.18); padding: 14px 20px calc(18px + env(safe-area-inset-bottom, 0px));
+  }
+  .sheet::before { content: ""; display: block; width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto 12px; }
+  @media (min-width: 600px) { .sheet { bottom: 24px; border-bottom: 1px solid var(--accent); border-radius: 6px; } .sheet::before { display: none; } }
+  dialog.sheet { max-width: none; inset: auto auto 0 50%; }
+  /* 電腦上編輯面板放在畫面正中央 */
+  @media (min-width: 600px) { dialog.sheet { inset: 50% auto auto 50%; transform: translate(-50%, -50%); } }
+  /* 手機：編輯面板固定佔畫面 85% 高，名單再多也有足夠的編輯空間 */
+  @media (max-width: 599px) { dialog.sheet[open] { height: 85vh; height: 85dvh; } }
+  dialog.sheet:focus { outline: none; }
+  /* 面板分成 頂部（標題、×）｜可捲動的內容｜底部（上一桌／下一桌），× 與按鈕永遠看得到 */
+  #detail:not([hidden]), dialog.sheet[open] { display: flex; flex-direction: column; overflow: hidden; padding: 0; }
+  .sheet::before { margin: 10px auto 2px; flex: none; }
+  .sheet-head { position: relative; flex: none; padding: 6px 20px 12px; border-bottom: 1px solid var(--line); }
+  /* 內容區以實際內容高度起算（flex-basis auto）；Safari 在面板沒有固定高度時會把 flex: 1 的 0% 起始高度算成 0，面板會被壓扁 */
+  .sheet-body { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 4px 20px 18px; }
+  #detail .sheet-body { padding: 8px 20px calc(18px + env(safe-area-inset-bottom, 0px)); }
+  .sheet-foot { flex: none; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); background: var(--paper); }
+  .sheet-foot.nav { margin-top: 0; }
+  .sheet-head .close { top: 0; right: 8px; }
+  /* 手機：面板往下滑就能關閉，不需要 × */
+  @media (max-width: 599px) { #close-detail, #close-editor { display: none; } }
+  .sheet.swiping { transition: none !important; user-select: none; -webkit-user-select: none; }   /* 滑鼠拖抽屜時不反白名單文字 */
+  .sheet.settling { transition: transform .2s ease; }
+  @media (min-width: 600px) { .sheet::before { display: none; } .sheet-head { padding-top: 16px; } .sheet-foot { padding-bottom: 14px; } #detail .sheet-body { padding-top: 18px; } }
+  dialog.sheet::backdrop { background: rgba(43,37,34,.35); }
+  .sheet h2 { margin: 0 0 4px; font-size: 12px; font-weight: 500; letter-spacing: .4em; color: var(--accent); }
+  .sheet h2 small { font-family: var(--latin); letter-spacing: .25em; margin-left: 8px; }
+  .close { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; border: 0; background: transparent; font-size: 26px; line-height: 1; color: var(--muted); cursor: pointer; }
+
+  .detail-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-right: 40px; }
+  .detail-head .big { font-size: 32px; font-weight: 700; color: var(--body); line-height: 1.2; }
+  .chip { font-size: 12px; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+  .chip[data-side="主婚人親友"] { background: var(--parents); color: var(--parents-ink); border-color: transparent; }
+  .chip[data-side="新人親友"] { background: var(--couple); color: var(--couple-ink); border-color: transparent; }
+  .chip.over { border-color: var(--warn); color: var(--warn); }
+  /* 賓客點桌子浮出的資訊卡：置中的座位卡樣式 */
+  .place { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 4px; }
+  .place .eyebrow { font-family: var(--latin); font-size: 12px; letter-spacing: .4em; padding-left: .4em; color: var(--accent); }
+  .place .n { font-family: var(--latin); font-size: 52px; font-weight: 600; line-height: 1; color: var(--body); }
+  .place .n:not(:empty) { font-variant-numeric: lining-nums; }
+  .place .mini-rule { display: flex; align-items: center; gap: 6px; width: 72px; margin: 14px 0 6px; color: var(--accent); }
+  .place .mini-rule::before, .place .mini-rule::after { content: ""; flex: 1; height: 1px; background: currentColor; opacity: .7; }
+  .place .mini-rule i { width: 5px; height: 5px; background: currentColor; transform: rotate(45deg); }
+  .reserved { margin: 6px 0 4px; text-align: center; font-size: 15px; letter-spacing: .3em; padding-left: .3em; color: var(--muted); }
+  .reserved em { display: block; margin-top: 4px; font-family: var(--latin); font-size: 15px; letter-spacing: .08em; color: var(--body); }
+  .place .tname { font-size: 20px; font-weight: 600; letter-spacing: .3em; padding-left: .3em; color: var(--body); margin: 0; }   /* 桌名是標題的一部分：字距拉開、稍粗，和下方名單區分 */
+
+  /* 編輯面板 */
+  .check { display: flex; align-items: flex-start; gap: 10px; margin: 16px 0 0; cursor: pointer; font-size: 15px; }
+  .check input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+  .check small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .field-label { font-size: 13px; color: var(--muted); letter-spacing: .1em; margin: 16px 0 6px; }
+  .seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line); background: #fff; }
+  .seg button { border: 0; border-left: 1px solid var(--line); background: transparent; min-height: 44px; padding: 6px 4px; cursor: pointer; font-size: 15px; color: var(--body); }
+  .seg button:first-child { border-left: 0; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .seg button[aria-pressed="true"][data-v="主婚人親友"] { background: var(--parents-ink); }
+  .seg button[aria-pressed="true"][data-v="新人親友"] { background: var(--couple-ink); }
+  .guest-list { list-style: none; margin: 0; padding: 0; counter-reset: g; border-top: 1px solid var(--line); }
+  .guest-list li { display: flex; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid var(--line); counter-increment: g; }   /* 每列上下留一點呼吸空間 */
+  /* 編號兼拖曳把手：按住 ⠿ 或編號上下拖，可以調整順序。編號用 CSS 計數，拖的時候即時跟著變 */
+  .guest-list .grip { flex: none; width: 28px; display: flex; align-items: center; justify-content: flex-end; gap: 3px; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+    font-family: var(--serif); font-size: 15px; font-variant-numeric: lining-nums tabular-nums; color: var(--muted); align-self: stretch; }
+  .guest-list .grip::before { content: "⠿"; font-size: 11px; color: var(--line); }
+  .guest-list .grip::after { content: counter(g); }
+  .guest-list .grip:hover::before { color: var(--accent); }
+  .guest-list li.over .grip::after { color: var(--warn); }
+  .guest-list li.dragging { background: var(--accent-soft); box-shadow: 0 4px 14px rgba(78,58,42,.15); position: relative; z-index: 1; }
+  body.reordering, body.reordering * { cursor: grabbing !important; user-select: none; }
+  .guest-list input { flex: 1; min-width: 0; border: 0; background: transparent; padding: 10px 4px; font-size: 16px; color: var(--body); }
+  .guest-list input:focus { outline: none; background: var(--accent-soft); }
+  /* 姓名可以直接修改：和新增列一樣用有框的輸入框，看得出可編輯 */
+  .guest-list .g-name { padding: 10px 8px; border: 1px solid var(--line); background: #fff; }
+  .guest-list .g-name:focus { border-color: var(--accent); background: #fff; }
+  .g-count { flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: 14px; color: var(--muted); }
+  .g-count input { width: 3.2em; padding: 8px 4px; border: 1px solid var(--line); background: #fff; text-align: center; font-size: 16px; color: var(--body); font-variant-numeric: lining-nums tabular-nums; }
+  .g-count input:focus { border-color: var(--accent); outline: none; background: #fff; }
+  .guest-list .g-count input { flex: none; }
+  .add .g-count input { padding: 10px 4px; }
+  .g-count.kid { font-size: 12px; }
+  .g-count.kid input { width: 2.6em; }
+  .g-count.veg { font-size: 12px; }
+  .g-count.veg input { width: 2.6em; }   /* 兒童椅、素食的輸入框和人數同色；只有平面圖上的座位分顏色 */
+  /* 工作人員版：有素食、兒童椅的名字用對應顏色（兩者都有：素食色＋兒童色底線），滑過看細節 */
+  .is-veg { color: var(--veg-ink); cursor: help; }
+  .is-kid { color: var(--kid-ink); cursor: help; }
+  .is-veg.is-kid { color: var(--veg-ink); text-decoration: underline 2px var(--kid); text-underline-offset: 3px; }
+  /* 滑過名字或素食座位時的浮動小面板 */
+  .tip { position: fixed; z-index: 50; pointer-events: none; min-width: 120px; padding: 10px 14px 9px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(78,58,42,.18); font: 14px/1.5 var(--serif); color: var(--body); white-space: nowrap; }
+  .tip b { display: block; font-size: 15px; font-weight: 600; color: var(--ink); }
+  .tip small { margin-left: 6px; font-size: 12px; color: var(--muted); font-weight: 400; }
+  .tip .row { display: flex; align-items: center; gap: 7px; margin-top: 4px; font-size: 13px; }
+  .tip .row::before { content: ""; flex: none; width: 9px; height: 9px; }
+  .tip .row.veg::before { border-radius: 50%; background: var(--veg); box-shadow: inset 0 0 0 1px var(--veg-ink); }
+  .tip .row.kid::before { border-radius: 2px; background: var(--kid); }
+  .party-n { margin-left: 6px; font-size: .8em; color: var(--muted); font-variant-numeric: lining-nums; }
+  .guest-list .del { width: 40px; height: 44px; border: 0; background: transparent; color: var(--muted); font-size: 20px; cursor: pointer; flex: none; }
+  .guest-list:empty { display: none; }
+  /* 新增列和名單對齊：左邊是下一個編號（和名單的編號欄同寬），人數、兒童椅在同一欄，加入鈕和 × 同寬（40px） */
+  .add { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+  .add .next-n { flex: none; width: 28px; text-align: right; font-size: 15px; font-variant-numeric: lining-nums tabular-nums; color: var(--muted); }
+  .add .btn.solid { flex: none; width: 40px; padding: 0; font-size: 14px; min-height: 44px; }
+  .add input { flex: 1; min-width: 0; padding: 10px 8px; border: 1px solid var(--line); background: #fff; font-size: 16px; }
+  .add input:focus { border-color: var(--accent); outline: none; }
+  /* 手機：一列放不下姓名＋三個數字，改成兩行。第一行姓名（和 ×／加入鈕），第二行位數、兒童椅、素食，左邊和姓名對齊 */
+  @media (max-width: 599px) {
+    .guest-list li, .add { flex-wrap: wrap; row-gap: 6px; }
+    .guest-list .grip { align-self: center; }
+    .guest-list .g-name { flex: 1 1 calc(100% - 28px - 40px - 12px); }
+    .guest-list .del { order: 1; }
+    .guest-list .g-count { order: 2; }
+    .guest-list .g-count:not(.kid):not(.veg) { margin-left: calc(28px + 6px); }
+    .add #f-new { flex: 1 1 calc(100% - 28px - 40px - 12px); }
+    .add .btn.solid { order: 1; }
+    .add .g-count { order: 2; }
+    .add .g-count:not(.kid):not(.veg) { margin-left: calc(28px + 6px); }
+    .g-count, .g-count.kid, .g-count.veg { font-size: 14px; }
+    .g-count input, .g-count.kid input, .g-count.veg input { width: 3.2em; }
+  }
+  .nav { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; }
+  .muted { color: var(--muted); font-size: 12px; }
+  .text-input { display: block; width: 100%; padding: 10px 12px; border: 1px solid var(--line); background: #fff; font-size: 16px; color: var(--body); }
+  .text-input:focus { border-color: var(--accent); outline: none; }
+  .field-label { display: block; }
+  /* 出席名單（待安排）：點一下就加入這一桌 */
+  .combo { position: relative; }
+  .combo-pop { display: none; margin-top: -1px; border: 1px solid var(--accent); background: #fff; box-shadow: 0 10px 24px rgba(78,58,42,.12); }
+  .combo:focus-within .combo-pop { display: block; }
+  .combo:focus-within .text-input { border-color: var(--accent); }
+  .combo-filter { display: flex; gap: 6px; padding: 8px; border-bottom: 1px solid var(--line); }
+  .combo-filter button { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 4px 12px; font-size: 13px; color: var(--body); cursor: pointer; min-height: 32px; }
+  .combo-filter button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .pool-list { list-style: none; margin: 0; padding: 0; max-height: 45vh; max-height: 45dvh; overflow: auto; }
+  .pool-list button.active { background: var(--accent-soft); }
+  .pool-list button { width: 100%; text-align: left; display: flex; align-items: center; gap: 10px; border: 0; border-bottom: 1px solid var(--line); background: transparent; padding: 9px 10px; cursor: pointer; color: var(--body); font-size: 16px; }
+  .pool-list button:hover { background: var(--accent-soft); }
+  .pool-list .who-line { flex: 1; min-width: 0; }
+  .pool-list .meta { display: block; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pool-list .meta .warn { color: var(--warn); }
+  .pool-list .party { flex: none; font-size: 13px; font-variant-numeric: lining-nums; color: var(--accent); border: 1px solid var(--line); border-radius: 999px; padding: 0 9px; }
+  .pool-list .plus { flex: none; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--accent); color: var(--accent); display: grid; place-items: center; font-size: 16px; }
+  .pool-list li { display: flex; align-items: stretch; }
+  .pool-list li > button[data-name] { flex: 1; min-width: 0; }
+  .pool-list .pool-del { flex: none; width: 40px; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 18px; cursor: pointer; }
+  .pool-list .pool-del:hover { color: var(--warn); background: var(--accent-soft); }
+  .pool-list .empty { padding: 12px 10px; color: var(--muted); font-size: 14px; }
+  .btn { border: 1px solid var(--accent); background: transparent; color: var(--body); min-height: 44px; padding: 8px 16px; cursor: pointer; letter-spacing: .1em; font-size: 15px; }
+  .btn:hover { background: var(--accent-soft); }
+  .btn.solid { background: var(--accent); color: #fff; }
+
+  /* 席次一覽 */
+  .roster { padding: 72px 40px 136px; }
+  .roster-head { text-align: center; margin-bottom: 26px; }
+  .roster-head h2 { margin: 0; font-size: 24px; letter-spacing: .5em; padding-left: .5em; font-weight: 700; color: var(--body); }
+  .roster-head p { margin: 2px 0 0; font-family: var(--latin); font-size: 13px; letter-spacing: .4em; color: var(--accent); }
+  .roster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  /* 席次一覽：像婚宴的座位卡——TABLE、大號桌號、桌名，細線菱形隔開，名單置中往下排 */
+  .card { position: relative; border: 1px solid var(--line); padding: 16px 12px 16px; cursor: pointer; background: var(--card); width: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; }   /* <button> 預設垂直置中，改成置頂 */
+  .card:hover { border-color: var(--accent); }
+  .card .eyebrow { font-family: var(--latin); font-size: 11px; letter-spacing: .4em; padding-left: .4em; color: var(--accent); }
+  .card .n { font-family: var(--latin); font-size: 40px; font-weight: 600; line-height: 1; color: var(--body); margin-top: 2px; font-variant-numeric: lining-nums; }
+  .card .mini-rule { display: flex; align-items: center; gap: 6px; width: 64px; margin: 12px 0 10px; color: var(--accent); }
+  .card .mini-rule::before, .card .mini-rule::after { content: ""; flex: 1; height: 1px; background: currentColor; opacity: .7; }
+  .card .mini-rule i { width: 5px; height: 5px; background: currentColor; transform: rotate(45deg); }
+  .card .tname { font-size: 15px; font-weight: 600; letter-spacing: .25em; padding-left: .25em; color: var(--body); margin: 8px 0 0; }
+  .card .who { font-size: 15px; color: var(--body); line-height: 1.9; }
+  .card .who.none { color: #c2b39c; font-size: 16px; }
+  .card .who.none.rsv { font-family: var(--latin); font-style: italic; font-size: 16px; letter-spacing: .06em; color: var(--body); }   /* 賓客版、輸出版的空桌 */
+  /* 姓名｜人數 兩欄對齊 */
+  .party-grid { display: grid; grid-template-columns: auto auto; justify-content: center; align-items: baseline; column-gap: 12px; text-align: left; }
+  .party-grid .ct { text-align: right; color: var(--muted); font-size: .85em; white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; }
+  /* 一列兩組（姓名、人數｜姓名、人數），面板不會太高。中間空一欄 32px：左右兩組等寬，點線在中間斷開，兩組分得清楚 */
+  .names-grid { justify-content: stretch; grid-template-columns: 1fr auto 32px 1fr auto; column-gap: 0; align-items: stretch; margin-top: 4px; }
+  .names-grid > :nth-child(4n+3) { grid-column: 4; }
+  .names-grid > :nth-child(4n+4) { grid-column: 5; }
+  /* 底線整列接續不斷開：兩格等高、文字貼底，人數格用左內距代替欄距 */
+  .names-grid .nm, .names-grid .ct { display: flex; align-items: flex-end; padding: 7px 0; border-bottom: 1px dotted var(--line); font-size: 16px; line-height: 1.5; }
+  .names-grid .ct { justify-content: flex-end; flex-wrap: wrap; padding-left: 14px; font-size: 14px; line-height: 1.7; }
+  @media (max-width: 599px) {   /* 手機抽屜：姓名、人數、Reserved 都放大一號，比較好讀 */
+    .names-grid .nm { font-size: 18px; } .names-grid .ct { font-size: 16px; }
+    #detail .reserved { font-size: 17px; } #detail .reserved em { font-size: 20px; }
+  }
+  /* 座位條 */
+  .card .meter { display: flex; gap: 4px; margin-top: auto; padding-top: 12px; }
+  .meter i { width: 6px; height: 6px; border-radius: 50%; border: 1px solid var(--accent); }
+  .meter i.on { background: var(--accent); }
+  .meter i.over { background: var(--warn); border-color: var(--warn); }
+  /* 人數：坐滿是淡色、還有空位用金色、超過用紅色。網頁版的圓點已經看得出來，數字只在工作人員桌機版（座位表格子裡）顯示 */
+  .meter b { display: none; font: 600 13px/1 var(--latin); font-variant-numeric: lining-nums tabular-nums; letter-spacing: .02em; color: var(--muted); opacity: .6; }
+  .meter.under b { color: var(--accent); opacity: 1; }
+  .meter.over b { color: var(--warn); opacity: 1; }
+
+  [hidden] { display: none !important; }
+
+  /* ───── 賓客版沉浸式（手機、桌機都一樣）：平面圖滿版一整個畫面，沒有花框與大標題；
+     一行小標題＋搜尋框浮在上方，圖例與縮放鈕浮在下方。高度用 100dvh：跟著手機瀏覽器網址列伸縮，永遠是看得到的高度 ───── */
+  .mini-title { display: none; }
+  body.immersive { padding: 0; height: 100vh; height: 100dvh; overflow: hidden; background: var(--paper); }
+  html.immersive, body.immersive { overscroll-behavior: none; }   /* 拖平面圖拖到底時，不要整頁回彈或觸發「下拉重新整理」 */
+  body.immersive .wrap { max-width: 720px; display: block; height: 100%; }   /* 大螢幕：中間一欄（約會場寬），兩側露出底色 */
+  @media (min-width: 721px) { body.immersive { background: var(--ground); } body.immersive .intro { box-shadow: 0 0 40px rgba(78,58,42,.12); } }
+  body.immersive .roster, body.immersive .hero, body.immersive .bar-sentinel, body.immersive .intro > .frame-art { display: none; }
+  body.immersive .intro { height: 100%; box-shadow: none; overflow: hidden; }
+  body.immersive .intro .bar-dock, body.immersive .intro .bar-dock.stuck { position: absolute; top: 0; left: 0; right: 0; z-index: 10; margin: 0;
+    padding: calc(18px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left));
+    background: none; box-shadow: none; pointer-events: none; }   /* 不鋪底色：只有輸入框本身浮在平面圖上，其他地方照樣能拖平面圖 */
+  body.immersive .bar-row, body.immersive .results { pointer-events: auto; }
+  body.immersive .bar { background: none; }
+  body.immersive .bar input { box-shadow: 0 2px 6px rgba(78,58,42,.12), 0 8px 24px rgba(78,58,42,.14); }
+  body.immersive .bar input:focus { box-shadow: inset 0 0 0 1px var(--accent), 0 2px 6px rgba(78,58,42,.12), 0 8px 24px rgba(78,58,42,.14); }
+  /* 標題與提示字直接疊在平面圖上：用紙色光暈襯底，壓在桌子上也讀得清楚 */
+  body.immersive #search-hint { display: none; }   /* 沉浸式不留提示行：平面圖從輸入框下緣算起 */
+  body.immersive .mini-title { text-shadow: 0 0 3px var(--paper), 0 0 6px var(--paper), 0 0 10px var(--paper); }
+  body.immersive .mini-title { display: block; text-align: center; padding: 0 0 10px; font-size: 20px; line-height: 1.35; letter-spacing: .16em; color: var(--accent); }   /* 整行香檳金、粗體；比搜尋框裡的提示字（18px）大一點 */
+  body.immersive .mini-title b { font-weight: 700; color: var(--body); }   /* 標題用深咖啡，和輸入的字同色；日期維持香檳金 */
+  body.immersive .mini-title small { display: block; margin-top: 2px; font-size: 14px; letter-spacing: .16em; }   /* 日期排在下一行 */
+  body.immersive .intro .bar { padding: 0; }
+  body.immersive .plan-card { position: absolute; inset: 0; padding: 0; }
+  body.immersive .plan-zoom { height: 100%; padding: 0; }
+  body.immersive .plan-card svg.plan { height: 100%; touch-action: none; }   /* 頁面不捲動：單指一律拖平面圖 */
+  body.immersive .legend { position: absolute; left: calc(12px + env(safe-area-inset-left)); bottom: calc(12px + env(safe-area-inset-bottom)); margin: 0;
+    box-sizing: border-box; height: 32px; align-items: center; flex-wrap: nowrap;   /* 和右下縮放鈕膠囊同高（按鈕 30px＋上下框線） */
+    padding: 0 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 1px 4px rgba(78,58,42,.1); gap: 4px 12px; }
+  /* 1122：圖例有五類，一行放不下：讓它折成兩三行，右邊留給縮放鈕；圓角改小，不再是膠囊 */
+  body.immersive .legend { height: auto; flex-wrap: wrap; justify-content: flex-start; max-width: calc(100% - 24px - 120px - env(safe-area-inset-left) - env(safe-area-inset-right));
+    padding: 6px 12px; border-radius: 14px; gap: 2px 12px; }
+  /* 縮放鈕：和左下圖例同款的膠囊，－＋ 兩顆合在一起、中間一條細線隔開 */
+  body.immersive .zoom-ctl { right: calc(12px + env(safe-area-inset-right)); bottom: calc(12px + env(safe-area-inset-bottom)); gap: 1px;
+    background: var(--line); border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 1px 4px rgba(78,58,42,.1); overflow: hidden; }
+  body.immersive .zoom-ctl button { width: 30px; height: 30px; border: 0; border-radius: 0; background: var(--paper); box-shadow: none; color: var(--muted); }   /* 和圖例文字同色 */   /* 兩顆都是 30×30 正方形（加上下框線共 32px，和圖例同高）；間隙透出底色當分隔線 */
+  body.immersive .zoom-ctl button:disabled { color: var(--line); }   /* 縮到全圖／放到最大時，那一顆變淡 */
+  /* iOS 點按時預設會蓋一塊灰色方形（不管圓角），在膠囊上會凸出來：關掉，改成按下時淡香檳底 */
+  body.immersive .zoom-ctl button { -webkit-tap-highlight-color: transparent; }
+  body.immersive .zoom-ctl button:not(:disabled):active { background: var(--accent-soft); }
+  /* 膠囊兩端是半圓，按鈕的幾何中心看起來偏外側：圖示各往內移 2px，視覺上才置中 */
+  body.immersive #zoom-out svg { transform: translateX(2px); }
+  body.immersive #zoom-in svg { transform: translateX(-2px); }
+  .zoom-pct { display: none; }
+  body.immersive .zoom-ctl #zoom-pct { width: 46px; }   /* 倍率也是按鈕（點了回到預設畫面），寬度和一般 －／＋ 不同 */
+  body.immersive .zoom-pct { display: flex; align-items: center; justify-content: center; width: 46px; height: 30px; background: var(--paper);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 13px; font-weight: 300; font-variant-numeric: tabular-nums; letter-spacing: .02em; color: var(--muted); }   /* 目前倍率：全圖＝100%；和 －／＋、圖例文字同色；數字用系統內建字型，不用思源宋體 */
+
+  /* ───── 桌卡（?cards）：三角立牌，版面照每面寬 90 × 高 140mm 畫。攤開是一長條，由上而下：黏貼邊 12、底座 50、背面 140、正面 140（共 342mm）；
+     輸出版整條放大 1.15 倍（TENT.S，每面約 10.4×16.1cm），A3 直式一張並排兩條。背面倒印，沿頂端對折後兩面都是正的；底座折到下面，黏貼邊塗膠黏在正面底部內側 ───── */
+  body.cards-mode { padding: 24px 0; background: #d9d4cc; }
+  body.cards-mode > :not(#cards):not(.tent-themes):not(.tent-pv):not(script) { display: none !important; }
+  /* 螢幕預覽：整張依視窗寬縮小（--cz，setupCards 依視窗寬計算；手機上一次看到一整張）。用 transform 縮放，外面包一層佔縮小後的大小；
+     不用 CSS zoom：iPhone Safari 的 zoom 不會縮 mm 單位的字，字會撐出紙外。列印時不縮放，照實際 A3 */
+  .card-slot { width: calc(297mm * var(--cz, 1)); height: calc(420mm * var(--cz, 1)); margin: 0 auto 24px; }
+  .card-slot > .card-sheet { transform: scale(var(--cz, 1)); transform-origin: 0 0; }
+  .card-sheet, .tent-pv { --tent: #faf5ec; --tent-ink: #000; --tent-warm: #231c17; --tent-gold: #9c7a3c; --script: "Pinyon Script", var(--latin); --hand: "LXGW WenKai TC", var(--serif); }   /* 立牌底色：淡香檳，左右與下緣出血 2mm（TENT.BLEED）；桌號、桌名用暖黑（比純黑柔和、和水彩搭），文案小字用純黑（只用 K 印，邊緣最銳利；深咖啡印出來偏淺），Table、WELCOME、Thank you 用飽和一點的香檳金（原本的香檳金印出來太淡） */
+  .card-sheet { position: relative; width: 297mm; height: 420mm; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.18); overflow: hidden; }
+  .tent-marks, .strip-art, .tf-art { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }   /* 單位都是 mm */
+  .strip { position: absolute; width: 90mm; height: 342mm; transform-origin: 0 0; }   /* 輸出版用 transform 等比放大（TENT.S） */
+  .tent-face { position: absolute; left: 0; width: 90mm; height: 140mm; color: var(--accent); }
+  .tent-face.back { top: 62mm; transform: rotate(180deg); }   /* 黏貼邊 12＋底座 50（TENT.TAB＋TENT.BASE），要和折線對齊 */
+  .tent-face.front { top: 202mm; }
+  .tent-face > span { position: absolute; left: 0; right: 0; text-align: center; line-height: 1; }
+  .tf-table { top: 31mm; font-family: var(--script); font-size: 12mm; color: var(--tent-gold); }
+  .tf-num { top: 41mm; font-family: var(--latin); font-style: italic; font-weight: 500; font-size: 60mm; color: var(--tent-warm); font-variant-numeric: lining-nums; }
+  .tf-num.zh { top: 60mm; font-family: var(--serif); font-style: normal; font-weight: 700; font-size: 19mm; letter-spacing: .15em; padding-left: .15em; }   /* 主桌 */
+  .tf-name { top: calc(113.1mm - var(--fs, 8mm) / 2);   /* 分隔線（101mm）和拱門內框底線（125.2mm）的正中間 */
+    font-family: var(--serif); font-weight: 600; font-size: var(--fs, 6mm); letter-spacing: .2em; padding-left: .2em; color: var(--tent-warm); white-space: nowrap; }
+  .tf-name.rsv { font-family: var(--latin); font-style: italic; font-weight: 500; letter-spacing: .06em; padding-left: .06em; }
+  .tent-face > .tf-poem { top: 34mm; font-family: var(--hand); font-size: 3.8mm; line-height: 1.55; color: var(--tent-ink); }   /* 霞鶩文楷；整段往下放，最長的第二行落在拱門已經變寬的地方，左右才有呼吸空間 */
+  .tf-poem p { margin: 0 0 1.4mm; }
+  .tf-thanks { font-family: var(--script); font-size: 8mm; color: var(--tent-gold); }   /* 不算 y 的尾巴，T 頂端到 you 的基線約 104.6–117.8mm：在文案最後一行（約 97.3mm）和拱門內框底線（125.1mm）的正中間 */
+  .tent-face > .tf-bg { left: calc(-1 * var(--bleed, 0mm)); right: calc(-1 * var(--bleed, 0mm)); top: 0; bottom: calc(-1 * var(--bleed, 0mm)); overflow: hidden; }   /* --bleed：出血換算回版面單位（drawCards 設在 .strip 上） */
+  .tf-bg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  /* 版本切換：固定在螢幕上方，列印不印 */
+  .tent-themes { position: sticky; top: 12px; z-index: 5; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin: 0 auto 16px; padding: 0 12px; }
+  .tent-themes .tent-view { display: inline-flex; }
+  .tent-themes .tent-view button:first-child { border-radius: 999px 0 0 999px; }
+  .tent-themes .tent-view button:last-child { border-radius: 0 999px 999px 0; margin-left: -1px; }
+  body[data-view="preview"] #cards, body[data-view="print"] .tent-pv { display: none; }
+  /* 預覽版：每桌一組（正面｜背面），依視窗寬縮放（--pz） */
+  .tent-pv { display: flex; flex-wrap: wrap; justify-content: center; gap: 28px 40px; padding: 0 16px 24px; }
+  .pv-card { margin: 0; text-align: center; font-size: 13px; color: var(--muted); }
+  .pv-pair { display: flex; gap: 16px; margin-bottom: 8px; }
+  .pv-slot { width: calc(90mm * var(--pz, 1)); height: calc(140mm * var(--pz, 1)); box-shadow: 0 2px 12px rgba(0,0,0,.18); }
+  .pv-face { position: relative; width: 90mm; height: 140mm; transform: scale(var(--pz, 1)); transform-origin: 0 0; overflow: hidden; background: var(--tent); }
+  .pv-face .tent-face { top: 0; transform: none; }
+  .tent-themes button { padding: 6px 16px; border: 1px solid var(--accent); border-radius: 999px; background: var(--paper); color: var(--body); font-size: 14px; letter-spacing: .1em; cursor: pointer; }
+  .tent-themes button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  @media print {
+    body.cards-mode { padding: 0; background: none; }
+    body.cards-mode .card-slot { width: auto; height: auto; margin: 0; break-after: page; }
+    body.cards-mode .card-sheet { transform: none; box-shadow: none; }
+    body.cards-mode .tent-themes, body.cards-mode .tent-pv { display: none !important; }
+    body.cards-mode #cards { display: block !important; }
+    body.cards-mode * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  /* ───── 輸出版海報：尺寸由 --pw/--ph 決定（預設 A2 橫式 594×420mm），字級跟著紙張等比放大 ───── */
+  body.poster-mode { padding: 0; background: #d9d4cc; overflow: auto; }
+  body.poster-mode .wrap { display: none; }
+  body.poster-mode:not(.board-mode) .sheet, body.poster-mode:not(.board-mode) .toast { display: none !important; }
+  .poster-stage { transform-origin: 0 0; }
+  .poster-stage { position: relative; width: 0; }
+  body.board-mode .bar { position: fixed; top: 0; left: 0; right: 0; z-index: 15; display: flex; align-items: center; gap: 8px 20px; padding: 8px 20px; }
+  body.board-mode .bar-row { flex: 0 0 380px; }
+  body.board-mode .bar .hint { display: none; }
+  body.board-mode .status { flex: 1; font-size: 13px; margin: 0; }
+  .plan-card .status { margin: 0 0 14px; }
+  @media (max-width: 560px) { #s-stats { display: none; } }   /* 手機版太擠：不顯示排桌統計，只留連結與同步異常提示 */
+  /* 編輯面板靠右，平面圖保持看得到 */
+  body.board-mode dialog.sheet { inset: auto 24px 24px auto; transform: none; height: calc(100vh - 110px); max-height: none; width: 480px; }
+  body.board-mode dialog.sheet::backdrop { background: rgba(43,37,34,.12); }
+  body.board-mode .p-list .card { cursor: pointer; }
+  body.board-mode .p-list .card:hover { border-color: var(--accent); }
+
+  /* 海報留白：左右等寬；四角花飾只剩小菱形和細弧，留白收窄讓平面圖與名單放大 */
+  .poster {
+    --k: calc(min(var(--pw), var(--ph)) / 420mm);   /* 相對 A2 的倍率（以短邊算，直式、橫式同一張紙字一樣大） */
+    width: var(--pw); height: var(--ph); box-sizing: border-box; background: #fff;   /* 印刷用純白：紙本身就是白的，不用滿版上一層淡米白（印不到邊會留白邊，也容易印不均勻） */
+    padding: calc(24mm * var(--k)) calc(20mm * var(--k)) calc(24mm * var(--k)) calc(20mm * var(--k));   /* 以 A2 為準：上下 24mm、左右 20mm（左右省下來的寬度都給名單卡片），A1／A3 等比縮放 */ display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr;
+    column-gap: calc(14mm * var(--k)); row-gap: calc(5mm * var(--k)); box-shadow: none;
+  }
+  body.poster-mode .poster { --body: #2e2117; --muted: #6b5a48; --print-gold: #8a6a33; }   /* 大圖輸出：咖啡色文字加深（原本的深咖啡印出來偏淺），網頁和工作人員版不變 */
+  body.poster-mode .p-kicker, body.poster-mode .plan .entrance { color: var(--print-gold); fill: var(--print-gold); }   /* 「座位表／SEATING CHART」和「入口」：香檳金印出來太淡，改用較深的金 */
+  /* 標題每一塊字後面各墊一團白霧（和「入口」一樣，貼著字、往外淡出；用漸層，不用 text-shadow 或描邊：text-shadow 印成 PDF 會變成白色色塊，描邊太分明像白框） */
+  body.poster-mode:not(.board-mode) .p-head > * { position: relative; justify-self: start; }
+  body.poster-mode:not(.board-mode) .p-head > .p-kicker { justify-self: end; }
+  body.poster-mode:not(.board-mode) .p-head > *::before { content: ""; position: absolute; inset: -.3em -.5em; z-index: -1; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(255,255,255,.92) 45%, rgba(255,255,255,0)); }
+  body.poster-mode:not(.board-mode) .p-list .card, body.poster-mode:not(.board-mode) .p-list .note, body.poster-mode:not(.board-mode) .p-qr .note { background: rgba(253,250,245,.72); }   /* 卡片微透明，後面的花隱約透出來 */
+  .poster > .frame-art { inset: calc(8mm * var(--k)); width: calc(100% - 16mm * var(--k)); height: calc(100% - 16mm * var(--k)); }
+  /* 輸出版：拿掉線條花框，改用水彩花裝飾（素材在 assets/deco，位置存在 assets/poster-deco.js） */
+  body.poster-mode:not(.board-mode) .poster { overflow: hidden; }
+  body.poster-mode:not(.board-mode) .poster > .frame-art { display: none; }
+  .poster > :not(.p-deco):not(.frame-art) { position: relative; z-index: 1; }   /* 花框要維持絕對定位：被改成 relative 的話它會變成格線的一格，跑到版面最下面 */
+  .p-deco { position: absolute; inset: 0; z-index: auto; pointer-events: none; }
+  .p-deco .d-item { position: absolute; height: auto; z-index: 0; user-select: none; }
+  .p-deco .d-item.over { z-index: 2; }
+  /* 標題橫跨整張、置中在花冠下方；平面圖與座位表都從標題下方開始，左右等高，重心不偏 */
+  /* 標題放在平面圖正上方（左欄第 1 列）；右邊座位表從頂端排到底（跨兩列），名單高度更多 */
+  .p-head { grid-column: 1; grid-row: 1; height: calc(44mm * var(--k)); box-sizing: border-box; }
+  .p-list { grid-column: 2; grid-row: 1 / span 2; }
+  /* 實驗：平面圖佔滿左欄（跨標題列），外牆往上延伸，標題寫在牆內、舞台上方；viewBox 與比例由 extendPlanForPoster() 依標題高度算出 */
+  .p-plan { grid-column: 1; grid-row: 1 / span 2; height: calc(var(--ph) - 48mm * var(--k)); aspect-ratio: 747.4 / 1171.2; }
+  .p-head { position: relative; z-index: 1; }
+  /* 實驗：輸出版不畫外牆、門和柱子，入口改用一條長條標示 */
+  body.poster-mode .plan .wall, body.poster-mode .plan .door, body.poster-mode .plan .pillar, body.poster-mode .plan > .entrance { display: none; }
+  .plan .entrance-mark { display: none; }
+  body.poster-mode .plan .entrance-mark, body.immersive .plan .entrance-mark { display: inline; }   /* 賓客版（不畫牆）也用輸出版的入口標示：左右門廊各一條淡金粗線＋「入口」 */
+  .plan .entrance-mark line { stroke: var(--line); stroke-width: 4; stroke-linecap: round; }
+  body.poster-mode .plan .plan-legend text { paint-order: stroke; stroke: #fff; stroke-width: 8px; stroke-linejoin: round; }   /* 花園壓在下方，字加一圈白邊才讀得清楚 */
+  .plan .entrance-mark .glow { display: none; }
+  body.poster-mode .plan .entrance-mark .glow { display: inline; }   /* 「入口」後面一團柔和的白霧（和標題一樣用漸層，不用描邊） */   /* 和卡片框線同色，比桌框淡，不搶眼 */
+  .p-plan svg.plan { width: 100%; height: 100%; overflow: visible; }
+  /* 標題區左右兩欄：左「座位表／SEATING CHART」靠右對齊，右「周林府喜宴／新人／日期」靠左對齊，中間一條淡金直線；左右等寬，直線落在花冠的中線上 */
+  .p-head { display: grid; grid-template-columns: 1fr 1fr; align-content: center; padding-bottom: calc(4mm * var(--k)); }
+  .p-head > * { grid-column: 2; text-align: left; padding-left: calc(8mm * var(--k)); border-left: calc(.66mm * var(--k)) solid var(--line); }   /* 和花框線同粗（1px × 2.5 ≈ 0.66mm），印出來才不會太細 */
+  .p-head > .p-kicker { grid-column: 1; grid-row: 1 / span 3; align-self: center; text-align: right; padding: 0 calc(8mm * var(--k)) 0 0; border: 0; }
+  .p-kicker { font-size: calc(11.5mm * var(--k)); color: var(--accent); }   /* 比「周林府喜宴」（13mm）小一點 */
+  /* 字距會加在每個字後面（含最後一個），左邊補一樣寬的 padding，整行才會真正置中 */
+  .p-kicker b { display: block; font-weight: 500; line-height: 1.15; letter-spacing: .35em; margin-right: -.35em; }   /* 字距加在每個字後面，靠右對齊時把最後一段收回來 */
+  .p-kicker span { display: block; font-family: var(--latin); font-size: calc(3.8mm * var(--k)); letter-spacing: .4em; margin-right: -.4em; margin-top: calc(1.5mm * var(--k)); }
+  .p-head h1 { margin: 0; padding-bottom: calc(1.6mm * var(--k)); font-size: calc(13mm * var(--k)); letter-spacing: .14em; color: var(--body); line-height: 1.15; }
+  .p-head .couple { font-size: calc(6.5mm * var(--k)); font-weight: 500; letter-spacing: .3em; color: var(--body); padding-bottom: calc(.9mm * var(--k)); }   /* 上下留白 1.6／0.9mm：日期是數字、沒有下伸筆畫，看起來比較遠，新人名字往下挪一點才會落在標題和日期正中間 */
+  .p-date { font-size: calc(5mm * var(--k)); letter-spacing: .1em; }
+  .p-head .couple, .p-head .p-date { padding-left: calc(9mm * var(--k)); }   /* 比「周林府喜宴」多內縮 1mm：「林」左邊的豎筆離字框有一段距離，眼睛會把豎筆當成左緣，下面兩行跟著它對齊才順 */
+  .p-list { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); gap: calc(3mm * var(--k)); min-height: 0; }
+  /* 海報的桌卡：桌號與桌名同一行，下方細線，名單往下排，省下高度給名單 */
+  .p-list .card { cursor: default; padding: calc(2.6mm * var(--k)) calc(1.8mm * var(--k)); overflow: hidden; min-height: 0;
+    display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr; align-content: start; align-items: center; column-gap: calc(2.2mm * var(--k)); text-align: left; }
+  .p-list .card .eyebrow, .p-list .card .mini-rule { display: none; }
+  .p-list .card .n { grid-column: 1; line-height: 1.15; margin: 0; }
+  /* 桌號與桌名同一行、同字級、同字體、基線對齊；字級依整行字寬放到最大（上限 5.6mm），不折行 */
+  .p-list .card .tname { grid-column: 2; margin: 0; letter-spacing: 0; padding-left: 0; line-height: 1.15; white-space: nowrap; overflow: hidden; color: var(--body); }
+  .p-list .card .n, .p-list .card .tname { font-family: var(--serif); font-size: calc(7.6mm * var(--k)); }   /* 1122：固定字級。原本吃 --name-fs（上一輪名單字級的眾數），標題列高度跟著變、名單字級又跟著變，每次重算會在兩個狀態之間來回跳 */   /* 和名單最常見的字級一樣大（--name-fs，fitPosterNames 算出）；放不下的長桌名由 fitPosterNames 收緊字距 */
+  .p-list .card .n { font-weight: 900; font-variant-numeric: lining-nums; }
+  .p-list .card .tname { font-weight: 700; }
+  .p-list .card { align-items: baseline; }
+  /* 名單：一家人每位寫一次名字（代表人 4 位就寫 4 次），團體寫一次加人數；兩欄。字級由 fitPosterNames() 依每張卡的人數各自放到最大 */
+  .p-list .card .who { grid-column: 1 / -1; align-self: start; font-size: var(--nfs, calc(3.1mm * var(--k))); line-height: 1.4;
+    border-top: calc(.3mm * var(--k)) solid var(--accent-soft); margin-top: calc(1.8mm * var(--k)); padding-top: calc(1.6mm * var(--k)); }
+  /* 兩欄放的都是 2–3 字的人名，欄寬就是名字寬，整組置中，左右留白一樣 */
+  .p-list .p-names { display: grid; grid-template-columns: repeat(2, max-content); justify-content: space-around; column-gap: .4em;
+    margin-inline: calc(-1.8mm * var(--k)); padding-inline: .2em; }   /* 名單撐到卡片左右邊框，space-around＋兩邊各 0.2em：人名到邊框＝人名到中線（多出來的空白平均分） */
+  .p-list .p-names span { white-space: nowrap; }
+  /* 團體／非人名：佔滿一整行、太長就折行；contain 讓它不把兩欄撐寬。整張卡都是團體時改成單欄滿版 */
+  .p-list .p-names .grp { grid-column: 1 / -1; white-space: normal; contain: inline-size; }
+  .p-list .p-names.solo { grid-template-columns: 1fr; justify-content: stretch; }
+  .p-list .p-names .grp small { margin-left: .5em; font-size: .8em; color: var(--muted); white-space: nowrap; }
+  /* 「尚未安排」和 Reserved 同大小、同一條基線（和其他卡片第一行名字對齊），只是用中文字、淡色 */
+  .p-list .card .who.none { font-size: var(--name-fs, calc(5mm * var(--k))); text-align: center; line-height: 1.4; position: relative; top: .03em; }
+  /* Reserved 水平置中，和名字同字級、同行高（名字常見字級 --name-fs × 1.4），垂直和其他卡片的第一行名字同一條基線 */
+  .p-list .card .who.none.rsv { font-size: var(--name-fs, calc(5mm * var(--k))); align-self: stretch; display: flex; align-items: center; justify-content: center; line-height: 1; padding-bottom: calc(3mm * var(--k)); }   /* 空桌的 Reserved 在名單區上下置中（分隔線留在原位），卡片才不會上半擠、下半空 */
+  .p-list .card .meter { display: none; }
+  body.board-mode .p-list .card .meter { display: block; grid-column: 1 / -1; justify-self: end; align-self: end; padding: 0; margin: 0; line-height: 1; }
+  body.board-mode .p-list .card .meter i { display: none; }
+  body.board-mode .p-list .card .meter b { display: inline; font-size: calc(5.2mm * var(--k)); }   /* 看板版整張等比縮小，用和名單同一套 mm 字級 */
+  /* 最後一格：「查找座位」在上、QR code 在下，整組在卡片裡上下置中 */
+  /* 卡片框線用 mm：印在 A2 上約 0.4mm，遠看也清楚（1px 只有 0.26mm） */
+  .p-list .card, .p-list .note, .p-qr .note { border-width: calc(.4mm * var(--k)); border-radius: calc(1.5mm * var(--k)); }   /* 小圓角 */
+  .p-list .note, .p-qr .note { border: calc(.4mm * var(--k)) solid var(--line); background: var(--card); padding: calc(2.6mm * var(--k)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(1.5mm * var(--k)); font-size: calc(3mm * var(--k)); color: var(--muted); text-align: center; }
+  .p-list .note { grid-column: span 3; }   /* 25 桌排 7×4，最後一排剩三格給 QR code */
+  /* ───── 直式海報（1122 的告示牌是 A2 直式）：整張是 5 欄 × 9 列的格子。
+     右上 3 欄 × 6 列是平面圖（查找座位疊在平面圖右上角、舞台右邊的空地）；左上一格寬兩欄的標題；
+     名單（display: contents，每張桌卡直接當海報的格子）從標題下方沿左邊兩欄往下排，底部三列鋪滿五欄，25 桌剛好填滿 ───── */
+  .p-qr { display: none; }
+  .poster.portrait { grid-template-columns: repeat(5, minmax(0, 1fr)); grid-template-rows: repeat(9, minmax(0, 1fr)); gap: calc(3mm * var(--k));
+    padding-bottom: calc(22mm * var(--k)); }   /* 底部花帶：最後一排卡片貼著花帶上緣，空間都留給名單 */
+  .poster.portrait .p-list { display: contents; }
+  .poster.portrait .p-head { grid-column: 1 / 3; grid-row: 1; height: auto; align-self: end; justify-self: stretch; padding: 0 0 calc(4mm * var(--k)); }   /* 撐滿兩欄：標題的 1fr 1fr 中線＝下方 1、6 兩欄名單的中線 */   /* 標題貼近下方名單；舞台、查找座位的上緣再對齊標題上緣（alignPortraitTop） */
+  /* 標題那一格只有兩欄寬：標題字小一號、不折行，左右兩塊間距收窄 */
+  .poster.portrait .p-list .card .who { line-height: 1.22; margin-top: calc(1.2mm * var(--k)); padding-top: calc(1.2mm * var(--k)); }   /* 直式格子比較矮：行距收緊，10 人一桌（5 行）的名字才不會被擠得太小 */
+  .poster.portrait .p-head { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }   /* 左右兩半固定等寬，左邊字比較寬也不會把中線推走 */
+  .poster.portrait .p-head h1 { font-size: calc(13.5mm * var(--k)); white-space: nowrap; }
+  .poster.portrait .p-head .couple { font-size: calc(8mm * var(--k)); }
+  .poster.portrait .p-head .p-date { font-size: calc(5.5mm * var(--k)); }
+  .poster.portrait .p-head > * { padding-left: calc(6mm * var(--k)); }
+  .poster.portrait .p-head > .p-kicker { padding: 0 calc(6mm * var(--k)) 0 0; font-size: calc(12.5mm * var(--k)); }
+  .poster.portrait .p-head .p-kicker span { font-size: calc(4.4mm * var(--k)); }
+  .poster.portrait .p-head .couple, .poster.portrait .p-head .p-date { padding-left: calc(7mm * var(--k)); }
+  .poster.portrait .p-plan { grid-column: 3 / 6; grid-row: 1 / 7; width: 100%; height: auto; align-self: start; margin-top: var(--stage-dy, 0px); }   /* 貼上緣：舞台框的上緣對齊標題上緣（--stage-dy 由 alignPortraitTop() 量出來補差） */
+  /* 查找座位放進平面圖的框裡，貼右上角：上緣和舞台框的上緣（y 105，viewBox 從 103.8 起算）同一條線 */
+  .poster.portrait .p-qr { display: flex; position: absolute; top: calc(1.2 / 1082.5 * 100%); right: 0; z-index: 2; }
+  .poster.portrait .p-qr .note { width: calc(54mm * var(--k)); height: calc(62mm * var(--k)); box-sizing: border-box; }   /* 要塞在舞台右邊、第 16 桌上方 */
+  .poster.portrait .p-qr .note b { font-size: calc(5.4mm * var(--k)); }
+  .p-list .note .qr, .p-qr .note .qr { flex: 0 1 auto; height: 72%; min-height: 0; max-width: 100%; aspect-ratio: 1; color: var(--body); }   /* QR 只佔自己的正方形，和標題一組上下置中 */
+  .p-list .note b, .p-qr .note b { color: var(--body); font-weight: 400; font-size: var(--name-fs, 1.05em); letter-spacing: .1em; text-indent: .1em; line-height: 1.3; }
+
+  @media print {
+    @page { size: A4 portrait; margin: 10mm; }
+    body { background: #fff; padding: 0; }
+    .bar, .legend, .sheet { display: none !important; }
+    .framed { box-shadow: none; }
+    .roster { break-before: page; }
+    .tbl.match circle.halo { animation: none; opacity: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 第一張卡：標題、找座位、平面圖合在同一個花框裡 -->
+  <section class="intro framed">
+  <header class="hero">
+    <div class="kicker"><div class="zh-kicker">座位表</div><div class="en-kicker">SEATING CHART</div></div>
+    <h1>周林府喜宴</h1>
+    <div class="couple">文瑜・杰鋐</div>
+    <div class="date">2026.11.22</div>
+    <div class="rule"><span></span></div>
+  </header>
+
+  <!-- 工作人員：同步、斷線、凍結等系統訊息，放在搜尋框上方；沒有訊息時不佔位置 -->
+  <p class="saved staff-only" id="saved" role="status">連線中…</p>
+  <div class="bar-sentinel" aria-hidden="true"></div>
+  <div class="bar-dock">
+  <div class="mini-title"><b>周林府喜宴座位表</b><small>2026.11.22</small></div>
+  <section class="bar" aria-label="尋找座位">
+    <div class="bar-row">
+      <svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.75"/><path d="M12.8 12.8 17 17"/></svg>
+      <input id="q" type="search" placeholder=" " autocomplete="off" enterkeyhint="search">
+      <label class="notch-label" for="q">請輸入您的姓名</label>
+    </div>
+    <ul class="results" id="results"></ul>
+    <p class="hint" id="search-hint"></p>   <!-- 固定空著：工作人員版搜尋列和平面圖之間的間隔（沉浸式不顯示） -->
+  </section>
+  </div>
+
+  <div class="plan-card">
+    <!-- 工作人員：排桌統計與同步狀態放在平面圖上方 -->
+    <p class="status staff-only" id="status"><span id="s-stats"></span><a id="guest-link" target="_blank">手機版 ↗</a><a id="poster-link" target="_blank">大圖版 ↗</a><a id="cards-link" target="_blank">桌卡 ↗</a></p>
+    <div class="plan-zoom">
+      <svg class="plan" id="plan" viewBox="53.8 103.8 747.4 1171.2" role="group" aria-label="宴會廳平面圖"></svg>
+      <span class="edge" aria-hidden="true"></span>
+      <div class="zoom-ctl" aria-label="平面圖縮放">
+        <button type="button" id="zoom-out" aria-label="縮小"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h9"/></svg></button>
+        <button type="button" class="zoom-pct" id="zoom-pct" aria-label="恢復預設大小" title="恢復預設大小">100%</button>
+        <button type="button" id="zoom-in" aria-label="放大"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.5 6h9M6 1.5v9"/></svg></button>
+      </div>
+    </div>
+    <div class="legend">
+      <span class="side-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25" style="fill:var(--g-groom)"/></svg>新郎親友</span>
+      <span class="side-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25" style="fill:var(--g-zhou)"/></svg>周府親友</span>
+      <span class="side-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25" style="fill:var(--g-jiang)"/></svg>江家親友</span>
+      <span class="side-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25" style="fill:var(--g-dad)"/></svg>爸爸好友</span>
+      <span class="side-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25" style="fill:var(--g-mom)"/></svg>媽媽好友</span>
+      <span class="side-tag"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25" style="fill:var(--g-rotary)"/></svg><span class="jus">扶輪社</span></span>
+      <span class="legend-break staff-only" aria-hidden="true"></span>
+      <span class="side-tag seat-tag staff-only"><svg viewBox="0 0 14 14" aria-hidden="true"><rect x="1.5" y="1.5" width="11" height="11" rx="1.5" style="fill:var(--kid)"/></svg>兒童座椅</span>
+      <span class="side-tag seat-tag staff-only"><svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6.25" style="fill:var(--veg)"/></svg>素食</span>
+    </div>
+  </div>
+  </section>
+
+  <div class="tip" id="tip" role="tooltip" hidden></div>
+  <div class="toast" id="toast" role="status" hidden><span id="toast-text"></span><button type="button" id="toast-undo">復原</button></div>
+
+  <!-- 賓客：點桌子後浮出同桌名單 -->
+  <div class="sheet" id="detail" hidden>
+    <button class="close" id="close-detail" aria-label="關閉">×</button>
+    <div class="sheet-body" id="detail-body"></div>
+  </div>
+
+  <!-- 工作人員：點桌子後開啟編輯對話框 -->
+  <dialog class="sheet" id="editor" aria-labelledby="f-title" tabindex="-1">
+    <header class="sheet-head">
+      <button class="close" id="close-editor" aria-label="關閉">×</button>
+      <h2>編輯這一桌<small>EDIT</small></h2>
+      <div class="detail-head"><span class="big" id="f-title"></span><span class="chip" id="f-count"></span></div>
+    </header>
+    <div class="sheet-body">
+    <label class="field-label" for="f-name">桌名</label>
+    <input class="text-input" id="f-name" maxlength="20" placeholder="選填，例如：扶輪社（同名的桌自動編 1、2…）" autocomplete="off" enterkeyhint="done">
+    <div class="field-label" id="side-label">歸屬</div>
+    <div class="seg" id="f-side" role="group" aria-labelledby="side-label">
+      <button type="button" data-v="主婚人親友">主婚人親友</button>
+      <button type="button" data-v="新人親友">新人親友</button>
+      <button type="button" data-v="">未設定</button>
+    </div>
+    <label class="check"><input type="checkbox" id="f-reserved"><span>保留席<small>賓客版與輸出版不列名單，只寫 Reserved</small></span></label>
+    <div class="field-label">賓客</div>
+    <ol class="guest-list" id="f-list"></ol>
+    <form class="add" id="f-add">
+      <span class="next-n" id="f-new-n" aria-hidden="true"></span>
+      <input id="f-new" placeholder="姓名" title="代表人姓名；可一次貼上多行，每人各 1 位" autocomplete="off" enterkeyhint="done" aria-label="新增一組賓客：代表人姓名，可一次貼上多行">
+      <label class="g-count boxed"><input id="f-new-count" type="number" inputmode="numeric" min="1" max="20" value="1" aria-label="這組共幾位">位</label>
+      <label class="g-count kid boxed"><input id="f-new-child" type="number" inputmode="numeric" min="0" max="10" value="0" aria-label="兒童椅幾張">兒童椅</label>
+      <label class="g-count veg boxed"><input id="f-new-veg" type="number" inputmode="numeric" min="0" max="20" value="0" aria-label="素食幾份">素食</label>
+      <button class="btn solid" type="submit">加入</button>
+    </form>
+    <div class="pool" id="pool" hidden>
+      <label class="field-label" for="pool-q">從出席名單加入 <span class="muted" id="pool-count"></span></label>
+      <!-- 下拉選單：點輸入框才展開，可打字篩選 -->
+      <div class="combo" id="combo">
+        <input class="text-input" id="pool-q" type="search" placeholder="點這裡選人，或輸入姓名、關係、單位" autocomplete="off" enterkeyhint="search"
+          role="combobox" aria-expanded="false" aria-controls="pool-list" aria-autocomplete="list">
+        <div class="combo-pop">
+          <div class="combo-filter" id="pool-side" role="group" aria-label="名單篩選">
+            <button type="button" data-v="">全部</button>
+            <button type="button" data-v="主婚人親友">主婚人親友</button>
+            <button type="button" data-v="新人親友">新人親友</button>
+          </div>
+          <ul class="pool-list" id="pool-list" role="listbox"></ul>
+        </div>
+      </div>
+    </div>
+    </div>
+    <footer class="sheet-foot nav">
+      <button class="btn" type="button" id="prev">← 上一桌</button>
+      <button class="btn" type="button" id="next">下一桌 →</button>
+    </footer>
+  </dialog>
+
+  <section class="roster framed" id="roster-wrap">
+    <div class="roster-head"><h2>席次一覽</h2><p>TABLE LIST</p></div>
+    <div class="roster-grid" id="roster"></div>
+  </section>
+
+  <!-- 輸出版（?poster，預設 A2 橫式）：上方置中標題，下方左邊平面圖、右邊 7×4 座位表；用瀏覽器列印或 tools/poster.sh 存成 PDF -->
+  <section class="poster framed" id="poster" data-frame-scale="1.8" data-line-scale="2.5" hidden>
+    <header class="p-head">
+      <div class="p-kicker"><b>座位表</b><span>SEATING CHART</span></div>
+      <h1>周林府喜宴</h1>
+      <div class="couple">文瑜・杰鋐</div>
+      <div class="p-date">2026.11.22</div>
+    </header>
+    <div class="p-plan" id="p-plan"></div>
+    <div class="p-qr" id="p-qr"></div>
+    <div class="p-list" id="p-list"></div>
+  </section>
+
+</div>
+
+<!-- 桌卡（?cards）：每桌一張 A4，對折成兩面一樣的立牌；預覽完直接用瀏覽器列印（Cmd+P）存成 PDF -->
+<section class="cards" id="cards" hidden></section>
+
+<script src="../assets/poster-deco.js"></script>
+<script>
+/* ───────────── 會場幾何（風采維納斯廳，依會館給的平面圖描繪）───────────── */
+/*
+ * 座標系沿用 1025 版（左牆 x 90、上緣 105），但會場比較窄（右牆 776，桌子交錯排）也比較矮：入口牆在 1160（1025 版是 1231），
+ * viewBox、.p-plan 的比例、海報的 VH、CONTENT 的高度都跟著少 71。
+ * 星光大道在主桌正下方；左區 2 欄、右區 3 欄，每欄 5 桌，各欄對齊同一排（會館的圖右區有錯開，畫成整齊的格子比較好找）。
+ */
+const TABLE_R = 40, SEAT = 48;            // 桌面半徑、連椅子的佔地半徑（比 1025 版大：桌子少、空間夠）
+const LEGEND = [["var(--g-groom)", "新郎親友"], ["var(--g-zhou)", "周府親友"], ["var(--g-jiang)", "江家親友"], ["var(--g-dad)", "爸爸好友"], ["var(--g-mom)", "媽媽好友"], ["var(--g-rotary)", "扶輪社"]];
+const LEG_Y = 1090;   // 輸出版圖例第一行的圓心高度：兩行圓點（上緣 LEG_Y−10、下緣 LEG_Y＋45）整組置中在 15 桌下緣（968＋52＝1020）和入口線（ENTRY_Y 1195）之間
+const PITCH = 132, ROW_A = 440;   // 上下靠攏一點，最下面的 26、27 桌才不會擠到入口   // 上下兩桌椅子之間約 49，和左右的間距（約 30）不會差太多
+// 交錯排（照會館的圖）：每區裡跟走道隔一欄的那一欄往上錯開半排，相鄰兩欄的桌子斜對著，欄距可以比對齊時窄。
+// 牆、走道到桌子留 WALL_GAP；同一區相鄰兩欄的中心距 COL_DX。
+const AISLE_W = 50, WALL_GAP = 30, COL_DX = 128, STAGGER = -PITCH / 4;   // 只錯開四分之一排：錯半排的話 6、16 會太靠近主桌
+const ROOM_L = 55;
+// 同一區相鄰兩欄的中心距一律 COL_DX，左右兩區的桌距一樣
+const colX = (k) => ROOM_L + WALL_GAP + SEAT + k * COL_DX + (k >= 2 ? 2 * SEAT + 2 * WALL_GAP + AISLE_W - COL_DX : 0);
+const ROOM_R = colX(4) + SEAT + WALL_GAP;   // 右牆（801）
+const AISLE = { x: colX(1) + SEAT + WALL_GAP, w: AISLE_W };
+const AX = AISLE.x + AISLE.w / 2;         // 主桌、舞台、入口都對齊星光大道的中線
+// 每欄：x、上下錯開量、兒童座椅朝哪邊（0＝右、π＝左：朝同區另一欄，不朝牆、不朝星光大道）
+const COLS = [
+  { x: colX(0), dy: STAGGER, kid: 0 },     // 左區 靠牆（往上錯開）
+  { x: colX(1), dy: 0, kid: Math.PI },     // 左區 靠星光大道
+  { x: colX(2), dy: 0, kid: 0 },           // 右區 靠星光大道
+  { x: colX(3), dy: STAGGER, kid: 0 },     // 右區 中間（往上錯開）
+  { x: colX(4), dy: 0, kid: Math.PI },     // 右區 靠牆
+];
+// 桌子的 id（t1…t25）綁在位置上、存檔也用 id：左區每排先靠走道、再靠牆（t1–t10），右區每排由走道往牆（t11–t25）。
+// 改桌號只改 NUM_OF（哪個位置是幾號），已排好的資料留在原位。
+// 桌號：每一欄由舞台往入口編，靠星光大道的欄先編、再往牆邊。左區 1–5 靠走道、6–10 靠牆；右區 11–15、16–20、21–25 由走道往牆。
+const ZONES_1122 = [[1, 0], [2, 3, 4]];   // 每區的欄，由走道往牆
+const TABLES = [{ id: "main", x: AX, y: 300, r: 44, seat: 54, main: true }];   // 舞台下緣 202、星光大道起點 386：主桌（大圖版半徑 58）上下各留約 40、28
+ZONES_1122.forEach(cols => { for (let r = 0; r < 5; r++) for (const c of cols)
+  TABLES.push({ id: "t" + TABLES.length, x: COLS[c].x, y: ROW_A + r * PITCH + COLS[c].dy, r: TABLE_R, seat: SEAT, kid: COLS[c].kid, col: c, row: r }); });
+const NUM_OF = { main: "主桌" };
+{ let n = 1; for (const cols of ZONES_1122) for (const c of cols) for (let r = 0; r < 5; r++) NUM_OF[TABLES.find(t => t.col === c && t.row === r).id] = String(n++); }
+// 第 26 桌（桌名「貴賓席」存在資料裡）：第 10 桌正下方（左區靠牆那欄往上錯開，下面到入口還有空間）
+TABLES.push({ id: "t26", x: COLS[0].x, y: ROW_A + 5 * PITCH + COLS[0].dy, r: TABLE_R, seat: SEAT, kid: COLS[0].kid });
+NUM_OF.t26 = "26";
+// 第 27 桌（桌名「預備桌」存在資料裡）：第 5 桌正下方，和 26 並排；名單一樣不列資訊卡
+TABLES.push({ id: "t27", x: COLS[1].x, y: ROW_A + 5 * PITCH, r: TABLE_R, seat: SEAT, kid: COLS[1].kid });
+NUM_OF.t27 = "27";
+const ORDER = ["main", ...TABLES.filter(t => !t.main).map(t => t.id).sort((a, b) => (+NUM_OF[a] || 99) - (+NUM_OF[b] || 99))];
+// 兒童座椅放在離走道最遠的那一側；主桌朝舞台那一側
+function awayFromAisle(t) { return t.main ? -Math.PI / 2 : t.kid; }
+const angDist = (a, b) => { const d = Math.abs(a - b) % (2 * Math.PI); return d > Math.PI ? 2 * Math.PI - d : d; };
+// 桌名分行：以字寬計（中文 1、英數 0.55），一行最多約 5 個中文字寬；
+// 有空白就在空白處斷（「合作夥伴 1」），否則從中間平均斷（「揪咪團／家人們」）；第二行太長用「…」
+// 桌卡用：桌名的數字換成全形、空格拿掉（「合作夥伴 3」→「合作夥伴３」），和中文字一樣寬；只改顯示、不動資料
+const fwName = (s) => (s || "").replace(/\s+/g, "").replace(/[0-9]/g, (c) => String.fromCharCode(c.charCodeAt(0) + 0xFEE0));
+const nameWidth = (str) => [...str].reduce((n, c) => n + (/[\x00-\x7f]/.test(c) ? 0.55 : 1), 0);
+function tableNameLines(name) {
+  name = (name || "").trim();
+  if (!name) return [];
+  const w = nameWidth;
+  const MAX = 6.15;   // 一行最多 6 個中文字（「北區扶輪社 1」五字＋空格＋數字剛好 6.1，要排在同一行）
+  if (w(name) <= MAX) return [name];
+  const chars = [...name];
+  let a, b;
+  const sp = name.indexOf(" ");
+  if (sp > 0 && w(name.slice(0, sp)) <= MAX) { a = name.slice(0, sp); b = name.slice(sp + 1).trim(); }
+  else {
+    let cut = 1, best = Infinity;   // 讓兩行寬度最接近
+    for (let i = 1; i < chars.length; i++) { const d = Math.abs(w(chars.slice(0, i).join("")) - w(chars.slice(i).join(""))); if (d < best && w(chars.slice(0, i).join("")) <= MAX) { best = d; cut = i; } }
+    a = chars.slice(0, cut).join(""); b = chars.slice(cut).join("");
+  }
+  while (w(b) > MAX - 0.6) b = [...b].slice(0, -1).join("");
+  if (b !== name.slice(name.length - b.length) && !name.endsWith(b)) b += "…";
+  return [a, b];
+}
+const seatCount = (d) => Math.max(d.cap, seatsOf(d));
+const slotAngle = (k, n) => -Math.PI / 2 + (k + 0.5) * 2 * Math.PI / n;
+// 兒童座椅在哪幾個椅位：先照工作人員拖過的角度（kidAngles）找最近的椅位，不夠的再自動補在離走道最遠處
+function kidSlots(t, d) {
+  const n = seatCount(d), kids = Math.min(n, d.guests.reduce((c, p) => c + (p.child || 0), 0)), chosen = new Set();
+  const nearest = (target) => Array.from({ length: n }, (_, k) => k).filter(k => !chosen.has(k))
+    .sort((a, b) => angDist(slotAngle(a, n), target) - angDist(slotAngle(b, n), target))[0];
+  for (const deg of (d.kidAngles || []).slice(0, kids)) chosen.add(nearest(deg * Math.PI / 180));
+  while (chosen.size < kids) chosen.add(nearest(awayFromAisle(t)));
+  return chosen;
+}
+
+// 素食座位：大人椅依名單順序一組一組坐下去（兒童座椅另外擺），每組前幾張是吃素的那幾位；回傳「第 i 張大人椅 → 吃素的那一組」，不吃素是 null
+function vegChairs(d) {
+  const out = [];
+  for (const g of d.guests) {
+    if (!g.name) continue;
+    const adults = Math.max(0, g.count - (g.child || 0));
+    for (let i = 0; i < adults; i++) out.push(i < (g.veg || 0) ? g : null);
+  }
+  return out;
+}
+
+/* ───────────── 資料（本機 localStorage 快取，雲端同步見下方）───────────── */
+const KEY = "wedding-seating-1122-v1";
+const DEFAULT_CAP = 10;                   // 每桌固定 10 人
+function defaultState() {
+  const tables = {};
+  TABLES.forEach((t, i) => tables[t.id] = { num: NUM_OF[t.id], name: "", side: "", kidAngles: [], cap: DEFAULT_CAP, guests: [] });
+  return { tables };
+}
+// 一筆賓客＝一組人 { name: 代表人, count: 共幾位 }；舊格式字串「王小明 +2」轉成 { 王小明, 3 }
+function toParty(g) {
+  if (typeof g === "string") {
+    const m = g.match(/^(.*?)\s*[+＋]\s*(\d+)$/);
+    g = m ? { name: m[1], count: 1 + +m[2] } : { name: g, count: 1 };
+  }
+  if (!g || typeof g !== "object" || typeof g.name !== "string" || !g.name.trim()) return null;
+  const count = Math.min(20, Math.max(1, Math.round(+g.count) || 1));
+  const child = Math.min(count, Math.max(0, Math.round(+g.child) || 0));
+  const veg = Math.min(count, Math.max(0, Math.round(+g.veg) || 0));   // 素食：這組有幾位吃素
+  return { name: g.name.trim().slice(0, 20), count, ...(child ? { child } : {}), ...(veg ? { veg } : {}) };
+}
+const SIDES = ["主婚人親友", "新人親友"];
+const DEFAULT_NUM = Object.fromEntries(Object.entries(defaultState().tables).map(([id, d]) => [id, d.num]));
+// 把本機存檔或雲端資料套到預設資料上；不認得的歸屬（例如舊版的男方、女方）一律改回未設定
+function merge(s) {
+  const d = defaultState();
+  for (const id in d.tables) {
+    Object.assign(d.tables[id], s.tables[id] || {});
+    const t = d.tables[id];   // 本機或雲端資料若有異常值，一律校正成安全的型別
+    t.name = typeof t.name === "string" ? t.name.slice(0, 20) : "";
+    t.reserved = t.reserved === true;
+    t.guests = Array.isArray(t.guests) ? t.guests.map(toParty).filter(Boolean) : [];
+    t.kidAngles = Array.isArray(t.kidAngles) ? t.kidAngles.filter(a => Number.isFinite(a) && Math.abs(a) <= 360).slice(0, 10) : [];
+    if (!SIDES.includes(d.tables[id].side)) d.tables[id].side = "";
+    d.tables[id].cap = DEFAULT_CAP;
+    d.tables[id].num = DEFAULT_NUM[id];       // 桌號固定，不吃存檔裡的值
+  }
+  return d;
+}
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if (s && s.tables) return merge(s);
+  } catch (e) {}
+  return defaultState();
+}
+let state = load();
+
+/* ───────────── 雲端同步（Supabase：wedding 專案的 seating schema，見 supabase/schema.sql）───────────── */
+const SB_URL = "https://jkzybhpzihljrluxslmy.supabase.co";
+const SB_KEY = "sb_publishable__eJX3f2Vw1CY-Dilst5Qfg_cgXw-i16";
+const EVENT = "zhou-20261122";
+const EDIT_KEY = new URLSearchParams(location.search).get("edit") || "";
+let canSync = false;                 // 金鑰驗證通過的工作人員才會寫入
+let roster = null;                   // 出席名單（工作人員才讀得到）：[{ name, count, side, relation, unit, veg, child, note }]
+let poolSide = "", poolQ = "";
+const dirty = new Set();             // 還沒送上雲端的桌（上傳成功才移除，上傳途中仍算）
+const rev = {};                      // 每桌本機修改次數：用來判斷上傳／下載途中又被改過
+let pushTimer = null, pushing = false, syncedAt = null, offline = false;
+
+async function rpc(fn, args) {
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method: "POST", headers: { apikey: SB_KEY, "Content-Type": "application/json" }, body: JSON.stringify(args) });
+  if (!r.ok) throw new Error(`${fn} ${r.status}`);
+  return r.json();
+}
+const pick = (d) => ({ num: d.num, name: d.name, side: d.side, cap: d.cap, guests: d.guests.filter(g => g.name), kidAngles: d.kidAngles || [], reserved: !!d.reserved });
+
+// 存檔：先寫本機（離線也不會遺失），再排程送上雲端；ids 省略 = 目前選取的桌
+function save(ids) {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  if (!canSync) return;
+  (ids || (selected ? [selected] : [])).forEach(id => { dirty.add(id); rev[id] = (rev[id] || 0) + 1; });
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(push, 600);
+}
+async function push() {
+  if (!canSync || !dirty.size || pushing) return;
+  pushing = true;
+  const ids = [...dirty], payload = {}, sent = {};
+  ids.forEach(id => { payload[id] = pick(state.tables[id]); sent[id] = rev[id]; });
+  showSync("同步中…");
+  try {
+    await rpc("seating_save", { p_event: EVENT, p_key: EDIT_KEY, p_tables: payload });
+    ids.forEach(id => { if (rev[id] === sent[id]) dirty.delete(id); });   // 上傳途中又改過的桌留著，下一輪再送
+    syncedAt = new Date(); offline = false;
+  } catch (e) { offline = true; }
+  pushing = false;
+  showSync();
+  if (dirty.size && !offline) { clearTimeout(pushTimer); pushTimer = setTimeout(push, 600); }
+}
+// 讀雲端：套用別人改過的桌，但不覆蓋自己還沒送出、或正在編輯的那一桌
+async function pull() {
+  if (canSync) { try { roster = (await rpc("seating_get_roster", { p_event: EVENT, p_key: EDIT_KEY })).people || []; } catch (e) {} }
+  // 下載途中本機有改、或開始下載時還沒上傳完成的桌，雲端那份可能是舊的，不能拿來覆蓋
+  const skip = new Set(dirty), revAtStart = { ...rev };
+  try {
+    const remote = await rpc("seating_get", { p_event: EVENT });
+    offline = false;
+    const ids = Object.keys(remote.tables || {});
+    if (!ids.length) {                                   // 雲端還是空的：工作人員第一次打開時把本機資料傳上去
+      if (canSync) save(ORDER);
+    } else {
+      const editing = mode === "staff" && document.activeElement?.closest?.("#editor") ? selected : null;
+      for (const id of ids) if (ORDER.includes(id) && !dirty.has(id) && !skip.has(id) && rev[id] === revAtStart[id] && id !== editing) Object.assign(state.tables[id], pick(remote.tables[id]));
+      state = merge(state);
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+      renderAll();
+    }
+    if (!dirty.size) syncedAt = new Date();
+  } catch (e) { offline = true; }
+  showSync();
+}
+function showSync(msg) {
+  const el = document.getElementById("saved");
+  if (!el || mode !== "staff") return;
+  el.classList.toggle("bad", !canSync || offline);
+  el.textContent = msg || (!canSync ? "座位表已凍結，暫停修改。"
+    : offline ? `無法連線，修改先存在這台電腦（${dirty.size} 桌待上傳），恢復連線後會自動補傳。`
+    : "");   // 同步正常時不顯示，只在同步中、斷線或凍結時出現（凍結＝換了編輯金鑰，舊網址的金鑰驗證不過）
+}
+
+/* ───────────── 花框（同告示牌：上方大花冠、下方小捲飾、四角內凹圓弧）───────────── */
+// lw：線寬倍率。線寬是固定像素（不隨花飾縮放）；網頁版 1.6 倍，A2 實際尺寸列印時 1px 只有 0.26mm，輸出版放大 2.5 倍
+// simpleTop：上方也用下方那組小捲飾（菱形＋兩道捲紋），不用大花冠
+function frameSVG(W, H, lw = 1, simpleTop = false) {
+  const CX = W / 2;
+  const ln = (w) => `fill="none" stroke="currentColor" stroke-width="${w * lw}" vector-effect="non-scaling-stroke"`;
+  const dot = `fill="currentColor"`;
+  const diamond = (x, y, r) => `<path d="M${x},${y - r} L${x + r},${y} L${x},${y + r} L${x - r},${y} Z" ${dot}/>`;
+  const leaf = (x, y, ang, len, wid) => `<path d="M0,0 Q${len / 2},${-wid} ${len},0 Q${len / 2},${wid} 0,0 Z" transform="translate(${x},${y}) rotate(${ang})" ${dot}/>`;
+  const four = (g) => ["", `translate(${W},0) scale(-1,1)`, `translate(0,${H}) scale(1,-1)`, `translate(${W},${H}) scale(-1,-1)`].map(t => `<g transform="${t}">${g}</g>`).join("");
+  const scaleAt = (k, x, y, g) => `<g transform="translate(${x},${y}) scale(${k}) translate(${-x},${-y})">${g}</g>`;
+  // 外框只有一條線；四角留一道和外框同粗的弧線和小菱形
+  const i = 2.56, a = 15 * 0.62;
+  const corner = scaleAt(1.25, 0, 0,
+    `<path d="M${i},${i + a} A${a},${a} 0 0 0 ${i + a},${i}" ${ln(1)}/>` + diamond(i + a * 0.42, i + a * 0.42, 1.3));
+  const arm = (s) =>
+    `<path d="M${CX},10 C${CX + s * 6},10 ${CX + s * 8},4.5 ${CX + s * 14},4.8 C${CX + s * 22},5.2 ${CX + s * 23},12.5 ${CX + s * 30},11.5 C${CX + s * 35},10.8 ${CX + s * 35.5},5.6 ${CX + s * 31.5},6 C${CX + s * 29},6.3 ${CX + s * 29.5},9 ${CX + s * 31.5},8.8" ${ln(1.1)}/>` +
+    `<path d="M${CX + s * 3},13.5 C${CX + s * 9},14.5 ${CX + s * 12},17.5 ${CX + s * 17},16 c${s * 2.6},-0.8 ${s * 2.2},-3.6 0,-3.4" ${ln(0.8)}/>` +
+    leaf(CX + s * 18.5, 7.2, s > 0 ? -20 : 200, 6, 1.5);
+  const crest = scaleAt(1.25, CX, 0, arm(1) + arm(-1) + diamond(CX, 7, 2.8) + `<circle cx="${CX}" cy="13" r="1.2" ${dot}/>`);
+  const curl = (s) => `<path d="M${CX + s * 4},4 C${CX + s * 10},4 ${CX + s * 12},8 ${CX + s * 17},7 C${CX + s * 20.5},6.2 ${CX + s * 20},2.8 ${CX + s * 17.5},3.4" ${ln(0.9)}/>`;
+  const foot = `<g transform="translate(0,${H}) scale(1,-1)">${diamond(CX, 4, 2.4) + curl(1) + curl(-1)}</g>`;
+  const top = simpleTop ? diamond(CX, 4, 2.4) + curl(1) + curl(-1) : crest;
+  return `<rect x="0" y="0" width="${W}" height="${H}" ${ln(1)}/>` + four(corner) + top + foot;
+}
+function decorate(el) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.classList.add("frame-art");
+  el.prepend(svg);
+  const draw = () => {
+    const w = el.clientWidth - 28, h = el.clientHeight - 28;
+    // 1 單位 = u 像素；窄螢幕時縮小花飾。海報（data-frame-scale）以 A2 為準，跟著紙張高度等比縮放，A3 的花冠才不會壓到卡片
+    const paper = el.dataset.frameScale ? Math.min(el.offsetWidth, el.offsetHeight) / (420 * 96 / 25.4) : 1;   // 以紙張短邊算，直式、橫式一樣
+    const u = Math.min(2.6, w / 130) * (+el.dataset.frameScale || 1) * paper;
+    const W = w / u, H = h / u;
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svg.innerHTML = frameSVG(W, H, +el.dataset.lineScale || 1.6, !!el.dataset.frameScale);   // 線寬：網頁版 1.6 倍、輸出版由 data-line-scale 指定；上方花飾：網頁版用大花冠、輸出版用小捲飾
+  };
+  new ResizeObserver(draw).observe(el);
+}
+document.querySelectorAll(".framed").forEach(decorate);
+
+/* ───────────── 平面圖 ───────────── */
+const NS = "http://www.w3.org/2000/svg";
+const plan = document.getElementById("plan");
+let PLAN_TOP = 105;   // 外牆上緣；輸出版把牆往上延伸，讓標題寫在牆內
+function staticPlan() {
+  const rect = (x, y, w, h, cls, rx = 0) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" class="${cls}"/>`;
+  const txt = (x, y, s, cls, extra = "") => `<text x="${x}" y="${y}" class="${cls}" text-anchor="middle" ${extra}>${s}</text>`;
+  // 入口：星光大道正下方一個內凹的門廊，雙開門（會館的圖只畫了開口和箭頭，門的畫法沿用 1025 版）
+  const WALL_Y = 1200, DOOR_Y = 1235;   // 入口線和「入口」字往下 40，填掉最後一排桌子到入口之間的空白
+  const SILL = DOOR_Y + 1.2;   // 側牆多延伸半個線寬，牆底才會和門弧的外緣齊平
+  const swing = (x0, x1) => {  // 一片門：從 x0 的門廊底部，向上弧到 x1 的牆線高度
+    const r = Math.abs(x1 - x0);
+    return `<path class="door" d="M${x0},${DOOR_Y} A${r},${DOOR_Y - WALL_Y} 0 0 ${x1 > x0 ? 0 : 1} ${x1},${WALL_Y}"/>`;
+  };
+  const D0 = AX - 50, D1 = AX + 50;   // 門廊左右
+  const ENTRY_Y = WALL_Y - 5;          // 輸出版入口線的高度
+  const ST = { x: AX - 117, w: 234 };  // 舞台：和 1025 版同寬，對齊主桌與星光大道的中線
+  return [
+    // 外牆一筆畫完：從門廊右側起筆，經右牆、上緣、左牆，回到門廊左側
+    `<path class="wall" d="M${D1},${SILL} V${WALL_Y} H${ROOM_R} V${PLAN_TOP} H${ROOM_L} V${WALL_Y} H${D0} V${SILL}"/>`,
+    rect(ST.x, 105, ST.w, 97, "stage"),   // 比 1025 版矮一點，主桌上方才有空間
+    txt(AX, 140, "維納斯", "label-lg"), txt(AX, 158, "VENUS", "hall-name"), txt(AX, 189, "舞　台", "label", `style="font-size:21px"`),
+    rect(AISLE.x, 386, AISLE.w, ENTRY_Y - 386, "runway"),   // 星光大道：從主桌下方一路接到入口，不寫字；下緣剛好落在入口線的中心，被入口線蓋住，接起來是一條乾淨的 T
+    swing(D0, AX) + swing(D1, AX),
+    txt(AX, WALL_Y + 67, "入　口", "entrance"),
+    // 輸出版（不畫牆）用的入口標示：門廊上一條粗線，下方寫「入口」
+    `<g class="entrance-mark">` +
+      `<ellipse class="glow" cx="${AX + 5}" cy="${ENTRY_Y + 24}" rx="62" ry="30" fill="url(#entrance-glow)"/>` +
+      `<line x1="${D0}" y1="${ENTRY_Y}" x2="${D1}" y2="${ENTRY_Y}"/>` + txt(AX, ENTRY_Y + 32, "入口", "entrance", `style="font-size:24px;letter-spacing:.4em"`) +
+      `<defs><radialGradient id="entrance-glow"><stop offset=".35" stop-color="#fff" stop-opacity=".92"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs></g>`,
+    // 圖例：輸出版放在右區最後一排下方的空地（網頁版圖例在平面圖卡片下方，這裡隱藏）
+    // 工作人員桌機版（board-mode）多一行兒童座椅、素食；印出來的輸出版不顯示
+    // 圖例：右區最後一排下方，三欄兩行（第三行兒童座椅、素食只在工作人員桌機版）；字靠左接在圓點後面
+    (() => {
+      const item = (i, fill, label) => {
+        const x = 440 + (i % 3) * 120, y = LEG_Y + Math.floor(i / 3) * 35;
+        // 不滿四個字的（扶輪社）拉開字距，左右撐滿四個字的寬度（19px×4＋字距 .04em×3），和其他標籤頭尾對齊
+        const fit = label.length < 4 ? ` textLength="${(19 * 4 + 19 * .04 * 3).toFixed(1)}" lengthAdjust="spacing"` : "";
+        return `<circle cx="${x}" cy="${y}" r="10" style="fill:${fill}"/><text x="${x + 17}" y="${y + 7}" class="label" style="font-size:19px;letter-spacing:${fit ? 0 : ".04em"}"${fit}>${label}</text>`;
+      };
+      const ys = LEG_Y + 70;
+      return `<g class="plan-legend">` + LEGEND.map(([f, l], i) => item(i, f, l)).join("") +
+        `<g class="seat-legend">` +
+          `<rect x="431" y="${ys - 9}" width="18" height="18" rx="2.5" class="kid-mark"/><text x="457" y="${ys + 7}" class="label" style="font-size:19px;letter-spacing:.04em">兒童座椅</text>` +
+          `<circle cx="560" cy="${ys}" r="10" class="veg-mark"/><text x="577" y="${ys + 7}" class="label" style="font-size:19px;letter-spacing:.04em">素食</text>` +
+        `</g></g>`;
+    })(),
+  ].join("");
+}
+function buildPlan() {
+  plan.innerHTML = staticPlan();
+  for (const t of TABLES) {
+    const g = document.createElementNS(NS, "g");
+    g.classList.add("tbl");
+    g.dataset.id = t.id;
+    g.setAttribute("tabindex", "0");
+    g.setAttribute("role", "button");
+    g.innerHTML = `<circle class="hit" cx="${t.x}" cy="${t.y}" r="${t.seat + 12}"/><circle class="glow" cx="${t.x}" cy="${t.y}" r="${t.seat + 9}"/><circle class="halo" cx="${t.x}" cy="${t.y}" r="${t.seat + 5}"/><g class="chairs"></g><circle class="disc" cx="${t.x}" cy="${t.y}" r="${t.r}"/>` +
+      `<text class="num" x="${t.x}" y="${t.y - 3}"></text><text class="tn" x="${t.x}"></text>`;
+    g.addEventListener("click", () => { if (!justDragged) select(t.id, true); });
+    g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(t.id, true); } });
+    plan.append(g);
+  }
+}
+
+/* ───────────── 狀態與畫面 ───────────── */
+// 網址帶 ?edit=1 → 工作人員版；沒帶參數 → 賓客版（滿版、唯讀、可找座位）
+const STAFF = !!EDIT_KEY;
+let mode = STAFF ? "staff" : "guest", selected = null, query = "";
+const $ = (id) => document.getElementById(id);
+const shownGuests = (d) => d.reserved && mode !== "staff" ? [] : d.guests;   // 保留席在賓客版、輸出版不公開名單
+const seatsOf = (d) => d.guests.reduce((n, g) => n + (g.name ? g.count : 0), 0);
+// 顯示用：代表人姓名，多人時後面加「3 位」
+// 名單排成兩欄：姓名（靠左）｜人數（靠右），整塊置中，每一行就會對齊
+// 兩個中文字的姓名（伍氏、志昆）中間補一個全形空格，和三個字的名字一樣寬、看起來整齊；只影響顯示，不改存檔
+const showName = (n) => /^[\u3400-\u9fff\uf900-\ufaff]{2}$/.test(n) ? n[0] + "\u3000" + n[1] : n;
+const partyCells = (g, all) => `<span class="nm${dietClass(g)}"${dietTitle(g)}>${esc(showName(g.name))}</span><span class="ct">${g.count > 1 || all ? `${g.count} 位` : ""}</span>`;
+// 工作人員版：有素食或兒童椅的名字換成對應的顏色，滑過顯示細節（seat＝這組的第幾個座位，給一人一格的名單用：前幾位是素食、最後幾位是兒童）
+function dietClass(g, seat) {
+  if (mode !== "staff") return "";
+  const veg = seat === undefined ? g.veg > 0 : seat < (g.veg || 0);
+  const kid = seat === undefined ? g.child > 0 : seat >= g.count - (g.child || 0);
+  return (veg ? " is-veg" : "") + (kid ? " is-kid" : "");
+}
+// 細節放在 data-tip-*，滑過時由浮動小面板（#tip）顯示，不用瀏覽器預設的 title 提示
+function dietTitle(g) {
+  if (mode !== "staff" || !(g.veg || g.child)) return "";
+  return ` data-tip="${esc(g.name)}" data-tip-count="${g.count}" data-tip-veg="${g.veg || 0}" data-tip-kid="${g.child || 0}"`;
+}
+{
+  const tip = $("tip");
+  document.body.append(tip);   // 移到 body 底下：桌機版的輸出版版面會把 .wrap 整個藏起來
+  const show = (el) => {
+    const n = +el.dataset.tipCount, v = +el.dataset.tipVeg, k = +el.dataset.tipKid;
+    tip.innerHTML = `<b>${esc(el.dataset.tip)}${n > 1 ? `<small>共 ${n} 位</small>` : ""}</b>` +
+      (v ? `<div class="row veg">素食 ${v} 位</div>` : "") + (k ? `<div class="row kid">兒童椅 ${k} 張</div>` : "");
+    tip.hidden = false;
+    // 放在名字正上方置中；上面不夠就放下面，左右不超出視窗
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const x = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2));
+    const y = r.top - h - 8 >= 8 ? r.top - h - 8 : r.bottom + 8;
+    tip.style.left = x + "px"; tip.style.top = y + "px";
+  };
+  document.addEventListener("mouseover", (e) => { const el = e.target.closest?.("[data-tip]"); if (el) show(el); else tip.hidden = true; });
+  document.addEventListener("scroll", () => tip.hidden = true, true);
+}
+// 座位條：10 個小點代表 10 個座位，已入座的塗滿，超過的標紅（工作人員才看得到）
+const meterHTML = (d) => { const used = seatsOf(d), n = Math.max(d.cap, used);
+  const st = used > d.cap ? "over" : used < d.cap ? "under" : "full";   // 超過／還有空位／剛好坐滿
+  return `<span class="meter ${st}" title="${used} / ${d.cap} 位" aria-label="${used} / ${d.cap} 位">` +
+    Array.from({ length: n }, (_, k) => `<i class="${k >= d.cap ? "over" : k < used ? "on" : ""}"></i>`).join("") + `<b>${used}/${d.cap}</b></span>`; };
+const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+// 顯示用的桌名：同名的桌（例如好幾桌「扶輪社」）依桌號由小到大自動加上 1、2、3…；只有一桌就不加。
+// 資料裡只存「扶輪社」，桌子換位置、改名後編號自動重排。舊資料手打的「扶輪社 2」也當成「扶輪社」。
+const baseName = (s) => (s || "").replace(/\s*[0-9０-９]+$/, "").trim();
+function shownName(d) {
+  const b = baseName(d.name);
+  if (!b) return "";
+  const same = ORDER.filter(id => baseName(state.tables[id].name) === b);   // ORDER 已依桌號排好
+  return same.length > 1 ? `${b} ${same.findIndex(id => state.tables[id] === d) + 1}` : b;
+}
+const label = (d) => d.num ? (/^\d+$/.test(d.num) ? `第 ${d.num} 桌` : d.num) : "未編號";
+const numKey = (d) => { const n = parseInt(d.num, 10); return d.num === "主桌" ? -1 : isNaN(n) ? 1e9 : n; };
+function duplicates() {
+  const seen = {}, dups = new Set();
+  for (const id of ORDER) { const n = state.tables[id].num.trim(); if (!n) continue; if (seen[n]) dups.add(n); seen[n] = 1; }
+  return dups;
+}
+
+function renderPlan() {
+  const dups = duplicates();
+  const q = query.trim();
+  for (const g of plan.querySelectorAll(".tbl")) {
+    const d = state.tables[g.dataset.id];
+    const num = g.querySelector(".num"), tn = g.querySelector(".tn");
+    const t = TABLES.find(x => x.id === g.dataset.id);
+    // 賓客版、輸出版不畫椅子，桌面放大到原本連椅子的範圍；字跟著桌面等比放大
+    const bare = mode !== "staff" || !!POSTER, R = bare ? t.seat + 4 : t.r, k = R / t.r;
+    g.querySelector(".disc").setAttribute("r", R);
+    num.textContent = d.num || (mode === "staff" ? "＋" : "");
+    num.classList.toggle("empty", !d.num);
+    num.classList.toggle("long", d.num.length > 2);
+    // 桌名寫在桌號下方；太長就分兩行（先在空白處斷，否則每行最多 5 字），第二行再長就用「…」
+    const lines = tableNameLines(shownName(d));
+    const up = lines.length ? (lines.length > 1 ? 10 : 8) * R / 30 * (bare ? 1.25 : 1) : 0;
+    num.setAttribute("y", t.y - 3 * k - up);
+    num.classList.toggle("with-name", lines.length > 0);
+    const F = bare ? 1.25 : 1;   // 1122 的桌子大：不畫椅子的版本（大圖版、手機版）桌號和桌名再放大 25%
+    num.style.fontSize = bare ? ((d.num.length > 2 ? 15 : 21) * k * F).toFixed(1) + "px" : "";
+    // 字級依這一行的字寬自動調整：短桌名字大一點，6 個字時剛好塞進桌面
+    tn.innerHTML = lines.map((l, i) => `<tspan x="${t.x}" y="${(t.y + (lines.length > 1 ? 4 + i * 10 : 8.5) * R / 30 * F).toFixed(1)}" font-size="${(Math.min(10 * F, 49 * F / nameWidth(l)) * k).toFixed(2)}">${esc(l)}</tspan>`).join("");
+    const used = seatsOf(d);
+    // 椅子：依人數上限擺一圈，已排入的賓客塗滿；兒童座椅畫成方塊，放在離走道最遠的那一側
+    const n = Math.max(d.cap, used), cr = t.r + 3.2;   // 椅子緊貼桌緣一圈
+    const angle = (k) => slotAngle(k, n);
+    const kidSeats = kidSlots(t, d);
+    let filled = kidSeats.size;   // 兒童也算入座人數
+    const vegOf = vegChairs(d);   // 工作人員版：第幾張大人椅是誰、吃不吃素
+    let adult = 0;
+    g.querySelector(".chairs").innerHTML = bare ? "" : Array.from({ length: n }, (_, k) => {
+      const a = angle(k), cx = (t.x + cr * Math.cos(a)).toFixed(1), cy = (t.y + cr * Math.sin(a)).toFixed(1);
+      if (kidSeats.has(k)) {
+        // 方塊的一條邊貼著桌緣（邊朝桌心），跟著座位角度轉
+        const side = 7.6, kr = t.r + side / 2 - 0.5, kx = t.x + kr * Math.cos(a), ky = t.y + kr * Math.sin(a);
+        return `<rect class="chair kid" data-slot="${k}" x="${(kx - side / 2).toFixed(2)}" y="${(ky - side / 2).toFixed(2)}" width="${side}" height="${side}" rx="1" transform="rotate(${(a * 180 / Math.PI).toFixed(1)} ${kx.toFixed(2)} ${ky.toFixed(2)})"><title>兒童座椅</title></rect>`;
+      }
+      const taken = filled < used && (filled++, true);
+      const veg = taken && mode === "staff" ? vegOf[adult++] : null;
+      const cls = mode !== "staff" ? "chair" : k >= d.cap && taken ? "chair over" : veg ? "chair taken veg" : taken ? "chair taken" : "chair";
+      return `<circle class="${cls}" cx="${cx}" cy="${cy}" r="3.6"${veg ? dietTitle(veg) : ""}/>`;
+    }).join("");
+    g.dataset.side = d.side;
+    g.classList.toggle("rotary", /扶輪/.test(d.name || ""));
+    g.classList.toggle("mom", /媽媽(好友|親友)/.test(d.name || ""));
+    g.classList.toggle("jiang", /江家親友|舅舅阿姨/.test(d.name || ""));
+    g.classList.toggle("pals", /廣太好友|南中之友|竹棧之友/.test(d.name || ""));
+    g.classList.toggle("selected", g.dataset.id === selected);
+    g.classList.toggle("dup", mode === "staff" && dups.has(d.num));
+    g.classList.toggle("match", !!q && (shownGuests(d).some(p => p.name.includes(q)) || d.name.includes(q)));
+    // SVG 後畫的蓋在上面：找到或選取中的桌子移到最後畫，擴散的波紋才不會被旁邊的桌子擋住
+    if (g.classList.contains("match") || g.classList.contains("selected")) plan.append(g);
+    g.setAttribute("aria-label", `${label(d)}${d.name ? "・" + shownName(d) : ""}，${d.side || "未設定"}，${used} 位賓客`);
+  }
+}
+
+function renderDetail() {
+  $("detail").hidden = mode === "staff" || !selected;
+  if (!selected) return;
+  const d = state.tables[selected];
+  // 和席次一覽的座位卡同一套：TABLE、大號桌號、桌名，細線菱形隔開名單
+  $("detail-body").innerHTML = `<div class="place">
+      <span class="eyebrow">${d.num === "主桌" ? "HEAD TABLE" : "TABLE"}</span>
+      <span class="n">${esc(d.num === "主桌" ? "主桌" : d.num)}</span>
+      ${d.name ? `<div class="tname">${esc(shownName(d))}</div>` : ""}
+      <span class="mini-rule"><i></i></span>
+    </div>
+    ${d.num === "主桌" ? `<p class="reserved">新人與主婚人席<em>Reserved</em></p>`   // 主桌不公布名單
+      : shownGuests(d).length ? `<div class="party-grid names-grid">${d.guests.map(g => partyCells(g, true)).join("")}</div>` : `<p class="reserved"><em>Reserved</em></p>`}`;   // 賓客看到空桌：寫 Reserved，不寫「還沒安排」
+}
+
+// 編輯區塊：工作人員點了桌子才出現；桌號依平面圖固定，不能手動改
+function renderEditor() {
+  const dlg = $("editor");
+  if (mode !== "staff" || !selected) { if (dlg.open) dlg.close(); return; }
+  if (!dlg.open) { dlg.showModal(); dlg.focus(); }   // 焦點放在面板本身，手機不會自動跳出鍵盤
+  const d = state.tables[selected];
+  $("f-title").textContent = label(d);
+  refreshCount();
+  if (document.activeElement !== $("f-name")) $("f-name").value = d.name;
+  for (const b of $("f-side").children) b.setAttribute("aria-pressed", b.dataset.v === d.side);
+  $("f-reserved").checked = !!d.reserved;
+  $("f-new-n").textContent = d.guests.length + 1;   // 新增列的編號＝下一組
+  // 名單：正在其中一格打字時不重畫，避免游標跳掉
+  if (!$("f-list").contains(document.activeElement)) {
+    const before = []; d.guests.reduce((n, g, i) => (before[i] = n, n + g.count), 0);   // 這組之前已坐了幾位
+    $("f-list").innerHTML = d.guests.map((p, i) =>
+      `<li class="${before[i] + p.count > d.cap ? "over" : ""}">` +
+      `<span class="grip" data-i="${i}" title="拖曳調整順序" aria-hidden="true"></span>` +
+      `<input class="g-name" value="${esc(p.name)}" data-i="${i}" aria-label="第 ${i + 1} 組代表人">` +
+      `<label class="g-count"><input type="number" inputmode="numeric" min="1" max="20" value="${p.count}" data-i="${i}" data-f="count" aria-label="${esc(p.name)} 這組共幾位">位</label>` +
+      `<label class="g-count kid" title="兒童座椅"><input type="number" inputmode="numeric" min="0" max="10" value="${p.child || 0}" data-i="${i}" data-f="child" aria-label="${esc(p.name)} 兒童座椅幾張">兒童椅</label>` +
+      `<label class="g-count veg" title="素食"><input type="number" inputmode="numeric" min="0" max="20" value="${p.veg || 0}" data-i="${i}" data-f="veg" aria-label="${esc(p.name)} 幾位吃素">素食</label>` +
+      `<button type="button" class="del" data-i="${i}" aria-label="移除 ${esc(p.name)}">×</button></li>`).join("");
+  }
+}
+
+function renderStats() {
+  const ts = ORDER.map(id => state.tables[id]);
+  const seated = ts.reduce((s, d) => s + seatsOf(d), 0);
+  const left = roster ? unassigned().reduce((s, p) => s + p.count, 0) : null;
+  // 有賓客、或勾了「保留」的桌都算已安排
+  const veg = ts.reduce((s, d) => s + d.guests.reduce((n, g) => n + (g.veg || 0), 0), 0);
+  $("s-stats").textContent = `已安排 ${ts.filter(d => d.guests.length || d.reserved).length} / ${ts.length} 桌・${seated} 位入座` + (veg ? `・素食 ${veg} 份` : "") + (left === null ? "" : `・待安排 ${left} 位`);
+}
+
+function renderRoster() {
+  const ids = ORDER.filter(id => id !== "main").sort(   // 席次一覽不列主桌
+    (a, b) => numKey(state.tables[a]) - numKey(state.tables[b]) || ORDER.indexOf(a) - ORDER.indexOf(b));
+  $("roster").innerHTML = ids.map(id => {
+    const d = state.tables[id];
+    // --hw：桌號＋桌名一行的總字寬（中文 1、數字約 0.62、間距 0.5），海報版用來把整行放到剛好塞滿
+    const hw = [...d.num].length * 0.62 + (d.name ? 0.5 + nameWidth(shownName(d)) : 0);
+    return `<button class="card${d.guests.length > 7 ? " many" : ""}" style="--hw:${hw.toFixed(2)}" data-id="${id}" aria-label="${esc(label(d))}${d.name ? "・" + esc(d.name) : ""}">
+      <span class="eyebrow">TABLE</span><span class="n">${esc(d.num)}</span>
+      ${d.name ? `<div class="tname">${esc(shownName(d))}</div>` : ""}
+      <span class="mini-rule"><i></i></span>
+      ${shownGuests(d).length ? `<div class="who party-grid">${d.guests.map(g => partyCells(g)).join("")}</div>` : (mode === "staff" && !d.reserved ? `<div class="who none">尚未安排</div>` : `<div class="who none rsv">Reserved</div>`)}
+      ${meterHTML(d)}</button>`;
+  }).join("");
+}
+
+function renderSearch() {
+  const q = query.trim(), list = $("results");
+  if (!q) { list.innerHTML = ""; return; }
+  const hits = [];
+  // 比對賓客姓名，也比對桌名（例如輸入「大學同學」找到那一桌）
+  for (const id of ORDER) {
+    const d = state.tables[id];
+    if (d.name && shownName(d).includes(q)) hits.push([shownName(d), id, true]);
+    for (const p of shownGuests(d)) if (p.name.includes(q)) hits.push([p.name, id]);
+  }
+  // 找不到也用下拉清單呈現（一列說明），不另外佔一行提示
+  if (!hits.length) { list.innerHTML = `<li class="empty">找不到「${esc(q)}」，試試只輸入一部分</li>`; return; }
+  const where = (id) => { const d = state.tables[id]; return label(d) + (d.name ? `・${shownName(d)}` : ""); };
+  list.innerHTML = hits.slice(0, 30).map(([n, id, isTable]) =>
+    `<li><button data-id="${id}" data-name="${esc(n)}"><span>${esc(isTable ? n : showName(n))}${isTable ? ` <small class="muted">（桌名）</small>` : ""}</span><b>${esc(isTable ? label(state.tables[id]) : where(id))}</b></button></li>`).join("");
+}
+
+// 已入座的人（依代表人姓名比對）
+function assignedNames() { const set = new Set(); for (const id of ORDER) for (const g of state.tables[id].guests) if (g.name) set.add(g.name); return set; }
+// 出席名單的一筆可能一次寫好幾個人（「林庭郁、林子瑜」），桌上卻拆成兩筆：拆開來看，每個人都排進某桌就算已安排
+const splitNames = (n) => n.split(/[、，,／\/]+/).map(x => x.trim()).filter(Boolean);
+function unassigned() { const a = assignedNames(); return (roster || []).filter(p => !a.has(p.name) && !splitNames(p.name).every(n => a.has(n))); }
+function renderPool() {
+  $("pool").hidden = mode !== "staff" || !roster || !selected;
+  if ($("pool").hidden) return;
+  for (const b of $("pool-side").children) b.setAttribute("aria-pressed", b.dataset.v === poolSide);
+  const q = poolQ.trim(), left = unassigned();
+  $("pool-count").textContent = `（待安排 ${left.length} 組、${left.reduce((n, p) => n + p.count, 0)} 位）`;
+  const list = left
+    .filter(p => !poolSide || p.side === poolSide)
+    .filter(p => !q || [p.name, p.relation, p.unit].some(x => x && x.includes(q)))
+    .sort((a, b) => (a.unit || "～").localeCompare(b.unit || "～", "zh-Hant") || (a.relation || "～").localeCompare(b.relation || "～", "zh-Hant") || a.name.localeCompare(b.name, "zh-Hant"));
+  $("pool-list").innerHTML = list.length ? list.map(p => {
+    const meta = [p.relation, p.unit, p.veg ? `素食 ${p.veg}` : "", p.child ? `兒童椅 ${p.child}` : ""].filter(Boolean).map(esc);
+    if (p.note) meta.push(`<span class="warn">${esc(p.note)}</span>`);
+    return `<li><button type="button" role="option" tabindex="-1" data-name="${esc(p.name)}"><span class="who-line">${esc(p.name)}<span class="meta">${meta.join("・") || "&nbsp;"}</span></span>${p.count > 1 ? `<span class="party">${p.count} 位</span>` : ""}<span class="plus" aria-hidden="true">＋</span></button><button type="button" class="pool-del" tabindex="-1" data-del="${esc(p.name)}" aria-label="從出席名單移除 ${esc(p.name)}" title="從出席名單移除（不會出席）">×</button></li>`;
+  }).join("") : `<li class="empty">${left.length ? "沒有符合的人。" : "出席名單都已安排好了。"}</li>`;
+  poolActive = Math.min(poolActive, list.length - 1);
+  markActive();
+}
+// 下拉選單的鍵盤操作：↑↓ 移動、Enter 加入、Esc 收起
+let poolActive = -1;
+function markActive() {
+  const opts = [...$("pool-list").querySelectorAll("button[data-name]")];
+  opts.forEach((b, i) => b.classList.toggle("active", i === poolActive));
+  opts[poolActive]?.scrollIntoView({ block: "nearest" });
+}
+function renderAll() { renderPlan(); renderDetail(); renderEditor(); renderStats(); renderRoster(); renderSearch(); renderPool(); renderPosterList(); renderCards(); }
+
+function select(id, fromPlan) {
+  if (id && id !== selected) { poolSide = state.tables[id].side; poolQ = ""; $("pool-q").value = ""; }
+  selected = id;
+  if (id && !fromPlan && !IMMERSIVE) { focusTable(id); document.querySelector(`.tbl[data-id="${id}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" }); }
+  renderPlan(); renderDetail(); renderEditor(); renderPool();
+  // 沉浸式：同桌名單先開好，量得到抽屜多高，再把桌子移到「搜尋框下緣～抽屜上緣」的正中間；關掉抽屜時重新套用拖曳範圍
+  if (IMMERSIVE) { if (id && !fromPlan) focusTable(id); else if (id) liftTable(id); else applyZoom(); }
+}
+
+// 工作人員：可編輯、看得到人數與重複桌號；賓客：唯讀，只能找座位、看同桌名單
+function setMode(m) {
+  mode = m;
+  document.body.dataset.mode = m;
+  renderAll();
+}
+
+/* ───────────── 事件 ───────────── */
+$("guest-link").href = location.pathname;
+$("poster-link").href = location.pathname + "?poster=a1";   // 即時讀雲端最新資料；要存 PDF 就在那個分頁用瀏覽器列印
+$("cards-link").href = location.pathname + "?cards";         // 桌卡：同樣在分頁裡預覽、用瀏覽器列印存成 PDF
+// 找座位列一捲到頂端就加上 .stuck（鋪底色擋住後面的內容）
+new IntersectionObserver(([e]) => document.querySelector(".bar-dock").classList.toggle("stuck", !e.isIntersecting), { rootMargin: "-1px 0px 0px 0px" })
+  .observe(document.querySelector(".bar-sentinel"));
+$("close-detail").onclick = () => select(null, true);
+// 手機：從下方滑出的面板往下滑就關閉。內容捲到頂端時才開始拖；拖超過 80px 或快速往下一撥就關，不夠就彈回
+function swipeToClose(sheet, close, onMove) {   // onMove(y, animate)：抽屜往下移了 y px（拖曳中 animate=false；放手後彈回／關閉為 true）
+  let start = null;
+  const body = () => sheet.querySelector(".sheet-body");
+  const setY = (y) => sheet.style.transform = y ? `translateX(-50%) translateY(${y}px)` : "";
+  const begin = (x, y, t, target) => {
+    if (innerWidth >= 600 || target.closest("input, textarea, select, button, .combo-pop, .grip")) { start = null; return; }
+    start = { y, x, t, dy: 0, v: 0, on: null };
+  };
+  // 回傳 true＝正在拖面板（呼叫端要擋下捲動／反白）
+  const move = (x, y, t, min = 0) => {
+    if (!start) return false;
+    const dy = y - start.y, dx = x - start.x;
+    if (start.on === null) {
+      if (Math.hypot(dx, dy) < min) return false;   // 滑鼠：先動一點再判斷方向（觸控第一下就判斷）
+      // 往下、以垂直為主、內容已在最頂端 → 拖面板；否則交給內容捲動
+      start.on = dy > 0 && dy >= Math.abs(dx) && (body()?.scrollTop || 0) <= 0;
+      if (start.on) sheet.classList.add("swiping");
+    }
+    if (!start.on) return false;
+    start.v = (dy - start.dy) / Math.max(1, t - start.t); start.t = t;
+    start.dy = Math.max(0, dy);
+    setY(start.dy); onMove?.(start.dy, false);
+    return true;
+  };
+  // 用 touch 事件：第一下移動就要決定是不是在拖面板，並立刻擋下捲動（等瀏覽器開始捲動就來不及了）
+  sheet.addEventListener("touchstart", (e) => {
+    if (e.touches.length > 1) { start = null; return; }
+    begin(e.touches[0].clientX, e.touches[0].clientY, e.timeStamp, e.target);
+  }, { passive: true });
+  sheet.addEventListener("touchmove", (e) => { if (move(e.touches[0].clientX, e.touches[0].clientY, e.timeStamp)) e.preventDefault(); }, { passive: false });
+  // 桌機（視窗窄到出現抽屜時）：用滑鼠按住往下拖也能關
+  sheet.addEventListener("pointerdown", (e) => { if (e.pointerType === "mouse" && e.button === 0) begin(e.clientX, e.clientY, e.timeStamp, e.target); });
+  addEventListener("pointermove", (e) => { if (e.pointerType === "mouse" && move(e.clientX, e.clientY, e.timeStamp, 4)) e.preventDefault(); });
+  addEventListener("pointerup", (e) => { if (e.pointerType === "mouse") end(); });
+  const end = () => {
+    if (!start) return;
+    const { on, dy, v } = start; start = null;
+    sheet.classList.remove("swiping");
+    if (!on) return;
+    sheet.classList.add("settling");
+    if (dy > 80 || v > 0.6) { setY(sheet.offsetHeight); onMove?.(sheet.offsetHeight, true); setTimeout(() => { sheet.classList.remove("settling"); setY(0); close(); }, 200); }
+    else { setY(0); onMove?.(0, true); setTimeout(() => sheet.classList.remove("settling"), 200); }
+  };
+  sheet.addEventListener("touchend", end);
+  sheet.addEventListener("touchcancel", end);
+}
+// 沉浸式：平面圖跟著抽屜走——抽屜往下 y px，畫面往下 y/2（桌子一直停在搜尋框與抽屜上緣的中間）；放手後的彈回／關閉用 0.2 秒跟上抽屜的動畫
+let sheetBase = null, sheetTween = 0;
+// 畫面上下移到 target（SVG 座標的 zy），0.2 秒、和抽屜一樣先快後慢
+const tweenZy = (target, done) => {
+  cancelAnimationFrame(sheetTween);
+  const from = zy, t0 = performance.now();
+  const step = (now) => {
+    const k = Math.min(1, (now - t0) / 200), e = 1 - (1 - k) ** 3;
+    zy = from + (target - from) * e; applyZoom();
+    if (k < 1) sheetTween = requestAnimationFrame(step); else done?.();
+  };
+  sheetTween = requestAnimationFrame(step);
+};
+const followSheet = (dy, animate) => {
+  if (!IMMERSIVE || !FIT) return;
+  if (sheetBase === null) sheetBase = zy;   // 這次拖曳開始時的位置
+  const target = sheetBase - dy / 2 / (FIT.s * zs);
+  if (!animate) { cancelAnimationFrame(sheetTween); zy = target; applyZoom(); return; }
+  tweenZy(target, () => { sheetBase = null; });
+};
+// 在平面圖上點桌子打開名單：桌子若在可見範圍（搜尋框～抽屜上緣）的中線以下，就跟著抽屜滑上來，停在正中間（和關抽屜時往下相反）
+function liftTable(id) {
+  if (!FIT) return;
+  const t = TABLES.find(x => x.id === id); if (!t) return;
+  const r = plan.parentElement.getBoundingClientRect(), u = FIT.s * zs;
+  const py = (t.y - zy) * u, mid = (FIT.T + (r.height - sheetCover())) / 2;
+  if (py > mid) tweenZy(zy + (py - mid) / u); else applyZoom();
+}
+swipeToClose($("detail"), () => select(null, true), followSheet);
+addEventListener("keydown", (e) => { if (e.key === "Escape" && mode === "guest" && selected) select(null, true); });
+// 留著的搜尋清單（keep-open）：點搜尋列以外的地方或按 Esc 就收起
+addEventListener("click", (e) => { if (!e.target.closest?.(".bar")) document.querySelector(".bar").classList.remove("keep-open"); });
+addEventListener("keydown", (e) => { if (e.key === "Escape") document.querySelector(".bar").classList.remove("keep-open"); });
+// 打字時：金色標出符合的桌子；停手 0.3 秒後把它們移進畫面（只移動平面圖，不開名單、不捲頁）
+let searchFocusTimer = null;
+// 注音、拼音還在組字時（例如只打了「ㄒ」）不搜尋，選好字、組字結束才找，免得一直跳出「找不到」
+const onSearch = (e) => {
+  if (e.isComposing) return;
+  query = e.target.value; renderPlan(); renderSearch();
+  // 搜尋框沒有焦點時被填入內容（iPhone 點鍵盤上方的建議字，常會順便收起鍵盤）：讓下拉清單留著，選好或點別處再收
+  document.querySelector(".bar").classList.toggle("keep-open", document.activeElement !== e.target && !!query.trim());
+  clearTimeout(searchFocusTimer);
+  const q = query.trim(); if (!q) return;
+  searchFocusTimer = setTimeout(() => {
+    const ids = ORDER.filter(id => { const d = state.tables[id]; return d.name.includes(q) || shownGuests(d).some(p => p.name.includes(q)); });
+    if (ids.length) focusTables(ids);
+  }, 300);
+};
+$("q").addEventListener("input", onSearch);
+$("q").addEventListener("compositionend", onSearch);
+$("q").addEventListener("change", onSearch);
+// iPhone 點鍵盤上方的建議字（QuickType／自動填入的姓名）時，Safari 有時直接換掉欄位內容、不送 input 事件，下拉清單就不會出現。
+// 搜尋框有焦點時每 0.25 秒對一次：內容和上次搜尋的不一樣（且不在組字中）就補搜一次
+let qComposing = false, qPoll = null;
+$("q").addEventListener("compositionstart", () => { qComposing = true; });
+$("q").addEventListener("compositionend", () => { qComposing = false; });
+$("q").addEventListener("focus", () => {
+  clearInterval(qPoll);
+  qPoll = setInterval(() => { const q = $("q"); if (!qComposing && q.value !== query) onSearch({ target: q }); }, 250);
+});
+$("q").addEventListener("blur", () => clearInterval(qPoll));
+// 點選項時先擋掉 mousedown，搜尋框才不會失焦：失焦會讓下拉清單收起、輸入法結束組字而重畫清單，點下去的選項就沒反應
+$("results").addEventListener("mousedown", (e) => { if (e.target.closest("button")) e.preventDefault(); });
+$("results").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-id]"); if (!b) return;
+  const { id, name } = b.dataset;
+  document.querySelector(".bar").classList.remove("keep-open");
+  // 先收起鍵盤：輸入法若還在組字（例如打完「林」又按了下一個注音），會在這時把字送出並重新搜尋，之後再填入選到的名字才不會被蓋掉
+  document.activeElement.blur();
+  clearTimeout(searchFocusTimer);
+  // 搜尋框換成點下去的那個名字（或桌名），只留那一桌是金色
+  $("q").value = query = name; renderPlan(); renderSearch();
+  select(id, false);
+});
+$("roster").addEventListener("click", (e) => { const b = e.target.closest("button[data-id]"); if (b) select(b.dataset.id, false); });
+
+// 海報版名單要逐張卡片量字級，很花時間：延後到停手 0.25 秒再重畫，編輯面板與平面圖先即時更新
+let posterTimer = null;
+const renderPosterListSoon = () => { clearTimeout(posterTimer); posterTimer = setTimeout(renderPosterList, 250); };
+const edit = (fn) => { if (!selected) return; fn(state.tables[selected]); save(); renderPlan(); renderStats(); renderRoster(); renderSearch(); renderPool(); renderPosterListSoon(); };
+$("f-side").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-v]"); if (!b) return;
+  edit(d => d.side = b.dataset.v);
+  for (const x of $("f-side").children) x.setAttribute("aria-pressed", x === b);
+});
+$("f-name").addEventListener("input", (e) => edit(d => d.name = e.target.value.trim()));
+$("f-name").addEventListener("change", (e) => { e.target.value = baseName(e.target.value); edit(d => d.name = e.target.value); });   // 打完才拿掉結尾的數字（打字中途不動，免得「扶輪社 1」打到一半被吃掉）
+$("f-reserved").addEventListener("change", (e) => edit(d => d.reserved = e.target.checked));
+// 中文輸入法選字時按的 Enter 也會觸發 keydown（isComposing），這時不能離開欄位，否則選好的字會再被送一次
+const composing = (e) => e.isComposing || e.keyCode === 229;
+$("f-name").addEventListener("keydown", (e) => { if (e.key === "Enter" && !composing(e)) e.target.blur(); });
+$("f-new").addEventListener("keydown", (e) => { if (e.key === "Enter" && composing(e)) e.preventDefault(); });
+// 名單編輯：每組＝代表人＋人數。改了即存；姓名清空或按 × 就移除；底下輸入框可一次貼上多行（也接受、，分隔）
+const clampCount = (v) => Math.min(20, Math.max(1, parseInt(v, 10) || 1));
+$("f-list").addEventListener("input", (e) => {
+  const i = +e.target.dataset.i;
+  if (e.target.matches(".g-name")) edit(d => d.guests[i].name = e.target.value.trim());
+  else if (e.target.value !== "" && e.target.dataset.f === "child")
+    edit(d => { const g = d.guests[i], c = Math.min(g.count, Math.max(0, parseInt(e.target.value, 10) || 0)); if (c) g.child = c; else delete g.child; });
+  else if (e.target.value !== "" && e.target.dataset.f === "veg")
+    edit(d => { const g = d.guests[i], v = Math.min(g.count, Math.max(0, parseInt(e.target.value, 10) || 0)); if (v) g.veg = v; else delete g.veg; });
+  else if (e.target.value !== "") edit(d => { const g = d.guests[i]; g.count = clampCount(e.target.value); if (g.child > g.count) g.child = g.count; if (g.veg > g.count) g.veg = g.count; });
+  refreshCount();
+});
+$("f-list").addEventListener("focusout", (e) => {
+  if (e.target.matches(".g-name") && !e.target.value.trim()) removeGuest(+e.target.dataset.i);
+  else if (e.target.matches('[type="number"]')) { renderEditor(); }
+});
+// × 在按下的瞬間就移除：若游標還在人數或姓名欄，放開時那一欄失焦會重畫整份名單，× 被換掉，click 就丟了
+$("f-list").addEventListener("pointerdown", (e) => {
+  const b = e.target.closest(".del"); if (!b || e.button > 0) return;
+  e.preventDefault();   // 不搶焦點，先移除再說
+  removeGuest(+b.dataset.i);
+});
+$("f-list").addEventListener("click", (e) => { const b = e.target.closest(".del"); if (b && e.detail === 0) removeGuest(+b.dataset.i); });   // 鍵盤按 Enter／空白鍵
+// 拖曳調整賓客順序：按住把手上下拖，放開時寫回名單
+let reorder = null;
+$("f-list").addEventListener("pointerdown", (e) => {
+  const g = e.target.closest(".grip"); if (!g || e.button > 0) return;
+  e.preventDefault();
+  const i = +g.dataset.i;
+  if ($("f-list").contains(document.activeElement)) document.activeElement.blur();   // 先結束正在編輯的欄位（可能會重畫名單）
+  const li = $("f-list").children[i]; if (!li) return;
+  li.classList.add("dragging"); document.body.classList.add("reordering");
+  reorder = { from: i, li };
+});
+addEventListener("pointermove", (e) => {
+  if (!reorder) return;
+  const list = $("f-list"), others = [...list.children].filter(x => x !== reorder.li);
+  const next = others.find(x => { const r = x.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; });
+  if (next !== reorder.li.nextElementSibling) list.insertBefore(reorder.li, next || null);
+});
+const endReorder = (commit) => {
+  if (!reorder) return;
+  const { from, li } = reorder; reorder = null;
+  li.classList.remove("dragging"); document.body.classList.remove("reordering");
+  const to = [...$("f-list").children].indexOf(li);
+  if (commit && to >= 0 && to !== from) edit(d => { const [g] = d.guests.splice(from, 1); d.guests.splice(to, 0, g); });
+  renderEditor();
+};
+addEventListener("pointerup", () => endReorder(true));
+addEventListener("pointercancel", () => endReorder(false));
+function removeGuest(i) { edit(d => d.guests.splice(i, 1)); renderEditor(); }
+function refreshCount() { const d = state.tables[selected], n = seatsOf(d); $("f-count").textContent = `${n} / ${d.cap} 人`; $("f-count").classList.toggle("over", n > d.cap); }
+function addNames(text) {
+  const names = text.split(/[\n,，、]+/).map(x => x.trim()).filter(Boolean);
+  if (!names.length) return;
+  const count = names.length === 1 ? clampCount($("f-new-count").value) : 1;   // 一次貼多人時每人各 1 位、不帶兒童椅與素食
+  const child = names.length === 1 ? Math.min(count, Math.max(0, parseInt($("f-new-child").value, 10) || 0)) : 0;
+  const veg = names.length === 1 ? Math.min(count, Math.max(0, parseInt($("f-new-veg").value, 10) || 0)) : 0;
+  edit(d => d.guests.push(...names.map(name => toParty({ name, count, child, veg }))));
+  $("f-new").value = ""; $("f-new-count").value = 1; $("f-new-child").value = 0; $("f-new-veg").value = 0;
+  renderEditor();
+  $("f-list").lastElementChild?.scrollIntoView({ block: "nearest" });
+}
+$("f-add").addEventListener("submit", (e) => { e.preventDefault(); addNames($("f-new").value); });
+$("f-new").addEventListener("paste", (e) => {   // 貼上多行名單直接加入（單行輸入框會吃掉換行，所以在這裡先攔下）
+  const text = e.clipboardData.getData("text");
+  if (!/[\n,，、]/.test(text)) return;
+  e.preventDefault();
+  addNames($("f-new").value + "\n" + text);
+});
+$("pool-side").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (b) { poolSide = b.dataset.v; renderPool(); } });
+$("pool-q").addEventListener("input", (e) => { poolQ = e.target.value; poolActive = -1; renderPool(); });
+function addFromPool(name) {
+  const p = roster.find(x => x.name === name); if (!p) return;
+  edit(d => d.guests.push(toParty({ name: p.name, count: p.count, child: p.child, veg: p.veg })));
+  renderEditor();
+  $("f-list").lastElementChild?.scrollIntoView({ block: "nearest" });
+}
+// 點選項時先擋掉 mousedown，輸入框才不會失焦、選單也不會收起，可以連續加好幾組
+$("combo").addEventListener("mousedown", (e) => { if (e.target.closest("button")) e.preventDefault(); });
+$("pool-list").addEventListener("click", (e) => {
+  const del = e.target.closest("button[data-del]"); if (del) { removeFromRoster(del.dataset.del); return; }
+  const b = e.target.closest("button[data-name]"); if (b) addFromPool(b.dataset.name);
+});
+// 從出席名單移除一筆（例如不會出席）：先讀雲端最新的名單再寫回，免得蓋掉別人剛匯入的資料。
+// 注意：重新執行 tools/import_roster.py 會依試算表整份覆蓋，被移除的人會再出現，要一併改試算表
+async function removeFromRoster(name) {
+  if (!canSync) { showToast("座位表已凍結，無法修改出席名單"); return; }
+  if (!confirm(`從出席名單移除「${name}」？\n（只影響待安排清單，不會動到已排好的座位）`)) return;
+  try {
+    const people = (await rpc("seating_get_roster", { p_event: EVENT, p_key: EDIT_KEY })).people || [];
+    const next = people.filter(p => p.name !== name);
+    if (next.length === people.length) return;
+    await rpc("seating_set_roster", { p_event: EVENT, p_key: EDIT_KEY, p_people: next });
+    roster = next; renderPool(); renderStats();
+    showToast(`已從出席名單移除「${name}」`, async () => {   // 復原：加回去
+      const cur = (await rpc("seating_get_roster", { p_event: EVENT, p_key: EDIT_KEY })).people || [];
+      const back = cur.concat(people.filter(p => p.name === name));
+      await rpc("seating_set_roster", { p_event: EVENT, p_key: EDIT_KEY, p_people: back });
+      roster = back; renderPool(); renderStats();
+    });
+  } catch (err) { showToast("移除失敗，請檢查網路後再試一次"); }
+}
+$("pool-q").addEventListener("focus", () => { $("pool-q").setAttribute("aria-expanded", "true"); poolActive = -1; renderPool(); });
+$("pool-q").addEventListener("blur", () => $("pool-q").setAttribute("aria-expanded", "false"));
+$("pool-q").addEventListener("keydown", (e) => {
+  if (composing(e)) return;
+  const n = $("pool-list").querySelectorAll("button[data-name]").length;
+  if (e.key === "ArrowDown") { e.preventDefault(); poolActive = Math.min(n - 1, poolActive + 1); markActive(); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); poolActive = Math.max(0, poolActive - 1); markActive(); }
+  else if (e.key === "Enter") { e.preventDefault(); const b = $("pool-list").querySelectorAll("button[data-name]")[Math.max(0, poolActive)]; if (b) addFromPool(b.dataset.name); }
+  else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); $("pool-q").blur(); }
+});
+$("editor").addEventListener("cancel", (e) => { if ($("combo").contains(document.activeElement)) e.preventDefault(); });   // Esc 只收起下拉，不關面板
+const step = (k) => { const i = ORDER.indexOf(selected); document.activeElement.blur(); select(ORDER[(i + k + ORDER.length) % ORDER.length], true); };
+$("close-editor").onclick = () => $("editor").close();
+swipeToClose($("editor"), () => $("editor").close());
+$("editor").addEventListener("close", () => { if (selected) select(null, true); });
+// 點面板外面（變暗的背景）就關閉；按下與放開都在外面才算，避免在面板裡拖選文字時誤關
+const outside = (dlg, e) => { const r = dlg.getBoundingClientRect(); return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom; };
+let downOutside = false;
+$("editor").addEventListener("pointerdown", (e) => { downOutside = e.target === $("editor") && outside($("editor"), e); });
+$("editor").addEventListener("click", (e) => { if (downOutside && e.target === $("editor") && outside($("editor"), e)) $("editor").close(); downOutside = false; });
+// 賓客的同桌名單：點頁面其他地方就收起（點別桌則直接換成那一桌）
+document.addEventListener("click", (e) => {
+  if (mode !== "guest" || !selected || $("detail").hidden) return;
+  if (!e.target.isConnected) return;   // 點的元素在處理點擊時被重畫掉了（例如搜尋選項），不算點到外面
+  if (e.target.closest("#detail, .tbl, #results, .card, .bar")) return;
+  select(null, true);
+});
+$("prev").onclick = () => step(-1);
+$("next").onclick = () => step(1);
+
+
+/* ───────────── 拖曳交換整桌（工作人員）─────────────
+ * 桌號、人數上限留在原位；桌名、歸屬、賓客整包互換。
+ * 滑鼠：按住移動超過 5px 就開始拖；手機：長按 0.35 秒再拖（避免和捲動衝突）。 */
+let justDragged = false, drag = null, toastTimer = null;
+const SWAP_KEYS = ["name", "side", "guests"];
+function svgPoint(e) { const p = plan.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(plan.getScreenCTM().inverse()); }
+function tableAt(pt) {
+  let best = null, bestD = Infinity;
+  for (const t of TABLES) { const d = Math.hypot(t.x - pt.x, t.y - pt.y); if (d < t.seat + 14 && d < bestD) { best = t; bestD = d; } }
+  return best;
+}
+function swapTables(a, b) {
+  const A = state.tables[a], B = state.tables[b];
+  for (const k of SWAP_KEYS) [A[k], B[k]] = [B[k], A[k]];
+  A.kidAngles = []; B.kidAngles = [];   // 換了位置，兒童座椅重新自動擺到離走道最遠處
+  save([a, b]); renderAll();
+}
+function showToast(text, undo) {
+  $("toast-text").textContent = text; $("toast").hidden = false;
+  $("toast-undo").hidden = !undo;   // 沒有可以復原的動作（例如錯誤訊息）就不顯示「復原」
+  $("toast-undo").onclick = () => { undo(); $("toast").hidden = true; };
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => $("toast").hidden = true, 6000);
+}
+function startDrag() {
+  drag.active = true;
+  document.body.classList.add("dragging");
+  if (drag.kind === "kid") { navigator.vibrate?.(15); return; }
+  drag.g.classList.add("lifting");
+  const t = TABLES.find(x => x.id === drag.id);
+  drag.ghost = document.createElementNS(NS, "g");
+  drag.ghost.classList.add("ghost");
+  drag.ghost.innerHTML = `<circle r="${t.seat}"/><text y="-2">${esc(state.tables[drag.id].num)}</text>`;
+  plan.append(drag.ghost);
+  navigator.vibrate?.(15);
+  moveDrag(drag.last);
+}
+function moveDrag(e) {
+  const pt = svgPoint(e);
+  if (drag.kind === "kid") {   // 兒童座椅：沿著桌邊轉到最近的椅位
+    const t = TABLES.find(x => x.id === drag.id), d = state.tables[drag.id], n = seatCount(d);
+    const a = Math.atan2(pt.y - t.y, pt.x - t.x);
+    const to = Array.from({ length: n }, (_, k) => k).sort((x, y) => angDist(slotAngle(x, n), a) - angDist(slotAngle(y, n), a))[0];
+    if (to !== drag.slot) {
+      const slots = [...kidSlots(t, d)];
+      const i = slots.indexOf(drag.slot), j = slots.indexOf(to);
+      if (j >= 0) slots[j] = drag.slot;   // 拖到另一張兒童座椅上就互換
+      slots[i] = to;
+      d.kidAngles = slots.map(k => Math.round(slotAngle(k, n) * 180 / Math.PI));
+      drag.slot = to;
+      renderPlan();
+    }
+    return;
+  }
+  drag.ghost.setAttribute("transform", `translate(${pt.x},${pt.y})`);
+  const over = tableAt(pt), target = over && over.id !== drag.id ? over.id : null;
+  if (target !== drag.target) {
+    plan.querySelector(".tbl.drop-target")?.classList.remove("drop-target");
+    if (target) plan.querySelector(`.tbl[data-id="${target}"]`).classList.add("drop-target");
+    drag.target = target;
+  }
+  drag.edge = e.clientY < 70 ? -1 : e.clientY > innerHeight - 70 ? 1 : 0;   // 靠近畫面上下緣時自動捲動
+}
+function autoScroll() {
+  if (!drag) return;
+  if (drag.active && drag.edge) { scrollBy(0, drag.edge * 12); moveDrag(drag.last); }
+  requestAnimationFrame(autoScroll);
+}
+function endDrag(drop) {
+  if (!drag) return;
+  clearTimeout(drag.timer);
+  if (drag.active && drag.kind === "kid") {
+    justDragged = true; setTimeout(() => justDragged = false, 0);
+    document.body.classList.remove("dragging");
+    const id = drag.id, before = drag.before, d = state.tables[id];
+    if (!drop) { d.kidAngles = before; renderPlan(); }
+    else if (JSON.stringify(before) !== JSON.stringify(d.kidAngles)) {
+      save([id]);
+      showToast(`已移動${label(d)}的兒童座椅`, () => { d.kidAngles = before; save([id]); renderPlan(); });
+    }
+  } else if (drag.active) {
+    justDragged = true; setTimeout(() => justDragged = false, 0);
+    drag.ghost.remove();
+    drag.g.classList.remove("lifting");
+    plan.querySelector(".tbl.drop-target")?.classList.remove("drop-target");
+    document.body.classList.remove("dragging");
+    const a = drag.id, b = drag.target;
+    if (drop && b) {
+      swapTables(a, b);
+      showToast(`已交換${label(state.tables[a])}與${label(state.tables[b])}`, () => swapTables(a, b));
+    }
+  }
+  drag = null;
+}
+plan.addEventListener("pointerdown", (e) => {
+  if (mode !== "staff" || e.button > 0) return;
+  const g = e.target.closest(".tbl"); if (!g) return;
+  drag = { id: g.dataset.id, g, x: e.clientX, y: e.clientY, last: e, active: false, target: null, edge: 0, touch: e.pointerType !== "mouse" };
+  const kid = e.target.closest(".chair.kid");   // 按在兒童座椅上 → 拖的是兒童座椅，不是整桌
+  if (kid) Object.assign(drag, { kind: "kid", slot: +kid.dataset.slot, before: [...(state.tables[drag.id].kidAngles || [])] });
+  if (drag.touch) drag.timer = setTimeout(() => drag && startDrag(), 350);
+  requestAnimationFrame(autoScroll);
+});
+addEventListener("pointermove", (e) => {
+  if (!drag) return;
+  drag.last = e;
+  const moved = Math.hypot(e.clientX - drag.x, e.clientY - drag.y);
+  if (!drag.active) {
+    if (drag.touch && moved > 8) { clearTimeout(drag.timer); drag = null; }   // 手指在長按前就移動 → 是在捲動，不拖
+    else if (!drag.touch && moved > 5) startDrag();
+    return;
+  }
+  moveDrag(e);
+});
+addEventListener("touchmove", (e) => { if (drag?.active) e.preventDefault(); }, { passive: false });   // 拖曳中不要捲動頁面
+addEventListener("contextmenu", (e) => { if (drag) e.preventDefault(); });                            // 長按不要跳出系統選單
+addEventListener("pointerup", () => endDrag(true));
+addEventListener("pointercancel", () => endDrag(false));
+addEventListener("keydown", (e) => { if (e.key === "Escape" && drag) endDrag(false); });
+
+/* ───────────── 輸出版（?poster=a2｜a1｜a3，預設 A2 橫式）───────────── */
+const POSTER = new URLSearchParams(location.search).get("poster");
+const PAPER = { a1: [594, 841], a2: [420, 594], a3: [297, 420] };   // 1122 的告示牌是直式（寬×高 mm）
+// 桌機的工作人員版也用這個版面當編輯畫面（BOARD）：上方找座位列，下方整張海報縮放到剛好塞滿視窗
+const BOARD = STAFF && !POSTER && matchMedia("(min-width: 1100px)").matches;
+const CARDS = new URLSearchParams(location.search).has("cards");   // 桌卡列印版
+const IMMERSIVE = !STAFF && !POSTER && !CARDS;   // 賓客版：平面圖滿版
+if (IMMERSIVE) { document.body.classList.add("immersive"); document.documentElement.classList.add("immersive"); }
+// 輸出版：平面圖往上多畫一段（高度 = 標題列＋列間距），比例尺不變；外牆上緣跟著上移，標題就落在牆內
+function extendPlanForPoster() {
+  const box = $("p-plan"), head = document.querySelector(".p-head");
+  const gap = parseFloat(getComputedStyle($("poster")).rowGap) || 0;
+  const portrait = $("poster").classList.contains("portrait");   // 直式：標題不在平面圖上方，不用往上延伸
+  // 直式：平面圖左邊緊貼名單，左邊多留 30 單位（約 9mm），6–10 那一欄才不會擠到名單；
+  // 右邊切齊 21–25 那一欄桌子的外緣（723＋52），桌子就和下方名單卡片的右邊界對齊
+  if (portrait) { plan.setAttribute("viewBox", "39.5 103.8 735.5 1122.5"); box.style.aspectRatio = "735.5 / 1122.5"; return; }
+  const H = box.clientHeight, top = head.offsetHeight + gap;
+  if (!H || H <= top) return;
+  // 不畫牆之後，可視範圍改成切齊內容（桌子、舞台、入口條）的外緣再留 1.5 單位，左右下都更貼
+  const X0 = 69.5, W = 718, Y0 = 103.8, VH = 1122.5;   // 平面圖比例以入口線為準；「入口」字超出下緣的部分畫在海報的下方留白裡（overflow: visible）   // 桌子放大後，左右各多留 6 單位
+  const u = (H - top) / VH;                  // 每單位幾 px
+  const E = top / u;                         // 往上多畫的單位數
+  plan.setAttribute("viewBox", `${X0} ${(Y0 - E).toFixed(2)} ${W} ${(VH + E).toFixed(2)}`);
+  box.style.aspectRatio = `${W} / ${(VH + E).toFixed(2)}`;
+  PLAN_TOP = 105 - E;
+}
+function setupPoster() {
+  // 桌機編輯畫面（BOARD）和印出來的一樣是 A2 直式
+  const [pw, ph] = PAPER[(POSTER || "a2").toLowerCase()] || PAPER.a2;
+  const PORTRAIT = ph > pw;
+  document.body.classList.add("poster-mode");
+  if (BOARD) document.body.classList.add("board-mode");
+  const poster = $("poster");
+  poster.style.setProperty("--pw", pw + "mm"); poster.style.setProperty("--ph", ph + "mm");
+  poster.classList.toggle("portrait", PORTRAIT);
+  poster.hidden = false;
+  // 水彩花裝飾：x、w 是紙張寬度的 %，y 是紙張高度的 %，高度照素材比例；layer＝over 的浮在卡片上面（蜻蜓）
+  // 位置檔是照 A2 橫式排的：直式時寬度變成 0.707 倍，素材跟著縮小，離上緣、下緣的距離也要等比縮（以紙寬為準），花才會一樣貼邊
+  const yOf = (y) => !PORTRAIT ? y : y < 50 ? y * (pw / ph) * (pw / ph) : 100 - (100 - y) * (pw / ph) * (pw / ph);
+  // 直式：上方那隻蜻蜓（el-01）會壓到標題，移到標題右邊、名單上方的花帶旁
+  const deco = (window.POSTER_DECO_LAYOUT || []).map(it => PORTRAIT && it.src === "el-01" ? { ...it, x: 50, y: 15 } : it);   // y 會再經過 yOf（上半部直式約 ×0.5）
+  if (!BOARD) poster.insertAdjacentHTML("afterbegin", `<div class="p-deco">${deco.map(it =>
+    `<img class="d-item ${it.layer === "over" ? "over" : "under"}" src="../assets/deco/${it.src}.webp" alt="" style="left:${it.x}%;top:${yOf(it.y).toFixed(3)}%;width:${it.w}%;transform:rotate(${it.rot || 0}deg) scaleX(${it.flip ? -1 : 1})">`).join("")}</div>`);
+  $("p-plan").append(plan);                 // 同一張平面圖搬進海報
+  if (PORTRAIT) $("p-plan").append($("p-qr"));   // 直式：查找座位疊在平面圖右上角，跟著平面圖走
+  const stage = document.createElement("div"); stage.className = "poster-stage";
+  document.body.prepend(stage); stage.append(poster);   // 移出 .wrap（海報模式會把 .wrap 藏起來）
+  extendPlanForPoster();                    // 要在海報顯示出來之後量，否則高度是 0
+  const bar = document.querySelector(".bar");
+  if (BOARD) {
+    document.body.prepend(bar);                                  // 找座位與同步狀態留在最上方
+    bar.append($("saved"), $("status"));                       // 系統訊息、統計原本在搜尋框上方與平面圖上方，桌機編輯畫面改放進頂端列
+    document.body.append($("editor"), $("toast"), $("detail"));  // 對話框也移出被藏起來的 .wrap
+  }
+  // 列印：取消螢幕預覽的縮放，舞台高度也要還原，否則只印得出縮小後那一截
+  document.head.insertAdjacentHTML("beforeend", `<style>@media print { @page { size: ${pw}mm ${ph}mm; margin: 0; } body.poster-mode { background: none; overflow: visible; } .poster-stage { transform: none !important; height: auto !important; } .bar { display: none !important; } }</style>`);
+  const fit = () => {
+    const top = BOARD ? bar.offsetHeight + 16 : 16;
+    // 編輯畫面以寬度為準（字比較大，可往下捲）；預覽／列印則整張塞進視窗
+    const vw = innerWidth;
+    // 直式的編輯畫面：寬度最多 1100px，免得整張拉到螢幕寬、要往下捲很久
+    const k = BOARD ? Math.min(vw - 32, PORTRAIT ? 1100 : Infinity) / poster.offsetWidth : Math.min((vw - 32) / poster.offsetWidth, (innerHeight - top - 16) / poster.offsetHeight, 1);
+    stage.style.transform = `translate(${(vw - poster.offsetWidth * k) / 2}px, ${top}px) scale(${k})`;
+    stage.style.height = (top + poster.offsetHeight * k + 16) + "px";
+  };
+  addEventListener("resize", fit); requestAnimationFrame(fit); document.fonts?.ready.then(fit);
+  // 點右邊的桌卡＝點平面圖上那一桌
+  $("p-list").addEventListener("click", (e) => { const c = e.target.closest(".card[data-id]"); if (c) select(c.dataset.id, true); });
+}
+// 海報右邊的 7×4 格：25 桌＋最後三格放查找座位的 QR code
+const QR_PATH = "M0 0.5h7m1 0h2m3 0h4m1 0h1m2 0h1m1 0h1m2 0h7m-33 1h1m5 0h1m2 0h2m2 0h2m1 0h1m1 0h5m3 0h1m5 0h1m-33 1h1m1 0h3m1 0h1m3 0h2m2 0h4m1 0h4m3 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h1m1 0h1m5 0h2m1 0h1m3 0h1m2 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m1 0h2m2 0h1m3 0h1m1 0h4m1 0h1m2 0h1m1 0h3m1 0h1m-33 1h1m5 0h1m1 0h1m3 0h1m2 0h1m1 0h1m1 0h1m6 0h1m5 0h1m-33 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-25 1h1m1 0h1m3 0h1m2 0h7m-24 1h1m3 0h1m1 0h5m3 0h2m1 0h1m2 0h10m2 0h1m-29 1h1m2 0h3m4 0h5m1 0h1m2 0h1m1 0h1m3 0h3m-31 1h1m3 0h3m1 0h1m2 0h5m1 0h1m1 0h1m2 0h4m2 0h1m1 0h1m-30 1h4m1 0h1m1 0h1m1 0h3m5 0h1m1 0h1m2 0h2m5 0h1m-32 1h1m5 0h1m5 0h2m1 0h2m2 0h3m1 0h2m1 0h1m1 0h2m2 0h1m-33 1h1m1 0h4m1 0h1m1 0h1m1 0h4m2 0h2m1 0h2m1 0h1m5 0h2m-31 1h1m2 0h1m2 0h2m1 0h1m5 0h1m1 0h1m5 0h1m1 0h2m2 0h1m1 0h1m-32 1h1m1 0h1m1 0h2m1 0h1m3 0h3m1 0h5m1 0h1m1 0h4m1 0h1m-28 1h1m4 0h5m3 0h1m2 0h1m1 0h1m1 0h2m1 0h1m1 0h1m1 0h1m2 0h1m-32 1h1m2 0h2m2 0h2m4 0h1m1 0h1m4 0h4m1 0h1m3 0h3m-31 1h2m1 0h4m1 0h1m1 0h2m2 0h3m2 0h1m2 0h2m2 0h1m1 0h1m1 0h1m-29 1h2m6 0h4m1 0h3m2 0h1m1 0h5m3 0h2m-32 1h2m2 0h3m2 0h1m7 0h1m2 0h1m1 0h1m2 0h1m1 0h2m2 0h1m-33 1h1m1 0h2m1 0h1m1 0h3m2 0h2m2 0h1m3 0h1m1 0h2m1 0h1m1 0h1m1 0h3m-30 1h2m2 0h3m3 0h3m1 0h3m2 0h1m1 0h5m1 0h1m1 0h1m-30 1h1m1 0h1m2 0h1m1 0h2m2 0h2m2 0h1m1 0h1m1 0h1m1 0h1m1 0h1m-26 1h2m3 0h3m1 0h1m1 0h2m2 0h1m1 0h1m1 0h1m1 0h1m2 0h5m3 0h1m-25 1h1m1 0h1m3 0h5m1 0h1m1 0h1m1 0h1m3 0h1m1 0h1m-31 1h7m1 0h8m2 0h1m1 0h3m1 0h1m1 0h1m1 0h2m1 0h1m-32 1h1m5 0h1m2 0h1m1 0h2m1 0h2m5 0h1m2 0h1m3 0h1m2 0h2m-33 1h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h1m2 0h1m4 0h1m2 0h6m-30 1h1m1 0h3m1 0h1m2 0h3m1 0h1m3 0h2m1 0h1m1 0h3m1 0h3m-29 1h1m1 0h3m1 0h1m5 0h4m1 0h1m2 0h3m3 0h3m-29 1h1m5 0h1m2 0h1m3 0h5m3 0h1m1 0h3m-26 1h7m1 0h1m1 0h1m1 0h2m2 0h2m1 0h1m1 0h1m1 0h2m1 0h1m5 0h1";   // https://memochou1993.github.io/wedding-seating/1122/（segno，version 4-M）
+/* ───────────── 桌卡（?cards）：主桌＋1–25 桌的三角立牌，A3 直式一張並排兩條（單位 mm）───────────── */
+// 版面照 90×140 畫，輸出版整條等比放大 S 倍（S＝1.15：每面約 10.4×16.1cm，攤開長約 39.3cm，A3 上下只剩放裁切記號的空間）
+const TENT = { W: 90, H: 140, BASE: 50, TAB: 12, BLEED: 2, GAP: 4, PW: 297, PH: 420, PER: 2, S: 1.15 };   // BLEED、GAP 是印出來的實際尺寸（不跟著放大）：出血 2mm；GAP＝相鄰兩條各自的出血，雙刀裁切，刀偏 2mm 內都不會切到隔壁
+const TENT_POEM = [
+  ["晨昏交替 四季流轉", "這一天因相聚而有了特別的意義"],
+  ["我們以一場溫柔的儀式", "為相愛留下印記 為承諾賦予形狀"],
+  ["感謝你遠道而來 帶著祝福赴約", "讓這場相聚 不只圓滿 更添暖意"],
+  ["願你感受此刻的真心", "也將這份溫暖 珍藏於心"],
+  ["久別重逢 幸而有你", "相聚有時 情誼長存"],
+];
+// 底圖：整張水彩（上方垂花、下方花叢），正反面都鋪滿；拱門裡鋪 60% 的底色，字才清楚、花又透得出來
+const TENT_BG = "../assets/meadow-bg.jpg", TENT_VEIL = "rgba(250,245,236,.6)";
+// view：預覽版（每桌正反面並排）或輸出版（A3 印刷版面），列印一律印輸出版
+let tentView = new URLSearchParams(location.search).get("view") === "print" ? "print" : "preview";
+function setupCards() {
+  mode = "guest";
+  document.body.classList.add("cards-mode");
+  document.head.insertAdjacentHTML("beforeend", `<style>@media print { @page { size: 297mm 420mm; margin: 0; } }</style>`);
+  // 預覽版／輸出版切換（只在螢幕上，列印不印）：網址記住目前的檢視（?cards&view=print），重新整理還是同一個
+  $("cards").insertAdjacentHTML("beforebegin", `<nav class="tent-themes"><span class="tent-view"><button type="button" data-view="preview">預覽版</button><button type="button" data-view="print">輸出版</button></span></nav>`);
+  $("cards").insertAdjacentHTML("afterend", `<section class="tent-pv" id="tent-pv"></section>`);
+  document.querySelector(".tent-themes").addEventListener("click", (e) => {
+    const v = e.target.closest("button[data-view]"); if (!v) return;
+    tentView = v.dataset.view; history.replaceState(null, "", `?cards${tentView === "print" ? "&view=print" : ""}`); showTentView();
+  });
+  const fitCards = () => {
+    $("cards").style.setProperty("--cz", Math.min(1, (innerWidth - 24) / (TENT.PW * 96 / 25.4)).toFixed(4));
+    $("tent-pv").style.setProperty("--pz", ((Math.min(innerWidth - 32, 720) - 16) / (2 * TENT.W * 96 / 25.4)).toFixed(4));   // 一桌（正反兩面）最寬 720px
+  };
+  fitCards(); addEventListener("resize", fitCards);
+  showTentView();
+  drawCards();
+}
+// 正面、背面的內容（輸出版和預覽版共用）
+function tentFaces() {
+  // 整張底圖：鋪滿卡面＋左右下出血，頂端切齊折線（越過去會印到另一面）
+  const bg = `<span class="tf-bg"><img src="${TENT_BG}" alt=""></span>`;
+  // 分隔線：wedding-signs 告示同款（兩段細線夾一顆菱形），依卡片大小縮小；線長跟著桌名寬度（fillTent 設定）
+  const rule = `<path class="tf-rule" d="${tentRule(38)}" stroke="currentColor" stroke-width=".25"/><path d="M45,99.8 L46.2,101 L45,102.2 L43.8,101 Z" fill="currentColor"/>`;
+  // 沿拱門頂端置中：左右對稱的圓弧，字從弧的正中間往兩邊排
+  const welcome = `<path id="tf-arc" d="M18.22,39.25 A28.5,28.5 0 0 1 71.78,39.25" fill="none"/>` +
+    `<text font-family="Cormorant Garamond, serif" font-weight="600" font-size="2.9" letter-spacing=".45" style="fill: var(--tent-gold)" text-anchor="middle"><textPath href="#tf-arc" startOffset="50%">WELCOME TO OUR WEDDING</textPath></text>`;
+  return {
+    front: `<div class="tent-face front">${bg}${tentArch(welcome + rule, TENT_VEIL)}` +
+      `<span class="tf-table">Table</span><span class="tf-num"></span><span class="tf-name"></span></div>`,
+    back: `<div class="tent-face back">${bg}${tentArch("", TENT_VEIL)}` +
+      `<span class="tf-poem">${TENT_POEM.map(p => `<p>${p.join("<br>")}</p>`).join("")}</span>` +
+      `<span class="tf-thanks" style="top:104.9mm">Thank</span><span class="tf-thanks" style="top:111.7mm">you</span></div>`,
+  };
+}
+function showTentView() {
+  document.body.dataset.view = tentView;
+  for (const b of document.querySelectorAll(".tent-themes [data-view]")) b.setAttribute("aria-pressed", b.dataset.view === tentView);
+}
+function drawCards() {
+  const ids = ORDER.slice().sort((a, b) => numKey(state.tables[a]) - numKey(state.tables[b]) || ORDER.indexOf(a) - ORDER.indexOf(b));
+  const { W, H, BASE, TAB, BLEED, GAP, PW, PER, S } = TENT, L = TAB + BASE + 2 * H;
+  // 左右置中；上緣只留裁切記號的空間（8mm），下緣放出血、裁切記號和說明文字
+  const x0 = (PW - PER * W * S - (PER - 1) * GAP) / 2, y0 = 8, b = BLEED / S;   // b：出血換算回版面單位
+  const { front, back } = tentFaces();
+  // 黏貼邊（梯形，虛線照著剪）＋底座＋兩面的底色；底色往底座多鋪 2mm，折線稍微偏一點也不會露白
+  const art = `<svg class="strip-art" viewBox="0 0 ${W} ${L}" aria-hidden="true">` +
+    `<rect x="${-b}" y="${TAB + BASE - 2}" width="${W + 2 * b}" height="${2 * H + 2 + b}" fill="var(--tent)"/>` +
+    `<path d="M0,${TAB} L6,0 H${W - 6} L${W},${TAB}" fill="none" stroke="#b8ad9c" stroke-width=".25" stroke-dasharray="1.2 .8"/>` +
+    `<text x="${W / 2}" y="${TAB / 2 + 1.2}" text-anchor="middle" font-family="Noto Serif TC, serif" font-size="3.2" letter-spacing=".6" fill="#b8ad9c">黏貼處（塗膠）</text>` +
+    `<text class="tf-label" x="${W / 2}" y="${TAB + BASE / 2 + 1.2}" text-anchor="middle" font-family="Noto Serif TC, serif" font-size="3.2" letter-spacing=".6" fill="#b8ad9c"></text></svg>`;
+  const sheets = [];
+  for (let i = 0; i < ids.length; i += PER) sheets.push(ids.slice(i, i + PER));
+  $("cards").innerHTML = sheets.map(group => `<div class="card-slot"><div class="card-sheet">${tentMarks(group.length, x0, y0)}` +
+    group.map((id, i) => `<div class="strip" data-id="${id}" style="left:${x0 + i * (W * S + GAP)}mm;top:${y0}mm;transform:scale(${S});--bleed:${b}mm">${art}${back}${front}</div>`).join("") +
+    `</div></div>`).join("");
+  $("cards").hidden = false;
+  // 預覽版：每桌正面、背面並排，背面轉正，只看裁切後的成品
+  $("tent-pv").innerHTML = ids.map(id => `<figure class="pv-card" data-id="${id}"><div class="pv-pair">` +
+    `<div class="pv-slot"><div class="pv-face">${front}</div></div><div class="pv-slot"><div class="pv-face">${back}</div></div></div><figcaption></figcaption></figure>`).join("");
+  renderCards();
+}
+// 分隔線兩段細線：總長 len、中間留 7.4mm 放菱形（卡面中線 x=45）
+const tentRule = (len) => `M${45 - len / 2},101 H41.3 M48.7,101 H${45 + len / 2}`;
+// 拱門框：外粗內細兩道，上緣半圓、下緣封口；extra 是框裡額外的線條（正面的沿拱字、分隔線）；fill：拱門裡鋪的半透明底色
+function tentArch(extra, fill) {
+  const arch = (d) => `M${11 + d},${127 - d} V49 A${34 - d},${34 - d} 0 0 1 ${79 - d},49 V${127 - d} Z`;
+  return `<svg class="tf-art" viewBox="0 0 ${TENT.W} ${TENT.H}" aria-hidden="true">` +
+    (fill ? `<path d="${arch(0)}" fill="${fill}"/>` : "") + `<path d="${arch(0)}" fill="none" stroke="currentColor" stroke-width=".55"/><path d="${arch(1.8)}" fill="none" stroke="currentColor" stroke-width=".25"/>${extra}</svg>`;
+}
+// 裁切記號（上下留白標直的裁線、左右留白標橫的裁線）與折線記號（左右留白的虛線；同一張的折線同高，影印店一刀壓過整張）
+function tentMarks(n, x0, y0) {
+  const { PW, PH, S, BLEED: B, GAP } = TENT, [W, H, BASE, TAB] = ["W", "H", "BASE", "TAB"].map(k => TENT[k] * S), L = TAB + BASE + 2 * H;   // 換算成放大後的實際尺寸
+  const crop = `stroke="#b8ad9c" stroke-width=".2"`, fold = `${crop} stroke-dasharray="1.5 1"`;
+  let s = "";
+  for (let i = 0; i < n; i++) for (const x of [x0 + i * (W + GAP), x0 + i * (W + GAP) + W])
+    s += `<path d="M${x},${y0 - 7} V${y0 - 2} M${x},${y0 + L + B + 1} V${y0 + L + B + 6}" ${crop}/>`;   // 頂端是黏貼邊（沒有出血），底端要避開出血
+  const xr = x0 + n * W + (n - 1) * GAP;
+  // 左右的記號畫在出血外面
+  const mark = (y, st) => `<path d="M${x0 - B - 6},${y} H${x0 - B - .5} M${xr + B + .5},${y} H${xr + B + 6}" ${st}/>`;
+  for (const y of [y0, y0 + L]) s += mark(y, crop);
+  for (const y of [y0 + TAB, y0 + TAB + BASE, y0 + TAB + BASE + H]) s += mark(y, fold);
+  const cm = (v) => +(v / 10).toFixed(1);
+  s += `<text x="${PW / 2}" y="${PH - 3}" text-anchor="middle" font-family="Noto Serif TC, serif" font-size="3" letter-spacing=".4" fill="#b8ad9c">實線裁切・虛線壓折線　每面 ${cm(W)} × ${cm(H)} cm　背面朝上折成三角，黏貼邊黏在正面底部內側</text>`;
+  return `<svg class="tent-marks" viewBox="0 0 ${PW} ${PH}" aria-hidden="true">${s}</svg>`;
+}
+function renderCards() {
+  if (!CARDS) return;
+  for (const strip of $("cards").querySelectorAll(".strip")) {
+    const d = state.tables[strip.dataset.id], main = d.num === "主桌";
+    fillTent(strip, d);
+    strip.querySelector(".tf-label").textContent = `底座・${main ? "主桌" : `第 ${d.num} 桌`}`;
+  }
+  for (const card of document.querySelectorAll(".pv-card")) {
+    const d = state.tables[card.dataset.id];
+    fillTent(card, d);
+    card.querySelector("figcaption").textContent = d.num === "主桌" ? "主桌" : `第 ${d.num} 桌${d.name ? `・${shownName(d)}` : ""}`;
+  }
+}
+// 填桌號與桌名
+function fillTent(root, d) {
+  // 只改顯示、不動資料：桌名的數字換成全形（「合作夥伴 3」→「合作夥伴３」），和中文字一樣佔一個字寬；中間的空格拿掉，間距就和字與字之間一樣
+  const main = d.num === "主桌", name = tentName(d);
+  // 桌名太長才縮小：寬度不超過 50mm（和分隔線差不多寬），每字約 1.2 個字寬（含字距），最大 8mm（5 個字以內都是 8mm，6 個字約 7mm）
+  const fs = Math.min(8, 50 / Math.max(1, [...name].length * 1.2));
+  const n = root.querySelector(".tf-num"), nm = root.querySelector(".tf-name");
+  n.textContent = main ? "主桌" : d.num; n.classList.toggle("zh", main);
+  // 沒有桌名（主桌）：分隔線下方寫 Reserved，和網站賓客版一致
+  nm.textContent = name || "Reserved"; nm.classList.toggle("rsv", !name); nm.style.setProperty("--fs", (name ? fs : 8) + "mm");
+  // 分隔線和桌名差不多寬（桌名每字約 1.2 個字寬），最短是四個字桌名的寬度（約 37.4mm），最長 48mm；Reserved 也用最短的
+  const minRule = 4 * 1.2 * 8 - 1;
+  root.querySelector(".tf-rule").setAttribute("d", tentRule(name ? Math.min(48, Math.max(minRule, [...name].length * 1.2 * fs - 1)) : minRule));
+}
+const tentName = (d) => d.num === "主桌" ? "" : fwName(shownName(d));
+function renderPosterList() {
+  if (!POSTER && !BOARD) return;
+  // 最後一格：查找座位的 QR code（網址固定，用 tools 產生好的 SVG 路徑內嵌；CSP 不允許外部圖片或程式）
+  // 直式海報：名單 25 格剛好排滿，QR code 移到平面圖右上角（#p-qr）
+  const note = `<div class="note">
+    <b>查找座位</b>
+    <svg class="qr" viewBox="-2 -2 37 37" role="img" aria-label="查找座位 QR code"><path stroke="currentColor" shape-rendering="crispEdges" d="${QR_PATH}"/></svg></div>`;
+  const portrait = $("poster").classList.contains("portrait");
+  $("p-list").innerHTML = $("roster").innerHTML + (portrait ? "" : note);
+  $("p-qr").innerHTML = portrait ? note : "";
+  // 直式：1–10 桌在左邊兩欄由上而下（1–5 一欄、6–10 一欄，和平面圖的欄一樣）；11–25 桌在底部三排，一排五桌（每排對應右區的一欄）
+  // 第 26 桌（貴賓席）、第 27 桌（預備桌）只畫在平面圖上，名單不列資訊卡
+  for (const id of ["t26", "t27"]) $("p-list").querySelector(`.card[data-id="${id}"]`)?.remove();
+  if (portrait) [...$("p-list").querySelectorAll(".card[data-id]:not([data-id=t26])")].forEach((c, i) => {
+    c.style.gridColumn = i < 10 ? String(1 + Math.floor(i / 5)) : String(1 + (i - 10) % 5);
+    c.style.gridRow = i < 10 ? String(2 + i % 5) : String(7 + Math.floor((i - 10) / 5));
+  });
+  for (const card of $("p-list").querySelectorAll(".card[data-id]")) {
+    const who = card.querySelector(".who:not(.none)"); if (!who) continue;
+    const groups = state.tables[card.dataset.id].guests.filter(g => g.name);
+    who.className = "who p-names" + (groups.some(perSeat) ? "" : " solo");
+    // 名字先由上往下排滿左欄、再排右欄；團體佔一整行，把名單切成幾段，每段各自上下排
+    let html = "", row = 1, seg = [];
+    const flush = () => {
+      const rows = Math.ceil(seg.length / 2);
+      html += seg.map(([g, k], i) => `<span class="${dietClass(g, k).trim()}"${dietTitle(g)} style="grid-row:${row + i % rows};grid-column:${i < rows ? 1 : 2}">${esc(showName(g.name))}</span>`).join("");
+      row += rows; seg = [];
+    };
+    for (const g of groups) {
+      if (perSeat(g)) { seg.push(...Array.from({ length: g.count }, (_, k) => [g, k])); continue; }
+      flush();
+      html += `<span class="grp${dietClass(g)}"${dietTitle(g)} style="grid-row:${row++}">${esc(g.name)}${g.count > 1 ? `<small>${g.count} 位</small>` : ""}</span>`;
+    }
+    flush();
+    who.innerHTML = html;
+  }
+  fitPosterNames();
+}
+// 一家人（1–3 字的名字、6 位以內）每位寫一次名字，四個字的單獨一位也是；公司、社團、親屬稱謂、多人並列，或 7 位以上的團體聯絡人，只寫一次加人數
+const perSeat = (g) => /^[\u3400-\u9fff\uf900-\ufaff]{1,3}$/.test(g.name) && g.count <= 6 || /^[\u3400-\u9fff\uf900-\ufaff]{4}$/.test(g.name) && g.count === 1;   // 四個字只算單獨一位的人名（冠夫姓，如羅陳清玉）；四個字又帶人數的多半是一家人的稱呼（久村楨琴 6 位、三嫂阿霞 3 位），照舊寫一次加人數
+// 每張卡各自找出名單放得下的最大字級（二分法）：人少的卡字大、人多的照樣塞得下；兩欄不能比卡片寬，上限 6.5mm 免得各卡差太多
+// 直式：舞台框（和疊在平面圖右上角的查找座位）往下推到和標題上緣同高
+function alignPortraitTop() {
+  const poster = $("poster");
+  if (!poster.classList.contains("portrait")) return;
+  const box = $("p-plan"), head = document.querySelector(".p-head"), stage = plan.querySelector(".stage");
+  if (!stage) return;
+  box.style.setProperty("--stage-dy", "0px");
+  const k = poster.getBoundingClientRect().height / poster.offsetHeight;   // 螢幕預覽有縮放，換回海報本身的 px
+  const dy = (head.getBoundingClientRect().top - stage.getBoundingClientRect().top) / k;
+  box.style.setProperty("--stage-dy", Math.max(0, dy).toFixed(2) + "px");
+}
+function fitPosterNames() {
+  alignPortraitTop();
+  const list = $("p-list");
+  if (!$("poster").clientHeight) return;   // 直式海報的名單是 display: contents，自己沒有高度，改看整張海報
+  const max = 7.5 * Math.min($("poster").offsetWidth, $("poster").offsetHeight) / 420;   // 上限 7.5mm（海報短邊 420mm 對應 A2，其他尺寸等比）；直式格子比較高，人少的卡放得下更大的字
+  for (const card of list.querySelectorAll(".card[data-id]")) {
+    const who = card.querySelector(".p-names");
+    if (!who) continue;
+    const fits = () => card.scrollHeight <= card.clientHeight + 1 && who.scrollWidth <= who.clientWidth + 1;
+    let lo = 6, hi = max;   // px
+    card.style.setProperty("--nfs", hi + "px");
+    if (!fits()) {
+      while (hi - lo > 0.2) { const mid = (lo + hi) / 2; card.style.setProperty("--nfs", mid + "px"); if (fits()) lo = mid; else hi = mid; }
+      card.style.setProperty("--nfs", lo.toFixed(2) + "px");
+    }
+  }
+  // 1122：人名最大就到坐滿 10 人那種卡的字級，人少的卡不再放得更大
+  const full = [...list.querySelectorAll(".card[data-id]")].filter(c => c.querySelector(".p-names") && seatsOf(state.tables[c.dataset.id]) >= 10);
+  const cap = Math.min(...full.map(c => parseFloat(c.style.getPropertyValue("--nfs")) || Infinity));
+  if (isFinite(cap)) for (const c of list.querySelectorAll(".card[data-id]"))
+    if (parseFloat(c.style.getPropertyValue("--nfs")) > cap) c.style.setProperty("--nfs", cap.toFixed(2) + "px");
+  // 最後一格的「查找座位」用人名最常見的字級（各卡字級的眾數）
+  const sizes = [...list.querySelectorAll(".card[data-id]")].map(c => c.style.getPropertyValue("--nfs")).filter(Boolean);
+  const freq = sizes.reduce((m, v) => (m[v] = (m[v] || 0) + 1, m), {});
+  const common = Object.keys(freq).sort((a, b) => freq[b] - freq[a])[0];
+  if (common) list.style.setProperty("--name-fs", common);
+  // 團體（「和平扶輪社 10 位」）盡量排成一行：放不下時這一行稍微縮小（最多縮到 85%），還是放不下才照常折行
+  for (const g of list.querySelectorAll(".p-names .grp")) {
+    g.style.fontSize = ""; g.style.whiteSpace = "nowrap";
+    const over = g.scrollWidth / g.clientWidth;
+    if (over > 1 / .85) g.style.whiteSpace = "";
+    else if (over > 1) g.style.fontSize = (1 / over).toFixed(3) + "em";
+  }
+  // 桌名一律和名單同字級；放不下的長桌名（六個字）先稍微收緊字距（最多 0.08 字寬），還是放不下才縮小；有調整的右邊留 0.15 字寬，不要頂到卡片邊
+  for (const t of list.querySelectorAll(".card .tname")) {
+    t.style.letterSpacing = t.style.fontSize = "";
+    if (t.scrollWidth <= t.clientWidth) continue;
+    const fs = parseFloat(getComputedStyle(t).fontSize), room = t.clientWidth - .15 * fs, over = t.scrollWidth - room;
+    t.style.letterSpacing = Math.max(-.08 * fs, -over / [...t.textContent].length) + "px";
+    if (t.scrollWidth > room) t.style.fontSize = fs * room / t.scrollWidth + "px";
+  }
+}
+document.fonts.ready.then(() => fitPosterNames());   // 字型載入後字寬會變，重算一次
+if (CARDS) setupCards();
+if (POSTER) { mode = "guest"; setupPoster(); }
+else if (BOARD) setupPoster();
+
+/* ───────────── 平面圖畫布：縮放與平移（改 viewBox，放大後線條和字一樣清晰）───────────── */
+let VB0 = (() => { const b = plan.viewBox.baseVal; return { x: b.x, y: b.y, w: b.width, h: b.height }; })();
+const ZMAX = 4;
+// 沉浸式：全圖（倍率 1）＝桌子與舞台（左右各留 16 單位）剛好塞進上方搜尋列與下方圖例之間；
+// 窗口比例隨螢幕而變，VB0 跟著窗口比例重算，縮放與拖曳的座標才對得上
+const CONTENT = { x: 59, y: 95, w: 738, h: 1149 };   // 下緣含入口標示（「入口」字在 y≈1227）
+let FOCUS_FY = .5;   // 把桌子移進畫面時放在窗口高度的哪裡（避開上方搜尋列與下方的同桌名單）
+let FIT = null;      // 全圖時：每單位幾 px（s）、上方搜尋列與下方圖例佔掉的高度（T、B，px）
+// 同桌名單（抽屜）蓋住窗口下方多少 px；沒開時 0。抽屜貼底，用版面高度算（不受滑入動畫影響）
+function sheetCover() {
+  const d = $("detail"); if (d.hidden) return 0;
+  const r = plan.parentElement.getBoundingClientRect();
+  return r.bottom - (innerHeight - (parseFloat(getComputedStyle(d).bottom) || 0) - d.offsetHeight) + 12;
+}
+// 移桌子進畫面時放在窗口高度的哪裡：抽屜開著就放在搜尋框下緣與抽屜上緣的正中間，否則照 FOCUS_FY
+function focusFY() {
+  const cover = sheetCover(); if (!cover || !FIT) return FOCUS_FY;
+  const h = plan.parentElement.getBoundingClientRect().height;
+  return (FIT.T + (h - cover)) / 2 / h;
+}
+function fitImmersive() {
+  const r = plan.parentElement.getBoundingClientRect(); if (!r.width || !r.height) return false;
+  const T = document.querySelector(".bar-dock").getBoundingClientRect().bottom - r.top + 12;
+  const B = r.bottom - document.querySelector(".legend").getBoundingClientRect().top + 12;
+  const s = Math.min(r.width / CONTENT.w, (r.height - T - B) / CONTENT.h);   // 每單位幾 px
+  VB0 = { x: CONTENT.x - (r.width / s - CONTENT.w) / 2, y: CONTENT.y - T / s - ((r.height - T - B) / s - CONTENT.h) / 2, w: r.width / s, h: r.height / s };
+  FOCUS_FY = (T + (r.height - T - B) * .4) / r.height;
+  FIT = { s, T, B };
+  return true;
+}
+let zs = 1, zx = VB0.x, zy = VB0.y;   // 放大倍率、目前看到的左上角（SVG 座標）
+function applyZoom() {
+  zs = Math.min(ZMAX, Math.max(1, zs));
+  const w = VB0.w / zs, h = VB0.h / zs;
+  if (IMMERSIVE && FIT) {
+    // 沉浸式：只能拖到會場邊緣——上緣停在搜尋框下方、下緣停在圖例上方、左右停在螢幕邊；看得到的範圍比會場大時置中。
+    // 不然全圖時為了配合螢幕比例在會場上下多出來的空白，放大後也拖得進去
+    const u = FIT.s * zs;   // 現在每單位幾 px
+    const clamp = (z, size, lo, hi) => hi - lo <= size ? (lo + hi - size) / 2 : Math.min(hi - size, Math.max(lo, z));
+    zx = clamp(zx, w, CONTENT.x, CONTENT.x + CONTENT.w);
+    zy = clamp(zy, h, CONTENT.y - FIT.T / u, CONTENT.y + CONTENT.h + Math.max(FIT.B, sheetCover()) / u);   // 抽屜開著：下緣可以拉到抽屜上方
+  } else {
+    zx = Math.min(VB0.x + VB0.w - w, Math.max(VB0.x, zx));
+    zy = Math.min(VB0.y + VB0.h - h, Math.max(VB0.y, zy));
+  }
+  plan.setAttribute("viewBox", `${zx} ${zy} ${w} ${h}`);
+  plan.classList.toggle("zoomed", zs > 1.01);
+  const box = plan.parentElement;
+  if (box.classList.contains("plan-zoom")) {
+    const e = 0.5;   // 還剩超過半個單位沒看到，就算那一側有內容
+    box.classList.toggle("zoomed", zs > 1.01);
+    box.classList.toggle("more-l", zx > VB0.x + e);
+    box.classList.toggle("more-t", zy > VB0.y + e);
+    box.classList.toggle("more-r", zx + w < VB0.x + VB0.w - e);
+    box.classList.toggle("more-b", zy + h < VB0.y + VB0.h - e);
+    // 放得越大，邊緣陰影越寬越深：提示畫面外還有更多內容
+    const t = (zs - 1) / (ZMAX - 1);
+    // 沉浸式滿版：放得越大陰影越深——濃度 .45（全圖）→ 1（最大）。寬度與深淺寫在行內樣式，在開發者工具改樣式表不會生效
+    box.style.setProperty("--edge-blur", (16 + 22 * t).toFixed(1) + "px");
+    box.style.setProperty("--edge-alpha", (IMMERSIVE ? .45 + .55 * t : .36 + .26 * t).toFixed(3));
+  }
+  $("zoom-in").disabled = zs >= ZMAX - 0.01; $("zoom-out").disabled = zs <= 1.01;
+  $("zoom-pct").textContent = Math.round(zs * 20) * 5 + "%";   // 取到最接近的 5%：捏合停在中間時也不會出現 163% 這種數字
+}
+// 讓 SVG 座標 (px, py) 落在畫面上 (fx, fy) 的位置（fx、fy 是在平面圖框內的比例 0–1）
+function placeAt(px, py, fx, fy) { zx = px - fx * VB0.w / zs; zy = py - fy * VB0.h / zs; applyZoom(); }
+function zoomBy(k) { const cx = zx + VB0.w / zs / 2, cy = zy + VB0.h / zs / 2; zs = Math.min(ZMAX, Math.max(1, zs * k)); placeAt(cx, cy, .5, .5); }
+// 把指定的桌子框進畫面：只有一桌就放大到約 2.2 倍置中；多桌就縮放到剛好全部看得到（最多 2.2 倍）
+function focusTables(ids) {
+  if (POSTER || BOARD) return;
+  const ts = TABLES.filter(t => ids.includes(t.id)); if (!ts.length) return;
+  const pad = 24, x0 = Math.min(...ts.map(t => t.x - t.seat)) - pad, x1 = Math.max(...ts.map(t => t.x + t.seat)) + pad;
+  const y0 = Math.min(...ts.map(t => t.y - t.seat)) - pad, y1 = Math.max(...ts.map(t => t.y + t.seat)) + pad;
+  // 沉浸式以畫面上的大小為準（約每單位 1.2px，手機上和原本放大 2.2 倍差不多），桌機、手機看起來一樣大
+  const k = IMMERSIVE ? 1.2 / (plan.getBoundingClientRect().width / VB0.w) : 2.2;
+  zs = Math.min(k, VB0.w / (x1 - x0), VB0.h / (y1 - y0));
+  placeAt((x0 + x1) / 2, (y0 + y1) / 2, .5, IMMERSIVE ? focusFY() : .5);
+}
+const focusTable = (id) => focusTables([id]);   // 從搜尋結果或名單選到某桌
+if (!POSTER && !BOARD) {
+  // 縮放鈕：沉浸式每按一下跳到下一個 50% 的整數級（100 → 150 → 200 …最多 400）；捏合停在中間時也是跳到上／下一級。工作人員版每按一下 ×1.6
+  const ZLEVEL = .5;
+  const nextLevel = (dir) => dir > 0 ? (Math.floor(zs / ZLEVEL + 1e-6) + 1) * ZLEVEL : (Math.ceil(zs / ZLEVEL - 1e-6) - 1) * ZLEVEL;
+  $("zoom-in").onclick = () => zoomBy(IMMERSIVE ? nextLevel(1) / zs : 1.6);
+  $("zoom-out").onclick = () => zoomBy(IMMERSIVE ? nextLevel(-1) / zs : 1 / 1.6);
+  if (IMMERSIVE) {
+    // 沉浸式：轉向、網址列伸縮時重算，畫面中心維持不動
+    // 預設 150%（1122 的桌子比 1025 大，250% 一次只看得到兩桌），對準會場左上：往左上推到底，由 applyZoom 停在會場左緣、上緣在搜尋框下方；點中間的倍率也回到這個畫面
+    const resetView = () => { zs = 1.5; placeAt(-1e6, -1e6, 0, 0); };
+    fitImmersive(); resetView();
+    $("zoom-pct").onclick = resetView;
+    // 字型載入後搜尋列會變高：搜尋列、圖例或視窗大小一變就重量，畫面中心維持不動
+    const refit = () => {
+      const cx = zx + VB0.w / zs / 2, cy = zy + VB0.h / zs / 2;
+      // 原本停在會場上緣／左緣（例如剛進來）：重算後也停在那裡
+      const atTop = FIT && zy <= CONTENT.y - FIT.T / (FIT.s * zs) + .5, atLeft = zx <= CONTENT.x + .5;
+      if (fitImmersive()) placeAt(atLeft ? -1e6 : cx, atTop ? -1e6 : cy, atLeft ? 0 : .5, atTop ? 0 : .5);
+    };
+    addEventListener("resize", refit);
+    const ro = new ResizeObserver(refit);
+    ro.observe(document.querySelector(".bar-dock")); ro.observe(document.querySelector(".legend"));
+  } else { zs = 1.4; placeAt(VB0.x, VB0.y, 0, 0); }   // 預設放大 1.4 倍（1122 的桌子比 1025 大，放太大一次只看得到兩桌），對準平面圖左上角
+  const fingers = new Map();
+  let anchor = null;   // 手勢開始時：手指中心底下的 SVG 座標、兩指距離、當時倍率
+  const centroid = () => { const p = [...fingers.values()]; return { x: p.reduce((a, q) => a + q.x, 0) / p.length, y: p.reduce((a, q) => a + q.y, 0) / p.length }; };
+  const spread = () => { const [a, b] = [...fingers.values()]; return b ? Math.hypot(a.x - b.x, a.y - b.y) : 0; };
+  const reanchor = () => {
+    if (!fingers.size) { anchor = null; return; }
+    const r = plan.getBoundingClientRect(), c = centroid();
+    anchor = { px: zx + (c.x - r.left) / r.width * VB0.w / zs, py: zy + (c.y - r.top) / r.height * VB0.h / zs, d: spread(), s: zs, x: c.x, y: c.y, moved: false };
+  };
+  plan.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "mouse") {
+      // 滑鼠：放大後按住左鍵拖曳平移；工作人員按在桌子上是在拖桌，不平移
+      if (e.button > 0 || zs <= 1.01 || (mode === "staff" && e.target.closest(".tbl"))) return;
+      e.preventDefault();   // 拖曳時不要反白平面圖上的字
+    } else if (e.pointerType !== "touch") return;
+    fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (fingers.size === 2 && drag && !drag.active) { clearTimeout(drag.timer); drag = null; }   // 兩指是在縮放，不是長按拖桌
+    reanchor();
+  });
+  // 移動、放開聽在整個視窗：滑鼠拖出平面圖外也能繼續平移、放開時收尾
+  addEventListener("pointermove", (e) => {
+    if (!fingers.has(e.pointerId) || !anchor || drag?.active) return;
+    fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (fingers.size === 1 && zs <= 1.01) return;   // 沒放大：交給瀏覽器捲動頁面
+    const c = centroid(), r = plan.getBoundingClientRect();
+    if (Math.hypot(c.x - anchor.x, c.y - anchor.y) > 8 || fingers.size > 1) anchor.moved = true;
+    if (anchor.moved && e.pointerType === "mouse") document.body.classList.add("panning");
+    // 先把倍率夾在 1–4 倍再定位：已到 400% 還繼續撐開時，用超出上限的倍率算位置、之後才被夾回，畫面會被推著滑走
+    if (fingers.size > 1 && anchor.d) zs = Math.min(ZMAX, Math.max(1, anchor.s * spread() / anchor.d));
+    placeAt(anchor.px, anchor.py, (c.x - r.left) / r.width, (c.y - r.top) / r.height);
+  });
+  const lift = (e) => {
+    if (!fingers.delete(e.pointerId)) return;
+    document.body.classList.remove("panning");
+    if (anchor?.moved) { justDragged = true; setTimeout(() => justDragged = false, 0); }   // 拖過畫布就不算點桌子
+    reanchor();
+  };
+  addEventListener("pointerup", lift);
+  addEventListener("pointercancel", lift);
+  // 全圖時平面圖的 touch-action 是 pan-y（單指捲頁）；這在手指按下時就決定了，捏合途中改成 none 也來不及，
+  // 瀏覽器會把後續移動當成捲動搶走（pointercancel），縮放卡在第一下。兩指以上就自己擋下預設行為，整段捏合都由這裡處理
+  const multi = (e) => { if (e.touches.length > 1) e.preventDefault(); };
+  plan.addEventListener("touchstart", multi, { passive: false });
+  plan.addEventListener("touchmove", multi, { passive: false });
+  plan.addEventListener("gesturestart", (e) => e.preventDefault());   // iOS Safari：不要把捏合當成整頁縮放
+  // 觸控板：兩指捏合在 Chrome／Edge／Firefox 是帶 ctrlKey 的滾輪事件（含桌機的手機模擬），預設會放大整頁——改成縮放平面圖，以游標為中心。
+  // 沉浸式頁面不捲動：兩指滑動（一般滾輪）就拿來平移平面圖
+  const zoomAt = (k, clientX, clientY) => {
+    const r = plan.getBoundingClientRect(), fx = (clientX - r.left) / r.width, fy = (clientY - r.top) / r.height;
+    const px = zx + fx * VB0.w / zs, py = zy + fy * VB0.h / zs;
+    zs *= k; zs = Math.min(ZMAX, Math.max(1, zs)); placeAt(px, py, fx, fy);
+  };
+  plan.addEventListener("wheel", (e) => {
+    if (e.ctrlKey) { e.preventDefault(); zoomAt(Math.exp(-e.deltaY * .01), e.clientX, e.clientY); return; }
+    if (!IMMERSIVE) return;   // 其他版面：滾輪照常捲動頁面
+    e.preventDefault();
+    const r = plan.getBoundingClientRect(), k = e.deltaMode === 1 ? 16 : 1;   // deltaMode 1＝以行為單位（Firefox 滑鼠滾輪）
+    zx += e.deltaX * k / r.width * VB0.w / zs; zy += e.deltaY * k / r.height * VB0.h / zs; applyZoom();
+  }, { passive: false });
+  // Safari 的觸控板捏合不送 ctrl＋滾輪，而是 gesturechange（scale 從 1 開始累計）
+  let gestureZs = 1;
+  plan.addEventListener("gesturestart", () => { gestureZs = zs; });
+  plan.addEventListener("gesturechange", (e) => {
+    e.preventDefault();
+    if (fingers.size) return;   // iPhone 捏合也會送 gesturechange：手指的縮放已由上面的觸控處理，這裡只管 Mac 觸控板
+    zoomAt(gestureZs * e.scale / zs, e.clientX, e.clientY);
+  });
+  if (IMMERSIVE) {
+    // 沉浸式：整頁都不讓 Safari 放大畫面——手指落在標題、搜尋框、圖例、名單上，或一指在圖上一指在圖外時，捏合也不會變成整頁放大
+    const noPageZoom = (e) => e.preventDefault();
+    document.addEventListener("gesturestart", noPageZoom); document.addEventListener("gesturechange", noPageZoom);
+    // 單指也擋：頁面本身不捲動，往下拖平面圖（或從標題、搜尋框旁開始拖）時，iPhone／LINE 不會把它當成下拉重新整理。
+    // 同桌名單與搜尋結果需要自己捲動，那裡的單指拖曳照常
+    document.addEventListener("touchmove", (e) => {
+      if (e.touches.length > 1 || !e.target.closest?.(".sheet, .results")) e.preventDefault();
+    }, { passive: false });
+  }
+  applyZoom();
+}
+
+buildPlan();
+setMode(mode);
+(async () => {
+  if (STAFF) { try { canSync = await rpc("seating_check_key", { p_event: EVENT, p_key: EDIT_KEY }); } catch (e) { offline = true; } }
+  await pull();
+  setInterval(() => { push(); pull(); }, STAFF ? 15000 : 60000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) pull(); });
+})();
+</script>
+</body>
+</html>
