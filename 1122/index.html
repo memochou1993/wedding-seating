@@ -622,7 +622,7 @@
   .poster > .frame-art { inset: calc(8mm * var(--k)); width: calc(100% - 16mm * var(--k)); height: calc(100% - 16mm * var(--k)); }
   /* 輸出版：拿掉線條花框，改用水彩花裝飾（素材在 assets/deco，位置存在 assets/poster-deco.js） */
   body.poster-mode:not(.board-mode) .poster { overflow: hidden; }
-  body.poster-mode:not(.board-mode) .poster > .frame-art { display: none; }
+  body.poster-mode .poster > .frame-art { display: none; }   /* 編輯版（board-mode）也不畫線條花框 */
   .poster > :not(.p-deco):not(.frame-art) { position: relative; z-index: 1; }   /* 花框要維持絕對定位：被改成 relative 的話它會變成格線的一格，跑到版面最下面 */
   .p-deco { position: absolute; inset: 0; z-index: auto; pointer-events: none; }
   .p-deco .d-item { position: absolute; height: auto; z-index: 0; user-select: none; }
