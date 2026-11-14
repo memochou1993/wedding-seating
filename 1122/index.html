@@ -876,8 +876,8 @@
  */
 const TABLE_R = 40, SEAT = 48;            // 桌面半徑、連椅子的佔地半徑（比 1025 版大：桌子少、空間夠）
 const LEGEND = [["var(--g-groom)", "新郎親友"], ["var(--g-zhou)", "周府親友"], ["var(--g-jiang)", "江家親友"], ["var(--g-dad)", "爸爸好友"], ["var(--g-mom)", "媽媽好友"], ["var(--g-rotary)", "扶輪社"]];
-const LEG_Y = 1090;   // 輸出版圖例第一行的圓心高度：兩行圓點（上緣 LEG_Y−10、下緣 LEG_Y＋45）整組置中在 15 桌下緣（968＋52＝1020）和入口線（ENTRY_Y 1195）之間
-const PITCH = 132, ROW_A = 440;   // 上下靠攏一點，最下面的 26 桌才不會擠到入口   // 上下兩桌椅子之間約 49，和左右的間距（約 30）不會差太多
+const LEG_Y = 1105;   // 輸出版圖例第一行的圓心高度：兩行圓點（上緣 LEG_Y−10、下緣 LEG_Y＋45）整組置中在 15 桌下緣（992＋58＝1050）和入口線（ENTRY_Y 1195）之間
+const PITCH = 138, ROW_A = 440;   // 上下靠攏一點，最下面的 26 桌才不會擠到入口   // 上下兩桌椅子之間約 49，和左右的間距（約 30）不會差太多
 // 交錯排（照會館的圖）：每區裡跟走道隔一欄的那一欄往上錯開半排，相鄰兩欄的桌子斜對著，欄距可以比對齊時窄。
 // 牆、走道到桌子留 WALL_GAP；同一區相鄰兩欄的中心距 COL_DX。
 const AISLE_W = 50, WALL_GAP = 30, COL_DX = 128, STAGGER = -PITCH / 4;   // 只錯開四分之一排：錯半排的話 6、16 會太靠近主桌
@@ -1257,8 +1257,8 @@ function renderPlan() {
     const d = state.tables[g.dataset.id];
     const num = g.querySelector(".num"), tn = g.querySelector(".tn");
     const t = TABLES.find(x => x.id === g.dataset.id);
-    // 賓客版、輸出版不畫椅子，桌面放大到原本連椅子的範圍；字跟著桌面等比放大
-    const bare = mode !== "staff" || !!POSTER, R = bare ? t.seat + 4 : t.r, k = R / t.r;
+    // 賓客版、輸出版不畫椅子，桌面放大到比原本連椅子的範圍再大一圈（桌距還有空間）；字跟著桌面等比放大
+    const bare = mode !== "staff" || !!POSTER, R = bare ? t.seat + 10 : t.r, k = R / t.r;
     g.querySelector(".disc").setAttribute("r", R);
     num.textContent = d.num || (mode === "staff" ? "＋" : "");
     num.classList.toggle("empty", !d.num);
