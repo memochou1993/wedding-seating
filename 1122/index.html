@@ -141,7 +141,7 @@
   .zoom-ctl { position: absolute; right: 8px; bottom: 8px; display: flex; gap: 4px; }   /* 水平排在右下角（入口旁的空白） */
   .zoom-ctl button { width: 26px; height: 26px; padding: 0; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); color: var(--accent);
     font-size: 14px; line-height: 1; cursor: pointer; box-shadow: 0 1px 4px rgba(78,58,42,.1); }
-  .zoom-ctl button:disabled { color: var(--line); cursor: default; }
+  .zoom-ctl button[aria-disabled=true] { color: var(--line); cursor: default; }   /* 不用 disabled：iPhone 點到停用的按鈕，會把這一下轉給旁邊的倍率鈕（回到預設畫面） */
   /* －／＋ 用線條圖示（字型的全形符號太細太長，和數字不搭）：線寬固定、跟著按鈕文字顏色 */
   .zoom-ctl button svg { display: block; width: 11px; height: 11px; margin: auto; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; }
 
@@ -523,10 +523,10 @@
   body.immersive .zoom-ctl { right: calc(12px + env(safe-area-inset-right)); bottom: calc(12px + env(safe-area-inset-bottom)); gap: 1px;
     background: var(--line); border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 1px 4px rgba(78,58,42,.1); overflow: hidden; }
   body.immersive .zoom-ctl button { width: 30px; height: 30px; border: 0; border-radius: 0; background: var(--paper); box-shadow: none; color: var(--muted); }   /* 和圖例文字同色 */   /* 兩顆都是 30×30 正方形（加上下框線共 32px，和圖例同高）；間隙透出底色當分隔線 */
-  body.immersive .zoom-ctl button:disabled { color: var(--line); }   /* 縮到全圖／放到最大時，那一顆變淡 */
+  body.immersive .zoom-ctl button[aria-disabled=true] { color: var(--line); }   /* 縮到全圖／放到最大時，那一顆變淡 */
   /* iOS 點按時預設會蓋一塊灰色方形（不管圓角），在膠囊上會凸出來：關掉，改成按下時淡香檳底 */
   body.immersive .zoom-ctl button { -webkit-tap-highlight-color: transparent; }
-  body.immersive .zoom-ctl button:not(:disabled):active { background: var(--accent-soft); }
+  body.immersive .zoom-ctl button:not([aria-disabled=true]):active { background: var(--accent-soft); }
   /* 膠囊兩端是半圓，按鈕的幾何中心看起來偏外側：圖示各往內移 2px，視覺上才置中 */
   body.immersive #zoom-out svg { transform: translateX(2px); }
   body.immersive #zoom-in svg { transform: translateX(-2px); }
@@ -2212,7 +2212,7 @@ function applyZoom() {
     box.style.setProperty("--edge-blur", (16 + 22 * t).toFixed(1) + "px");
     box.style.setProperty("--edge-alpha", (IMMERSIVE ? .45 + .55 * t : .36 + .26 * t).toFixed(3));
   }
-  $("zoom-in").disabled = zs >= ZMAX - 0.01; $("zoom-out").disabled = zs <= 1.01;
+  $("zoom-in").setAttribute("aria-disabled", zs >= ZMAX - 0.01); $("zoom-out").setAttribute("aria-disabled", zs <= 1.01);   // 到頂時按鈕仍可點（只是沒作用），見 .zoom-ctl 的註解
   $("zoom-pct").textContent = Math.round(zs * 20) * 5 + "%";   // 取到最接近的 5%：捏合停在中間時也不會出現 163% 這種數字
 }
 // 讓 SVG 座標 (px, py) 落在畫面上 (fx, fy) 的位置（fx、fy 是在平面圖框內的比例 0–1）
