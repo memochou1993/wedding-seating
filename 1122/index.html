@@ -2182,6 +2182,10 @@ function fitImmersive() {
   return true;
 }
 let zs = 1, zx = VB0.x, zy = VB0.y;   // 放大倍率、目前看到的左上角（SVG 座標）
+// 沉浸式左右拖到底時，最外側桌緣（75、781）外面留的空間：至少 22 單位，螢幕上也至少 SIDE_PX。
+// 只用固定單位的話，剛放大到要左右拖的倍率（約 150%）時只剩 9px，被邊緣陰影一蓋就像貼著螢幕邊
+const TABLE_L = 75, TABLE_R_EDGE = 781, SIDE_UNITS = 22, SIDE_PX = 28;
+let XB = null;   // 沉浸式目前左右可拖的範圍 [lo, hi]（SVG 座標），左右的邊緣陰影也照這個判斷
 function applyZoom() {
   zs = Math.min(ZMAX, Math.max(1, zs));
   const w = VB0.w / zs, h = VB0.h / zs;
@@ -2190,7 +2194,9 @@ function applyZoom() {
     // 不然全圖時為了配合螢幕比例在會場上下多出來的空白，放大後也拖得進去
     const u = FIT.s * zs;   // 現在每單位幾 px
     const clamp = (z, size, lo, hi) => hi - lo <= size ? (lo + hi - size) / 2 : Math.min(hi - size, Math.max(lo, z));
-    zx = clamp(zx, w, CONTENT.x, CONTENT.x + CONTENT.w);
+    const side = Math.max(SIDE_UNITS, SIDE_PX / u);
+    XB = [TABLE_L - side, TABLE_R_EDGE + side];
+    zx = clamp(zx, w, XB[0], XB[1]);
     zy = clamp(zy, h, CONTENT.y - FIT.T / u, CONTENT.y + CONTENT.h + Math.max(FIT.B, sheetCover()) / u);   // 抽屜開著：下緣可以拉到抽屜上方
   } else {
     zx = Math.min(VB0.x + VB0.w - w, Math.max(VB0.x, zx));
@@ -2202,10 +2208,12 @@ function applyZoom() {
   if (box.classList.contains("plan-zoom")) {
     const e = 0.5;   // 還剩超過半個單位沒看到，就算那一側有內容
     box.classList.toggle("zoomed", zs > 1.01);
-    box.classList.toggle("more-l", zx > VB0.x + e);
-    box.classList.toggle("more-t", zy > VB0.y + e);
-    box.classList.toggle("more-r", zx + w < VB0.x + VB0.w - e);
-    box.classList.toggle("more-b", zy + h < VB0.y + VB0.h - e);
+    // 左右：沉浸式照實際可拖的範圍判斷，拖到底那一側就不再蓋陰影（用 VB0 判斷的話，VB0 比會場寬，拖到底陰影還在，桌子看起來貼邊）
+    const [x0, x1] = IMMERSIVE && XB ? XB : [VB0.x, VB0.x + VB0.w], [y0, y1] = [VB0.y, VB0.y + VB0.h];   // 上下維持原樣
+    box.classList.toggle("more-l", zx > x0 + e);
+    box.classList.toggle("more-t", zy > y0 + e);
+    box.classList.toggle("more-r", zx + w < x1 - e);
+    box.classList.toggle("more-b", zy + h < y1 - e);
     // 放得越大，邊緣陰影越寬越深：提示畫面外還有更多內容
     const t = (zs - 1) / (ZMAX - 1);
     // 沉浸式滿版：放得越大陰影越深——濃度 .45（全圖）→ 1（最大）。寬度與深淺寫在行內樣式，在開發者工具改樣式表不會生效
@@ -2224,8 +2232,9 @@ function focusTables(ids) {
   const ts = TABLES.filter(t => ids.includes(t.id)); if (!ts.length) return;
   const pad = 24, x0 = Math.min(...ts.map(t => t.x - t.seat)) - pad, x1 = Math.max(...ts.map(t => t.x + t.seat)) + pad;
   const y0 = Math.min(...ts.map(t => t.y - t.seat)) - pad, y1 = Math.max(...ts.map(t => t.y + t.seat)) + pad;
-  // 沉浸式以畫面上的大小為準（約每單位 1.2px，手機上和原本放大 2.2 倍差不多），桌機、手機看起來一樣大
-  const k = IMMERSIVE ? 1.2 / (plan.getBoundingClientRect().width / VB0.w) : 2.2;
+  // 沉浸式以畫面上的大小為準（約每單位 0.9px），桌機、手機看起來一樣大；取到 50% 的整數級，和 －／＋ 的級距對得上
+  // （原本 1.2px：手機上會放到 325%，桌子放大之後一次只看得到一兩桌，太大）
+  const k = IMMERSIVE ? Math.max(1, Math.round(0.9 / (plan.getBoundingClientRect().width / VB0.w) * 2) / 2) : 2.2;
   zs = Math.min(k, VB0.w / (x1 - x0), VB0.h / (y1 - y0));
   placeAt((x0 + x1) / 2, (y0 + y1) / 2, .5, IMMERSIVE ? focusFY() : .5);
 }
