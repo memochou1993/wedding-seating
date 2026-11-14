@@ -877,7 +877,7 @@
 const TABLE_R = 40, SEAT = 48;            // 桌面半徑、連椅子的佔地半徑（比 1025 版大：桌子少、空間夠）
 const LEGEND = [["var(--g-groom)", "新郎親友"], ["var(--g-zhou)", "周府親友"], ["var(--g-jiang)", "江家親友"], ["var(--g-dad)", "爸爸好友"], ["var(--g-mom)", "媽媽好友"], ["var(--g-rotary)", "扶輪社"]];
 const LEG_Y = 1090;   // 輸出版圖例第一行的圓心高度：兩行圓點（上緣 LEG_Y−10、下緣 LEG_Y＋45）整組置中在 15 桌下緣（968＋52＝1020）和入口線（ENTRY_Y 1195）之間
-const PITCH = 132, ROW_A = 440;   // 上下靠攏一點，最下面的 26、27 桌才不會擠到入口   // 上下兩桌椅子之間約 49，和左右的間距（約 30）不會差太多
+const PITCH = 132, ROW_A = 440;   // 上下靠攏一點，最下面的 26 桌才不會擠到入口   // 上下兩桌椅子之間約 49，和左右的間距（約 30）不會差太多
 // 交錯排（照會館的圖）：每區裡跟走道隔一欄的那一欄往上錯開半排，相鄰兩欄的桌子斜對著，欄距可以比對齊時窄。
 // 牆、走道到桌子留 WALL_GAP；同一區相鄰兩欄的中心距 COL_DX。
 const AISLE_W = 50, WALL_GAP = 30, COL_DX = 128, STAGGER = -PITCH / 4;   // 只錯開四分之一排：錯半排的話 6、16 會太靠近主桌
@@ -907,9 +907,6 @@ const NUM_OF = { main: "主桌" };
 // 第 26 桌（桌名「貴賓席」存在資料裡）：第 10 桌正下方（左區靠牆那欄往上錯開，下面到入口還有空間）
 TABLES.push({ id: "t26", x: COLS[0].x, y: ROW_A + 5 * PITCH + COLS[0].dy, r: TABLE_R, seat: SEAT, kid: COLS[0].kid });
 NUM_OF.t26 = "26";
-// 第 27 桌（桌名「預備桌」存在資料裡）：第 5 桌正下方，和 26 並排；名單一樣不列資訊卡
-TABLES.push({ id: "t27", x: COLS[1].x, y: ROW_A + 5 * PITCH, r: TABLE_R, seat: SEAT, kid: COLS[1].kid });
-NUM_OF.t27 = "27";
 const ORDER = ["main", ...TABLES.filter(t => !t.main).map(t => t.id).sort((a, b) => (+NUM_OF[a] || 99) - (+NUM_OF[b] || 99))];
 // 兒童座椅放在離走道最遠的那一側；主桌朝舞台那一側
 function awayFromAisle(t) { return t.main ? -Math.PI / 2 : t.kid; }
@@ -2051,8 +2048,8 @@ function renderPosterList() {
   $("p-list").innerHTML = $("roster").innerHTML + (portrait ? "" : note);
   $("p-qr").innerHTML = portrait ? note : "";
   // 直式：1–10 桌在左邊兩欄由上而下（1–5 一欄、6–10 一欄，和平面圖的欄一樣）；11–25 桌在底部三排，一排五桌（每排對應右區的一欄）
-  // 第 26 桌（貴賓席）、第 27 桌（預備桌）只畫在平面圖上，名單不列資訊卡
-  for (const id of ["t26", "t27"]) $("p-list").querySelector(`.card[data-id="${id}"]`)?.remove();
+  // 第 26 桌（貴賓席）只畫在平面圖上，名單不列資訊卡
+  $("p-list").querySelector('.card[data-id="t26"]')?.remove();
   if (portrait) [...$("p-list").querySelectorAll(".card[data-id]:not([data-id=t26])")].forEach((c, i) => {
     c.style.gridColumn = i < 10 ? String(1 + Math.floor(i / 5)) : String(1 + (i - 10) % 5);
     c.style.gridRow = i < 10 ? String(2 + i % 5) : String(7 + Math.floor((i - 10) / 5));
